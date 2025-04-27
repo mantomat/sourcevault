@@ -5,7 +5,7 @@
 
 namespace Gui {
 
-class MainWindow : QMainWindow {
+class MainWindow : public QMainWindow {
     // placeholder
 };
 

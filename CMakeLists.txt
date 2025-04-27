@@ -4,7 +4,7 @@ project(sourcevault LANGUAGES CXX)
 # C++20 standard enforcement
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(COMMON_COMPILE_OPTIONS -Wall -Wextra -Wpedantic -Werror)
+set(COMMON_COMPILE_OPTIONS -Wall -Wextra -Wpedantic -Werror -Wshadow)
 
 # Enable Qt's meta-object compiler, resource compiler, and user interface compiler
 set(CMAKE_AUTOMOC ON)

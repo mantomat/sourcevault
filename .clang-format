@@ -1,6 +1,19 @@
+Language: Cpp
+Standard: c++20
+
 BasedOnStyle: LLVM
 ColumnLimit: 100
 PointerAlignment: Left
 IndentWidth: 4
 AllowShortFunctionsOnASingleLine: Empty
+
 FixNamespaceComments: false
+
+BreakConstructorInitializersBeforeComma: true
+
+IncludeBlocks: Regroup
+IncludeCategories:
+  - Regex: '^"'
+    Priority: 1
+  - Regex: '^<'
+    Priority: 2
