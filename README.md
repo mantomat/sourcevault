@@ -1,5 +1,9 @@
 # SourceVault
 
+[![CI](https://github.com/mntmtt/sourcevault/actions/workflows/ci.yml/badge.svg?branch=develop)](https://github.com/mntmtt/sourcevault/actions/workflows/ci.yml)
+
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=mntmtt_sourcevault&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=mntmtt_sourcevault)
+
 SourceVault is a **personal library management system** designed to help individuals organize, categorize, and
 prioritize their media collection. Whether you're managing books, articles, videos, or podcasts, SourceVault provides a
 centralized platform to store and access your resources efficiently. With features like customizable topics, priority
