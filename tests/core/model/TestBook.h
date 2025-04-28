@@ -16,6 +16,10 @@ class TestBook : public QObject {
     static void testEditionValidator();
     static void testEdition();
 
+    static void testPublisherValidator_data();
+    static void testPublisherValidator();
+    static void testPublisher();
+
     static void testYearPublished();
 
     static void testPageNumber();

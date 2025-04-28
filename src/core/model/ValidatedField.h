@@ -10,8 +10,8 @@ template <typename T> class ValidatedField final {
 public:
     using Validator = std::function<bool(const T&)>;
 
-    explicit ValidatedField(Validator validator)
-        : validator(std::move(validator)) {}
+    explicit ValidatedField(Validator newValidator)
+        : validator(std::move(newValidator)) {}
 
     bool has() const {
         return data.has_value();

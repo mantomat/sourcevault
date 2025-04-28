@@ -58,6 +58,33 @@ void TestBook::testEdition() {
     QCOMPARE(constBookInvalidEdition.edition().get(), std::nullopt);
 }
 
+void TestBook::testPublisherValidator_data() {
+    QTest::addColumn<QString>("candidatePublisher");
+    QTest::addColumn<bool>("expected");
+
+    QTest::addRow("Empty publisher should be invalid") << "" << false;
+    QTest::addRow("Non-empty publisher should be valid") << "O'Reilly" << true;
+}
+
+void TestBook::testPublisherValidator() {
+    QFETCH(QString, candidatePublisher);
+    QFETCH(bool, expected);
+    QCOMPARE(Book::publisherValidator(candidatePublisher), expected);
+}
+
+void TestBook::testPublisher() {
+    Book book;
+    const QString validPublisher{"O'Reilly"};
+    book.publisher().set(validPublisher);
+    const Book constBookValidPublisher{book};
+    QCOMPARE(constBookValidPublisher.publisher().get(), std::make_optional(validPublisher));
+
+    const QString invalidPublisher{};
+    book.publisher().set(invalidPublisher);
+    const Book constBookInvalidPublisher{book};
+    QCOMPARE(constBookInvalidPublisher.publisher().get(), std::nullopt);
+}
+
 void TestBook::testYearPublished() {
     Book book;
     constexpr int validYear{2023};

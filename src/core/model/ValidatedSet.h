@@ -10,8 +10,8 @@ template <typename T> class ValidatedSet {
 public:
     using Validator = std::function<bool(const T&)>;
 
-    explicit ValidatedSet(Validator validator)
-        : validator{std::move(validator)} {}
+    explicit ValidatedSet(Validator newValidator)
+        : validator{std::move(newValidator)} {}
 
     template <typename U>
         requires std::convertible_to<U, std::set<T>>
