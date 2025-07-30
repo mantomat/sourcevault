@@ -19,12 +19,6 @@ jobs:
           # Fetch all history for all branches. This is required for SonarQube's analysis.
           fetch-depth: 0
 
-      - name: Set up SonarQube build-wrapper
-        uses: sonarsource/sonarqube-scan-action@master
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ env.SONAR_HOST_URL }}
-
       - name: Configure and Build Project
         run: |
           build-wrapper-linux-x86-64 --out-dir bw-output cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS=--coverage
@@ -34,24 +28,20 @@ jobs:
         run: |
           cd build
           ctest --extra-verbose
-          # Use lcov to capture coverage data and create the report file.
-          # SonarQube will look for this 'coverage-report.lcov' file.
-          # Step 1: Capture coverage, ignoring inconsistencies from system headers
           lcov --gcov-tool /usr/bin/gcov-11 \
-          --capture \
-          --directory . \
-          --output-file coverage-report.lcov \
-          --ignore-errors inconsistent
-          # Step 2: Remove system file coverage, also ignoring potential inconsistencies
+            --capture \
+            --directory . \
+            --output-file coverage-report.lcov \
+            --ignore-errors inconsistent
           lcov --remove coverage-report.lcov '/usr/*' --output-file coverage-report.lcov \
-          --ignore-errors inconsistent
+            --ignore-errors inconsistent
           cd ..
 
       - name: Run SonarQube Scanner
         uses: sonarsource/sonarqube-scan-action@master
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ env.SONAR_HOST_URL }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
         with:
           args: >
             -Dsonar.projectKey=mantomat_sourcevault
