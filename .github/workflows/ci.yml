@@ -18,17 +18,29 @@ jobs:
           # Fetch all history for all branches. This is required for SonarQube's analysis.
           fetch-depth: 0
 
-      - name: Set up SonarQube build-wrapper
-        uses: sonarsource/sonarqube-scan-action@master
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+      # Step 1: Cache and download SonarQube build-wrapper for C++ analysis
+      - name: Cache SonarQube build-wrapper
+        id: cache-build-wrapper
+        uses: actions/cache@v4
+        with:
+          path: build-wrapper
+          key: build-wrapper-1 # Increment this key to invalidate the cache
 
+      - name: Download SonarQube build-wrapper
+        if: steps.cache-build-wrapper.outputs.cache-hit != 'true'
+        run: |
+          wget https://sonarcloud.io/static/cpp/build-wrapper-linux-x86.zip
+          unzip build-wrapper-linux-x86.zip
+          mv build-wrapper-linux-x86 build-wrapper
+          rm build-wrapper-linux-x86.zip
+
+      # Step 2: Build the project, wrapped by the SonarQube tool.
       - name: Configure and Build Project
         run: |
-          build-wrapper-linux-x86-64 --out-dir bw-output cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS=--coverage
-          build-wrapper-linux-x86-64 --out-dir bw-output cmake --build build -j$(nproc)
+          ./build-wrapper/build-wrapper-linux-x86-64 --out-dir bw-output cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS=--coverage
+          ./build-wrapper/build-wrapper-linux-x86-64 --out-dir bw-output cmake --build build -j$(nproc)
 
+      # Step 3: Run tests and generate the code coverage report.
       - name: Run Tests & Generate Coverage
         run: |
           cd build
@@ -42,6 +54,8 @@ jobs:
             --ignore-errors inconsistent
           cd ..
 
+      # Step 4: Run the final SonarQube analysis.
+      # This step uses the output from the build-wrapper and the coverage report.
       - name: Run SonarQube Scanner
         uses: sonarsource/sonarqube-scan-action@master
         env:
