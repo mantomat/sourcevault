@@ -12,6 +12,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     unzip \
     python3 \
     xz-utils \
+    ca-certificates \
     # Qt Dependencies
     libxrender-dev \
     libxcb-render0-dev \

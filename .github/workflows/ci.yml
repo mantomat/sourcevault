@@ -9,7 +9,6 @@ on:
 jobs:
   build-and-analyze:
     runs-on: ubuntu-latest
-
     container: mntmtt/sourcevaultdev:latest
 
     steps:
@@ -18,6 +17,12 @@ jobs:
         with:
           # Fetch all history for all branches. This is required for SonarQube's analysis.
           fetch-depth: 0
+
+      - name: Set up SonarQube build-wrapper
+        uses: sonarsource/sonarqube-scan-action@master
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
 
       - name: Configure and Build Project
         run: |
@@ -51,4 +56,4 @@ jobs:
             -Dsonar.cfamily.build-wrapper-output=bw-output
             -Dsonar.cfamily.lcov.reportPaths=build/coverage-report.lcov
             -Dsonar.sourceEncoding=UTF-8
-            -Dsonar.exclusions=**/moc_*.cpp, **/ui_*.h, **/qrc_*.cpp
+            -Dsonar.exclusions=**/moc_*.cpp,**/ui_*.h,**/qrc_*.cpp
