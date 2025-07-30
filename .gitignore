@@ -7,3 +7,6 @@ cmake-build*/
 
 # MacOS specific
 **/.DS_Store
+
+# Secrets for act
+.secret

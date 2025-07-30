@@ -7,7 +7,7 @@ namespace Core::Model {
 
 template <typename T> class ValidatedSet {
 
-public:
+  public:
     using Validator = std::function<bool(const T&)>;
 
     explicit ValidatedSet(Validator newValidator)
@@ -17,11 +17,11 @@ public:
         requires std::convertible_to<U, std::set<T>>
     bool set(U&& newElements) {
         std::set<T> elementsToSet{std::forward<U>(newElements)};
-        if (elementsToSet.empty() ||
-            std::ranges::any_of(elementsToSet, [&](const T& item) { return !validator(item); })) {
+        if (elementsToSet.empty() || std::any_of(elementsToSet.begin(), elementsToSet.end(),
+                                                 [&](const T& item) { return !validator(item); })) {
             unset();
             return false;
-            }
+        }
         storedElements = std::move(elementsToSet);
         return true;
     }
@@ -51,7 +51,7 @@ public:
         return has() ? std::make_optional(storedElements) : std::nullopt;
     }
 
-private:
+  private:
     std::set<T> storedElements;
     Validator validator;
 };

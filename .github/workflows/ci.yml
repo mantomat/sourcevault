@@ -1,46 +1,64 @@
-name: CI
+name: Build, Test, and Analyze
 
 on:
   push:
     branches:
       - main
       - develop
-  pull_request:
-    branches:
-      - main
-      - develop
 
 jobs:
-
-  build-and-test:
+  build-and-analyze:
     runs-on: ubuntu-latest
 
+    container: mntmtt/sourcevaultdev:latest
+
     steps:
-      - name: Checkout repository
+      - name: Check out source code
         uses: actions/checkout@v4
         with:
+          # Fetch all history for all branches. This is required for SonarQube's analysis.
           fetch-depth: 0
 
-      - name: Install Qt
-        uses: jurplel/install-qt-action@v4
-        with:
-          version: '6.2.4'
-          setup-python: false
-          cache: true
-
-      - name: Install dependencies
-        run: sudo apt update && sudo apt install -y cmake ninja-build g++
-
-      - name: Configure CMake
-        run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug
-
-      - name: Build
-        run: cmake --build build
-
-      - name: Run tests
-        run: ctest --test-dir build --output-on-failure
-
-      - name: SonarQube Scan
-        uses: SonarSource/sonarqube-scan-action@v5.1.0
+      - name: Set up SonarQube build-wrapper
+        uses: sonarsource/sonarqube-scan-action@master
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ env.SONAR_HOST_URL }}
+
+      - name: Configure and Build Project
+        run: |
+          build-wrapper-linux-x86-64 --out-dir bw-output cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS=--coverage
+          build-wrapper-linux-x86-64 --out-dir bw-output cmake --build build -j$(nproc)
+
+      - name: Run Tests & Generate Coverage
+        run: |
+          cd build
+          ctest --extra-verbose
+          # Use lcov to capture coverage data and create the report file.
+          # SonarQube will look for this 'coverage-report.lcov' file.
+          # Step 1: Capture coverage, ignoring inconsistencies from system headers
+          lcov --gcov-tool /usr/bin/gcov-11 \
+          --capture \
+          --directory . \
+          --output-file coverage-report.lcov \
+          --ignore-errors inconsistent
+          # Step 2: Remove system file coverage, also ignoring potential inconsistencies
+          lcov --remove coverage-report.lcov '/usr/*' --output-file coverage-report.lcov \
+          --ignore-errors inconsistent
+          cd ..
+
+      - name: Run SonarQube Scanner
+        uses: sonarsource/sonarqube-scan-action@master
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ env.SONAR_HOST_URL }}
+        with:
+          args: >
+            -Dsonar.projectKey=mantomat_sourcevault
+            -Dsonar.organization=mantomat
+            -Dsonar.sources=src
+            -Dsonar.tests=tests
+            -Dsonar.cfamily.build-wrapper-output=bw-output
+            -Dsonar.cfamily.lcov.reportPaths=build/coverage-report.lcov
+            -Dsonar.sourceEncoding=UTF-8
+            -Dsonar.exclusions=**/moc_*.cpp, **/ui_*.h, **/qrc_*.cpp
