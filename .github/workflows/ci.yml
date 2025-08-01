@@ -43,17 +43,9 @@ jobs:
           ctest --extra-verbose
           cd ..
 
-      - name: Generate Gcov Reports
-        run: |
-          cd build
-          # Find all object files, but exclude paths containing "tests" or "autogen"
-          find . -type f -name "*.o" \
-            -not -path "*/tests/*" \
-            -not -path "*_autogen/*" \
-            | xargs gcov --preserve-paths
-          cd ..
+      - name: Generate Coverage Report
+        run: gcovr --sonarqube coverage.xml -r . --filter "src/.*"
 
-      # Run the scanner from within the container
       - name: Run SonarQube Analysis
         run: |
           ./.sonar/scanner/cli/bin/sonar-scanner \
