@@ -70,7 +70,7 @@ jobs:
             -Dsonar.organization=mantomat
             -Dsonar.sources=src
             -Dsonar.tests=tests
-            -Dsonar.cfamily.build-wrapper-output=bw-output
-            -Dsonar.cfamily.lcov.reportPaths=build/coverage-report.lcov
+            -Dsonar.cfamily.compile_commands=bw-output/compile_commands.json
+            -Dsonar.cfamily.gcov.reportsPath=build
             -Dsonar.sourceEncoding=UTF-8
             -Dsonar.exclusions=**/moc_*.cpp,**/ui_*.h,**/qrc_*.cpp
