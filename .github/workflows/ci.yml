@@ -49,7 +49,7 @@ jobs:
             --capture \
             --directory . \
             --output-file coverage.info
-          lcov --extract coverage.info '/workspace/src/*' \
+          lcov --extract coverage.info '${GITHUB_WORKSPACE}/src/*' \
             --output-file coverage-extracted.info
           lcov --remove coverage-extracted.info '*/moc_*.cpp' \
             --output-file coverage-report.lcov
