@@ -17,37 +17,22 @@ jobs:
           # Fetch all history for all branches. This is required for SonarQube's analysis.
           fetch-depth: 0
 
-      - name: Cache SonarQube Scanner
-        id: cache-sonar-scanner
-        uses: actions/cache@v4
-        with:
-          path: ./.sonar/scanner
-          key: sonar-scanner-cli-7.2.0.5079-linux-x64
-
-      - name: Download and Prepare SonarQube Scanner
-        if: steps.cache-sonar-scanner.outputs.cache-hit != 'true'
-        run: |
-          mkdir -p ./.sonar/scanner
-          wget -q -P ./.sonar/scanner https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-7.2.0.5079-linux-x64.zip
-          unzip -q ./.sonar/scanner/sonar-scanner-cli-7.2.0.5079-linux-x64.zip -d ./.sonar/scanner
-          mv ./.sonar/scanner/sonar-scanner-7.2.0.5079-linux-x64 ./.sonar/scanner/cli
-
       - name: Configure and Build Project
         run: |
           cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS=--coverage
           cmake --build build -j$(nproc)
 
-      - name: Run Tests to Generate Coverage Data
+      - name: Run Tests
         run: |
           cd build
           ctest --extra-verbose
           cd ..
 
       - name: Generate Coverage Report
-        run: gcovr --sonarqube coverage.xml -r . --filter "src/.*"
+        run: gcovr --sonarqube coverage.xml -r . --filter "src/.*" --exclude-throw-branches --print-summary
 
-      - name: Run SonarQube Analysis
-        run: |
-          ./.sonar/scanner/cli/bin/sonar-scanner \
-            -Dsonar.token=${{ secrets.SONAR_TOKEN }} \
-            -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }}
+      - name: Run SonarQube Scanner
+        uses: sonarsource/sonarqube-scan-action@master
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
