@@ -1,13 +1,11 @@
 {
   "name": "C++",
-
   // Uncomment this to use the uploaded image
-  // "image": "mntmtt/sourcevaultdev",
-
+  "image": "mntmtt/sourcevaultdev",
   // Uncomment this to switch to local dockerfile build
-  "build": {
-    dockerfile: "Dockerfile",
-  },
+  // "build": {
+  //   dockerfile: "Dockerfile",
+  // },
 
   "workspaceFolder": "/workspace",
   "customizations": {

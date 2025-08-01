@@ -48,10 +48,11 @@ jobs:
           lcov --gcov-tool /usr/bin/gcov-11 \
             --capture \
             --directory . \
-            --output-file coverage-report.lcov \
-            --ignore-errors inconsistent
-          lcov --remove coverage-report.lcov '/usr/*' --output-file coverage-report.lcov \
-            --ignore-errors inconsistent
+            --output-file coverage.info
+          lcov --extract coverage.info '/workspace/src/*' \
+            --output-file coverage-extracted.info
+          lcov --remove coverage-extracted.info '*/moc_*.cpp' \
+            --output-file coverage-report.lcov
           cd ..
 
       # Step 4: Run the final SonarQube analysis.
