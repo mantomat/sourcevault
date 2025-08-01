@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - develop
 
 jobs:
   build-and-analyze:
@@ -18,47 +17,17 @@ jobs:
           # Fetch all history for all branches. This is required for SonarQube's analysis.
           fetch-depth: 0
 
-      # Step 1: Cache and download SonarQube build-wrapper for C++ analysis
-      - name: Cache SonarQube build-wrapper
-        id: cache-build-wrapper
-        uses: actions/cache@v4
-        with:
-          path: build-wrapper
-          key: build-wrapper-1 # Increment this key to invalidate the cache
-
-      - name: Download SonarQube build-wrapper
-        if: steps.cache-build-wrapper.outputs.cache-hit != 'true'
-        run: |
-          wget https://sonarcloud.io/static/cpp/build-wrapper-linux-x86.zip
-          unzip build-wrapper-linux-x86.zip
-          mv build-wrapper-linux-x86 build-wrapper
-          rm build-wrapper-linux-x86.zip
-
-      # Step 2: Build the project, wrapped by the SonarQube tool.
       - name: Configure and Build Project
         run: |
-          ./build-wrapper/build-wrapper-linux-x86-64 --out-dir bw-output cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS=--coverage
-          ./build-wrapper/build-wrapper-linux-x86-64 --out-dir bw-output cmake --build build -j$(nproc)
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS=--coverage
+          cmake --build build -j$(nproc)
 
-      # Step 3: Run tests and generate the code coverage report.
       - name: Run Tests & Generate Coverage
-        # The whole GITHUB_WORKSPACE workaround is a known open issue: https://github.com/actions/runner/issues/2058
         run: |
           cd build
           ctest --extra-verbose
-          lcov --gcov-tool /usr/bin/gcov-11 \
-            --capture \
-            --directory . \
-            --output-file coverage.info
-          echo "${GITHUB_WORKSPACE}"
-          lcov --extract coverage.info "${GITHUB_WORKSPACE}/src/*" \
-            --output-file coverage-extracted.info
-          lcov --remove coverage-extracted.info '*/moc_*.cpp' \
-            --output-file coverage-report.lcov
           cd ..
 
-      # Step 4: Run the final SonarQube analysis.
-      # This step uses the output from the build-wrapper and the coverage report.
       - name: Run SonarQube Scanner
         uses: sonarsource/sonarqube-scan-action@master
         env:
@@ -70,7 +39,7 @@ jobs:
             -Dsonar.organization=mantomat
             -Dsonar.sources=src
             -Dsonar.tests=tests
-            -Dsonar.cfamily.compile_commands=bw-output/compile_commands.json
+            -Dsonar.cfamily.compile_commands=build/compile_commands.json
             -Dsonar.cfamily.gcov.reportsPath=build
             -Dsonar.sourceEncoding=UTF-8
             -Dsonar.exclusions=**/moc_*.cpp,**/ui_*.h,**/qrc_*.cpp
