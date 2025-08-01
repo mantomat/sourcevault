@@ -42,14 +42,16 @@ jobs:
 
       # Step 3: Run tests and generate the code coverage report.
       - name: Run Tests & Generate Coverage
+        # The whole GITHUB_WORKSPACE workaround is a known open issue: https://github.com/actions/runner/issues/2058
         run: |
+          echo "GITHUB_WORKSPACE=$GITHUB_WORKSPACE" >> $GITHUB_ENV
           cd build
           ctest --extra-verbose
           lcov --gcov-tool /usr/bin/gcov-11 \
             --capture \
             --directory . \
             --output-file coverage.info
-          lcov --extract coverage.info '${GITHUB_WORKSPACE}/src/*' \
+          lcov --extract coverage.info '${{ env.GITHUB_WORKSPACE }}/src/*' \
             --output-file coverage-extracted.info
           lcov --remove coverage-extracted.info '*/moc_*.cpp' \
             --output-file coverage-report.lcov
