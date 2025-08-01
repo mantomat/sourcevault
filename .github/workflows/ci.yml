@@ -33,13 +33,3 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-        with:
-          args: >
-            -Dsonar.projectKey=mantomat_sourcevault
-            -Dsonar.organization=mantomat
-            -Dsonar.sources=src
-            -Dsonar.tests=tests
-            -Dsonar.cfamily.compile_commands=build/compile_commands.json
-            -Dsonar.cfamily.gcov.reportsPath=build
-            -Dsonar.sourceEncoding=UTF-8
-            -Dsonar.exclusions=**/moc_*.cpp,**/ui_*.h,**/qrc_*.cpp
