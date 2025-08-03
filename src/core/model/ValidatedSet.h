@@ -15,26 +15,20 @@ template <typename T> class ValidatedSet {
     explicit ValidatedSet(Validator newValidator)
         : validator{std::move(newValidator)} {}
 
-    template <typename U>
-        requires std::convertible_to<U, std::set<T>>
-    bool set(U&& newElements) {
-        std::set<T> elementsToSet{std::forward<U>(newElements)};
-        if (elementsToSet.empty() ||
-            std::ranges::any_of(elementsToSet, [&](const T& item) { return !validator(item); })) {
+    bool set(std::set<T> newElements) {
+        if (newElements.empty() ||
+            std::ranges::any_of(newElements, [&](const T& item) { return !validator(item); })) {
             unset();
             return false;
         }
-        storedElements = std::move(elementsToSet);
+        storedElements = std::move(newElements);
         return true;
     }
 
-    template <typename U>
-        requires std::convertible_to<U, T>
-    bool add(U&& newElement) {
-        T elementToAdd{static_cast<T>(std::forward<U>(newElement))};
-        if (!validator(elementToAdd))
+    bool add(T newElement) {
+        if (!validator(newElement))
             return false;
-        return storedElements.insert(std::move(elementToAdd)).second;
+        return storedElements.insert(std::move(newElement)).second;
     }
 
     void remove(const T& elementToRemove) {

@@ -21,15 +21,12 @@ template <typename T> class ValidatedField final {
         return data;
     }
 
-    template <typename U>
-        requires std::convertible_to<U, T>
-    bool set(U&& newValue) {
-        auto convertedNewValue = static_cast<T>(std::forward<U>(newValue));
+    bool set(T newValue) {
         if (!validator(newValue)) {
             unset();
             return false;
         }
-        data = std::move(convertedNewValue);
+        data = std::move(newValue);
         return true;
     }
 
