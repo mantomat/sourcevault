@@ -3,7 +3,6 @@
 #include "model/TestLibrary.h"
 #include "model/TestMedium.h"
 #include "model/TestMediumUserData.h"
-#include "model/TestOptionalField.h"
 #include "model/TestValidatedField.h"
 #include "model/TestValidatedSet.h"
 #include "model/TestVideo.h"
@@ -15,7 +14,6 @@ int main(const int argc, char** argv) {
 
     ret |= QTest::qExec(std::make_unique<TestValidatedField>().get(), argc, argv);
     ret |= QTest::qExec(std::make_unique<TestValidatedSet>().get(), argc, argv);
-    ret |= QTest::qExec(std::make_unique<TestOptionalField>().get(), argc, argv);
     ret |= QTest::qExec(std::make_unique<TestMediumUserData>().get(), argc, argv);
     ret |= QTest::qExec(std::make_unique<TestMedium>().get(), argc, argv);
     ret |= QTest::qExec(std::make_unique<TestVideo>().get(), argc, argv);

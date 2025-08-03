@@ -1,170 +1,183 @@
 #include "TestBook.h"
 
+#include "TestValidatedField.h"
 #include "model/Book.h"
 
 #include <QTest>
 
 using Core::Model::Book;
 
-void TestBook::testIsbnValidator_data() {
+void TestBook::testIsbn_data() {
     QTest::addColumn<QString>("candidateIsbn");
-    QTest::addColumn<bool>("expected");
+    QTest::addColumn<bool>("shouldBeValid");
 
-    QTest::addRow("Empty ISBN should be invalid") << "" << false;
-    QTest::addRow("Invalid ISBN should be invalid") << "123" << false;
-    QTest::addRow("Valid ISBN-10 should be valid") << "0-306-40615-2" << true;
-    QTest::addRow("Valid ISBN-13 should be valid") << "978-3-16-148410-0" << true;
+    QTest::addRow("Empty ISBNs are invalid") << "" << false;
+    QTest::addRow("Invalid ISBNs are invalid") << "123" << false;
+    QTest::addRow("ISBN-10's are valid") << "0-306-40615-2" << true;
+    QTest::addRow("ISBN-13's are valid") << "978-3-16-148410-0" << true;
 }
-void TestBook::testIsbnValidator() {
-    QFETCH(QString, candidateIsbn);
-    QFETCH(bool, expected);
-    QCOMPARE(Book::isbnValidator(candidateIsbn), expected);
-}
+
 void TestBook::testIsbn() {
-    Book book;
-    const QString validIsbn{"978-3-16-148410-0"};
-    book.isbn().set(validIsbn);
-    const Book constBookValidIsbn{book};
-    QCOMPARE(constBookValidIsbn.isbn().get(), std::make_optional(validIsbn));
+    QFETCH(QString, candidateIsbn);
+    QFETCH(bool, shouldBeValid);
 
-    const QString invalidIsbn{};
-    book.isbn().set(invalidIsbn);
-    const Book constBookInvalidIsbn{book};
-    QCOMPARE(constBookInvalidIsbn.isbn().get(), std::nullopt);
+    TestValidatedField::testValidatedFieldHelper<Book, QString>(
+        &Book::isbnValidator, [](Book& b) -> ValidatedField<QString>& { return b.isbn(); },
+        [](const Book& b) -> const ValidatedField<QString>& { return b.isbn(); }, candidateIsbn,
+        shouldBeValid);
 }
 
-void TestBook::testEditionValidator_data() {
+void TestBook::testEdition_data() {
     QTest::addColumn<QString>("candidateEdition");
-    QTest::addColumn<bool>("expected");
+    QTest::addColumn<bool>("shouldBeValid");
 
-    QTest::addRow("Empty edition should be invalid") << "" << false;
-    QTest::addRow("Non-empty edition should be valid") << "First Edition" << true;
+    QTest::addRow("Empty strings are invalid editions") << "" << false;
+    QTest::addRow("Space and CR-only strings are invalid editions") << "  \n " << false;
+    QTest::addRow("Every non-empty string is a valid edition") << "First Edition" << true;
 }
-void TestBook::testEditionValidator() {
-    QFETCH(QString, candidateEdition);
-    QFETCH(bool, expected);
-    QCOMPARE(Book::editionValidator(candidateEdition), expected);
-}
+
 void TestBook::testEdition() {
-    Book book;
-    const QString validEdition{"Second Edition"};
-    book.edition().set(validEdition);
-    const Book constBookValidEdition{book};
-    QCOMPARE(constBookValidEdition.edition().get(), std::make_optional(validEdition));
+    QFETCH(QString, candidateEdition);
+    QFETCH(bool, shouldBeValid);
 
-    const QString invalidEdition{};
-    book.edition().set(invalidEdition);
-    const Book constBookInvalidEdition{book};
-    QCOMPARE(constBookInvalidEdition.edition().get(), std::nullopt);
+    TestValidatedField::testValidatedFieldHelper<Book, QString>(
+        &Book::editionValidator, [](Book& b) -> ValidatedField<QString>& { return b.edition(); },
+        [](const Book& b) -> const ValidatedField<QString>& { return b.edition(); },
+        candidateEdition, shouldBeValid);
 }
 
-void TestBook::testPublisherValidator_data() {
+void TestBook::testPublisher_data() {
     QTest::addColumn<QString>("candidatePublisher");
-    QTest::addColumn<bool>("expected");
+    QTest::addColumn<bool>("shouldBeValid");
 
-    QTest::addRow("Empty publisher should be invalid") << "" << false;
-    QTest::addRow("Non-empty publisher should be valid") << "O'Reilly" << true;
-}
-
-void TestBook::testPublisherValidator() {
-    QFETCH(QString, candidatePublisher);
-    QFETCH(bool, expected);
-    QCOMPARE(Book::publisherValidator(candidatePublisher), expected);
+    QTest::addRow("Empty strings are invalid publishers") << "" << false;
+    QTest::addRow("Space and CR-only strings are invalid publishers") << "  \n " << false;
+    QTest::addRow("Every non-empty string is a valid publisher") << "O'Reilly" << true;
 }
 
 void TestBook::testPublisher() {
-    Book book;
-    const QString validPublisher{"O'Reilly"};
-    book.publisher().set(validPublisher);
-    const Book constBookValidPublisher{book};
-    QCOMPARE(constBookValidPublisher.publisher().get(), std::make_optional(validPublisher));
+    QFETCH(QString, candidatePublisher);
+    QFETCH(bool, shouldBeValid);
+    TestValidatedField::testValidatedFieldHelper<Book, QString>(
+        &Book::publisherValidator,
+        [](Book& b) -> ValidatedField<QString>& { return b.publisher(); },
+        [](const Book& b) -> const ValidatedField<QString>& { return b.publisher(); },
+        candidatePublisher, shouldBeValid);
+}
 
-    const QString invalidPublisher{};
-    book.publisher().set(invalidPublisher);
-    const Book constBookInvalidPublisher{book};
-    QCOMPARE(constBookInvalidPublisher.publisher().get(), std::nullopt);
+void TestBook::testYearPublished_data() {
+    QTest::addColumn<int>("candidateYearPublished");
+    QTest::addColumn<bool>("shouldBeValid");
+
+    QTest::addRow("Books can't be published before 10000 BC") << -10001 << false;
+    QTest::addRow("Books can be published from 10000 BC onward") << -10000 << true;
+    QTest::addRow("Books can be published from 10000 BC onward") << 0 << true;
+    QTest::addRow("Books can be published from 10000 BC onward") << 2100 << true;
 }
 
 void TestBook::testYearPublished() {
-    Book book;
-    constexpr int validYear{2023};
-    book.yearPublished().set(validYear);
-    const Book constBookValidYear{book};
-    QCOMPARE(constBookValidYear.yearPublished().get(), std::make_optional(validYear));
+    QFETCH(int, candidateYearPublished);
+    QFETCH(bool, shouldBeValid);
 
-    book.yearPublished().unset();
-    const Book constBookInvalidYear{book};
-    QCOMPARE(constBookInvalidYear.yearPublished().get(), std::nullopt);
+    TestValidatedField::testValidatedFieldHelper<Book, int>(
+        &Book::yearPublishedValidator,
+        [](Book& b) -> ValidatedField<int>& { return b.yearPublished(); },
+        [](const Book& b) -> const ValidatedField<int>& { return b.yearPublished(); },
+        candidateYearPublished, shouldBeValid);
+}
+
+void TestBook::testPageNumber_data() {
+    QTest::addColumn<unsigned int>("candidatePageNumber");
+    QTest::addColumn<bool>("shouldBeValid");
+
+    QTest::addRow("Zero pages is an invalid page number") << 0u << false;
+    QTest::addRow("Any number of pages greater than zero is a valid page number") << 1u << true;
+    QTest::addRow("Any number of pages greater than zero is a valid page number") << 1234u << true;
 }
 
 void TestBook::testPageNumber() {
-    Book book;
-    constexpr unsigned int validPages{321};
-    book.pageNumber().set(validPages);
-    const Book constBookValidPages{book};
-    QCOMPARE(constBookValidPages.pageNumber().get(), std::make_optional(validPages));
+    QFETCH(unsigned int, candidatePageNumber);
+    QFETCH(bool, shouldBeValid);
 
-    book.pageNumber().unset();
-    const Book constBookInvalidPages{book};
-    QCOMPARE(constBookInvalidPages.pageNumber().get(), std::nullopt);
+    TestValidatedField::testValidatedFieldHelper<Book, unsigned int>(
+        &Book::pageNumberValidator,
+        [](Book& b) -> ValidatedField<unsigned int>& { return b.pageNumber(); },
+        [](const Book& b) -> const ValidatedField<unsigned int>& { return b.pageNumber(); },
+        candidatePageNumber, shouldBeValid);
 }
 
-void TestBook::testDescriptionValidator_data() {
+void TestBook::testDescription_data() {
     QTest::addColumn<QString>("candidateDescription");
-    QTest::addColumn<bool>("expected");
+    QTest::addColumn<bool>("shouldBeValid");
 
-    QTest::addRow("Empty description should be invalid") << "" << false;
-    QTest::addRow("Non-empty description should be valid")
+    QTest::addRow("Empty strings are invalid book descriptions") << "" << false;
+    QTest::addRow("Space and CR-only strings are invalid book descriptions") << "  \n " << false;
+    QTest::addRow("Every non-empty string is a valid book description")
         << "A great book about software design." << true;
 }
-void TestBook::testDescriptionValidator() {
-    QFETCH(QString, candidateDescription);
-    QFETCH(bool, expected);
-    QCOMPARE(Book::descriptionValidator(candidateDescription), expected);
-}
 void TestBook::testDescription() {
-    Book book;
-    const QString validDescription{"An excellent introduction to C++."};
-    book.description().set(validDescription);
-    const Book constBookValidDescription{book};
-    QCOMPARE(constBookValidDescription.description().get(), std::make_optional(validDescription));
+    QFETCH(QString, candidateDescription);
+    QFETCH(bool, shouldBeValid);
 
-    const QString invalidDescription{};
-    book.description().set(invalidDescription);
-    const Book constBookInvalidDescription{book};
-    QCOMPARE(constBookInvalidDescription.description().get(), std::nullopt);
+    TestValidatedField::testValidatedFieldHelper<Book, QString>(
+        &Book::descriptionValidator,
+        [](Book& b) -> ValidatedField<QString>& { return b.description(); },
+        [](const Book& b) -> const ValidatedField<QString>& { return b.description(); },
+        candidateDescription, shouldBeValid);
 }
 
-void TestBook::testThumbnailUrlValidator_data() {
-    QTest::addColumn<QUrl>("candidateUrl");
-    QTest::addColumn<bool>("expected");
+void TestBook::testThumbnailUrl_data() {
+    QTest::addColumn<QUrl>("candidateThumbnailUrl");
+    QTest::addColumn<bool>("shouldBeValid");
 
-    QTest::addRow("Empty url should be invalid") << QUrl{} << false;
-    QTest::addRow("Non-image url should be invalid")
+    QTest::addRow("Empty urls are invalid") << QUrl{} << false;
+
+    QTest::addRow("Only local paths, http and https - i.e. mailto is not")
+        << QUrl{"mailto:user@example.com"} << false;
+    QTest::addRow("Only local paths, http and https - i.e. ftp is not")
+        << QUrl{"ftp://user@host/foo/image.png"} << false;
+
+    QTest::addRow("Non-image http urls are invalid")
+        << QUrl{"http://www.example.com/book"} << false;
+    QTest::addRow("Non-image https urls are invalid")
         << QUrl{"https://www.example.com/book"} << false;
-    QTest::addRow("Image url should be valid") << QUrl{"https://example.com/image.jpg"} << true;
-    QTest::addRow("Any image url should be valid")
+    QTest::addRow("Non-image file urls are invalid")
+        << QUrl{"file://www.example.com/book"} << false;
+    QTest::addRow("Non-image local paths are invalid")
+        << QUrl::fromLocalFile("/etc/passwd") << false;
+
+    QTest::addRow(".jpg image http urls are valid") << QUrl{"http://example.com/image.jpg"} << true;
+    QTest::addRow(".jpeg image http urls are valid")
+        << QUrl{"http://example.com/image.jpeg"} << true;
+    QTest::addRow(".png image http urls are valid")
+        << QUrl{"http://upload.wikimedia.org/wikipedia/commons/4/47/"
+                "PNG_transparency_demonstration_1.png"}
+        << true;
+
+    QTest::addRow(".jpg image https urls are valid")
+        << QUrl{"https://example.com/image.jpg"} << true;
+    QTest::addRow(".jpeg image https urls are valid")
+        << QUrl{"https://example.com/image.jpeg"} << true;
+    QTest::addRow(".png image https urls are valid")
         << QUrl{"https://upload.wikimedia.org/wikipedia/commons/4/47/"
                 "PNG_transparency_demonstration_1.png"}
         << true;
-    QTest::addRow("Local image url should be valid")
+
+    QTest::addRow(".jpg local image urls are valid")
+        << QUrl::fromLocalFile("/Users/example/Pictures/cover.jpg") << true;
+    QTest::addRow(".jpeg local image urls are valid")
+        << QUrl::fromLocalFile("/Users/example/Pictures/cover.jpeg") << true;
+    QTest::addRow(".png local image urls are valid")
         << QUrl::fromLocalFile("/Users/example/Pictures/cover.png") << true;
 }
-void TestBook::testThumbnailUrlValidator() {
-    QFETCH(QUrl, candidateUrl);
-    QFETCH(bool, expected);
-    QCOMPARE(Book::thumbnailUrlValidator(candidateUrl), expected);
-}
-void TestBook::testThumbnailUrl() {
-    Book book;
-    const QUrl validThumbnailUrl{"https://example.com/image.jpg"};
-    book.thumbnailUrl().set(validThumbnailUrl);
-    const Book constBookValidThumbnailUrl{book};
-    QCOMPARE(constBookValidThumbnailUrl.thumbnailUrl().get(),
-             std::make_optional(validThumbnailUrl));
 
-    const QUrl invalidThumbnailUrl{};
-    book.thumbnailUrl().set(invalidThumbnailUrl);
-    const Book constBookInvalidThumbnailUrl{book};
-    QCOMPARE(constBookInvalidThumbnailUrl.thumbnailUrl().get(), std::nullopt);
+void TestBook::testThumbnailUrl() {
+    QFETCH(QUrl, candidateThumbnailUrl);
+    QFETCH(bool, shouldBeValid);
+
+    TestValidatedField::testValidatedFieldHelper<Book, QUrl>(
+        &Book::thumbnailUrlValidator,
+        [](Book& b) -> ValidatedField<QUrl>& { return b.thumbnailUrl(); },
+        [](const Book& b) -> const ValidatedField<QUrl>& { return b.thumbnailUrl(); },
+        candidateThumbnailUrl, shouldBeValid);
 }

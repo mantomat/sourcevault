@@ -1,7 +1,6 @@
 #ifndef USERINFO_H
 #define USERINFO_H
 
-#include "OptionalField.h"
 #include "ValidatedField.h"
 #include "ValidatedSet.h"
 
@@ -10,7 +9,7 @@
 namespace Core::Model {
 
 class MediumUserData {
-public:
+  public:
     enum class PriorityLevel : unsigned short {
         min = 1,
         low = 2,
@@ -20,7 +19,7 @@ public:
     };
 
     bool& favorite();
-    const bool& favorite() const;
+    bool favorite() const;
 
     ValidatedSet<QString>& topics();
     const ValidatedSet<QString>& topics() const;
@@ -30,14 +29,15 @@ public:
     const ValidatedField<QString>& notes() const;
     static bool notesValidator(const QString& notesToValidate);
 
-    OptionalField<PriorityLevel>& priority();
-    const OptionalField<PriorityLevel>& priority() const;
+    ValidatedField<PriorityLevel>& priority();
+    const ValidatedField<PriorityLevel>& priority() const;
+    static bool priorityValidator(PriorityLevel priorityToValidate);
 
-private:
+  private:
     bool favorite_{false};
     ValidatedSet<QString> topics_{topicValidator};
     ValidatedField<QString> notes_{notesValidator};
-    OptionalField<PriorityLevel> priority_;
+    ValidatedField<PriorityLevel> priority_{priorityValidator};
 };
 
 }

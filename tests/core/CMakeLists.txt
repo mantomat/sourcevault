@@ -7,8 +7,6 @@ add_executable(testscore CoreTestsMain.cpp
         model/TestValidatedSet.h
         model/TestMediumUserData.cpp
         model/TestMediumUserData.h
-        model/TestOptionalField.cpp
-        model/TestOptionalField.h
         model/TestVideo.cpp
         model/TestVideo.h
         model/TestBook.cpp

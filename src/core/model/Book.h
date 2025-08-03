@@ -2,7 +2,6 @@
 #define BOOK_H
 
 #include "Medium.h"
-#include "OptionalField.h"
 
 #include <QUrl>
 
@@ -25,11 +24,13 @@ class Book : public Medium {
     const ValidatedField<QString>& publisher() const;
     static bool publisherValidator(const QString& publisherToValidate);
 
-    OptionalField<int>& yearPublished();
-    const OptionalField<int>& yearPublished() const;
+    ValidatedField<int>& yearPublished();
+    const ValidatedField<int>& yearPublished() const;
+    static bool yearPublishedValidator(int yearPublishedToValidate);
 
-    OptionalField<unsigned int>& pageNumber();
-    const OptionalField<unsigned int>& pageNumber() const;
+    ValidatedField<unsigned int>& pageNumber();
+    const ValidatedField<unsigned int>& pageNumber() const;
+    static bool pageNumberValidator(unsigned int pageNumberToValidate);
 
     ValidatedField<QString>& description();
     const ValidatedField<QString>& description() const;
@@ -37,14 +38,14 @@ class Book : public Medium {
 
     ValidatedField<QUrl>& thumbnailUrl();
     const ValidatedField<QUrl>& thumbnailUrl() const;
-    static bool thumbnailUrlValidator(const QUrl& url);
+    static bool thumbnailUrlValidator(const QUrl& urlToValidate);
 
   private:
     ValidatedField<QString> isbn_{isbnValidator};
     ValidatedField<QString> edition_{editionValidator};
     ValidatedField<QString> publisher_{publisherValidator};
-    OptionalField<int> yearPublished_;
-    OptionalField<unsigned int> pageNumber_;
+    ValidatedField<int> yearPublished_{yearPublishedValidator};
+    ValidatedField<unsigned int> pageNumber_{pageNumberValidator};
     ValidatedField<QString> description_{descriptionValidator};
     ValidatedField<QUrl> thumbnailUrl_{thumbnailUrlValidator};
 };

@@ -9,7 +9,8 @@ const ValidatedField<QUrl>& Article::articleUrl() const {
     return articleUrl_;
 }
 bool Article::articleUrlValidator(const QUrl& urlToValidate) {
-    return urlToValidate.isValid();
+    const std::set<QString> allowedSchemes{"http", "https"};
+    return urlToValidate.isValid() && allowedSchemes.contains(urlToValidate.scheme());
 }
 
 ValidatedField<QString>& Article::sourceName() {
@@ -22,11 +23,14 @@ bool Article::sourceNameValidator(const QString& sourceNameToValidate) {
     return !sourceNameToValidate.trimmed().isEmpty();
 }
 
-OptionalField<unsigned int>& Article::readTimeMinutes() {
+ValidatedField<unsigned int>& Article::readTimeMinutes() {
     return readTimeMinutes_;
 }
-const OptionalField<unsigned int>& Article::readTimeMinutes() const {
+const ValidatedField<unsigned int>& Article::readTimeMinutes() const {
     return readTimeMinutes_;
+}
+bool Article::readTimeMinutesValidator(const unsigned int readTimeMinutesToValidate) {
+    return readTimeMinutesToValidate > 0;
 }
 
 ValidatedField<QDate>& Article::publicationDate() {

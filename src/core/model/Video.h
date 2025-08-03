@@ -2,7 +2,6 @@
 #define VIDEO_H
 
 #include "Medium.h"
-#include "OptionalField.h"
 
 #include <QDate>
 #include <QUrl>
@@ -16,22 +15,23 @@ class Video : public Medium {
 
     ValidatedField<QUrl>& videoUrl();
     const ValidatedField<QUrl>& videoUrl() const;
-    static bool videoUrlValidator(const QUrl& url);
+    static bool videoUrlValidator(const QUrl& urlToValidate);
 
-    OptionalField<unsigned int>& durationSeconds();
-    const OptionalField<unsigned int>& durationSeconds() const;
+    ValidatedField<unsigned int>& durationSeconds();
+    const ValidatedField<unsigned int>& durationSeconds() const;
+    static bool durationSecondsValidator(unsigned int durationSecondsToValidate);
 
     ValidatedField<QDate>& uploadDate();
     const ValidatedField<QDate>& uploadDate() const;
-    static bool uploadDateValidator(const QDate& date);
+    static bool uploadDateValidator(const QDate& dateToValidate);
 
     ValidatedField<QUrl>& thumbnailUrl();
     const ValidatedField<QUrl>& thumbnailUrl() const;
-    static bool thumbnailUrlValidator(const QUrl& url);
+    static bool thumbnailUrlValidator(const QUrl& urlToValidate);
 
   private:
     ValidatedField<QUrl> videoUrl_{videoUrlValidator};
-    OptionalField<unsigned int> durationSeconds_;
+    ValidatedField<unsigned int> durationSeconds_{durationSecondsValidator};
     ValidatedField<QDate> uploadDate_{uploadDateValidator};
     ValidatedField<QUrl> thumbnailUrl_{thumbnailUrlValidator};
 };

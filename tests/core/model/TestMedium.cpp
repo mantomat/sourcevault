@@ -1,6 +1,11 @@
 #include "TestMedium.h"
 
+#include "TestValidatedField.h"
+#include "TestValidatedSet.h"
+
 #include <QTest>
+
+using Core::Model::Medium;
 
 void TestMedium::testUserData() {
     ConcreteMedium medium;
@@ -26,106 +31,82 @@ void TestMedium::testUserData() {
     QCOMPARE(constMedium.userData().priority().get(), priority);
 }
 
-void TestMedium::testDateAddedValidator_data() {
-    QTest::addColumn<QDate>("candidate");
-    QTest::addColumn<bool>("expected");
+void TestMedium::testDateAdded_data() {
+    QTest::addColumn<QDate>("candidateDateAdded");
+    QTest::addColumn<bool>("shouldBeValid");
 
-    QTest::addRow("A default constructed date should be invalid") << QDate{} << false;
-    QTest::addRow("A defined date should be valid") << QDate{2025, 4, 22} << true;
+    QTest::addRow("A default constructed date is invalid") << QDate{} << false;
+    QTest::addRow("A defined date is be valid") << QDate{2025, 4, 22} << true;
 }
-void TestMedium::testDateAddedValidator() {
-    QFETCH(QDate, candidate);
-    QFETCH(bool, expected);
-    QCOMPARE(ConcreteMedium::dateAddedValidator(candidate), expected);
-}
+
 void TestMedium::testDateAdded() {
-    ConcreteMedium medium{};
+    QFETCH(QDate, candidateDateAdded);
+    QFETCH(bool, shouldBeValid);
 
-    const QDate validDate{2025, 4, 22};
-    medium.dateAdded().set(validDate);
-    const ConcreteMedium constMediumValidDate{medium};
-    QCOMPARE(constMediumValidDate.dateAdded().get(), std::make_optional(validDate));
-
-    constexpr QDate invalidDate{};
-    medium.dateAdded().set(invalidDate);
-    const ConcreteMedium constMediumInvalidDate{medium};
-    QCOMPARE(constMediumInvalidDate.dateAdded().get(), std::nullopt);
+    TestValidatedField::testValidatedFieldHelper<ConcreteMedium, QDate>(
+        &Medium::dateAddedValidator,
+        [](Medium& m) -> ValidatedField<QDate>& { return m.dateAdded(); },
+        [](const Medium& m) -> const ValidatedField<QDate>& { return m.dateAdded(); },
+        candidateDateAdded, shouldBeValid);
 }
 
-void TestMedium::testTitleValidator_data() {
-    QTest::addColumn<QString>("candidate");
-    QTest::addColumn<bool>("expected");
+void TestMedium::testTitle_data() {
+    QTest::addColumn<QString>("candidateTitle");
+    QTest::addColumn<bool>("shouldBeValid");
 
-    QTest::addRow("An empty string should be invalid") << QString{} << false;
-    QTest::addRow("Every non-empty string should be valid") << QString{"non-empty"} << true;
+    QTest::addRow("Empty strings are invalid titles") << QString{} << false;
+    QTest::addRow("Space and CR-only strings are invalid titles") << QString{"   \n  \n"} << false;
+    QTest::addRow("Every non-empty string is a valid title") << QString{"non-empty"} << true;
 }
-void TestMedium::testTitleValidator() {
-    QFETCH(QString, candidate);
-    QFETCH(bool, expected);
-    QCOMPARE(ConcreteMedium::titleValidator(candidate), expected);
-}
+
 void TestMedium::testTitle() {
-    ConcreteMedium medium{};
+    QFETCH(QString, candidateTitle);
+    QFETCH(bool, shouldBeValid);
 
-    const QString validTitle{"Norwegian Wood"};
-    medium.title().set(validTitle);
-    const ConcreteMedium constMediumValidTitle{medium};
-    QCOMPARE(constMediumValidTitle.title().get(), std::make_optional(validTitle));
-
-    const QString invalidTitle{};
-    medium.title().set(invalidTitle);
-    const ConcreteMedium constMediumInvalidTitle{medium};
-    QCOMPARE(constMediumInvalidTitle.title().get(), std::nullopt);
+    TestValidatedField::testValidatedFieldHelper<ConcreteMedium, QString>(
+        &Medium::titleValidator, [](Medium& m) -> ValidatedField<QString>& { return m.title(); },
+        [](const Medium& m) -> const ValidatedField<QString>& { return m.title(); }, candidateTitle,
+        shouldBeValid);
 }
 
-void TestMedium::testAuthorValidator_data() {
-    QTest::addColumn<QString>("candidate");
-    QTest::addColumn<bool>("expected");
+void TestMedium::testAuthors_data() {
+    QTest::addColumn<std::set<QString>>("candidateAuthors");
+    QTest::addColumn<bool>("shouldBeValid");
 
-    QTest::addRow("An empty string should be invalid") << QString{} << false;
-    QTest::addRow("Every non-empty string should be valid") << QString{"non-empty"} << true;
+    QTest::addRow("Empty strings are invalid authors")
+        << std::set{QString{}, QString{"valid"}} << false;
+    QTest::addRow("Space and CR-only strings are invalid authors")
+        << std::set{QString{"   \n  \n"}, QString{"valid"}} << false;
+    QTest::addRow("Every non-empty string is a valid author")
+        << std::set{QString{"non-empty"}} << true;
 }
-void TestMedium::testAuthorValidator() {
-    QFETCH(QString, candidate);
-    QFETCH(bool, expected);
-    QCOMPARE(ConcreteMedium::authorValidator(candidate), expected);
-}
+
 void TestMedium::testAuthors() {
-    ConcreteMedium medium{};
+    QFETCH(std::set<QString>, candidateAuthors);
+    QFETCH(bool, shouldBeValid);
 
-    const std::set validAuthors{QString{"Cormen"}, QString{"Skiena"}};
-    medium.authors().set(validAuthors);
-    const ConcreteMedium constMediumValidAuthors{medium};
-    QCOMPARE(constMediumValidAuthors.authors().get(), std::make_optional(validAuthors));
-
-    const std::set invalidAuthors{QString{}};
-    medium.authors().set(invalidAuthors);
-    const ConcreteMedium constMediumInvalidAuthors{medium};
-    QCOMPARE(constMediumInvalidAuthors.authors().get(), std::nullopt);
+    TestValidatedSet::testValidatedFieldHelper<ConcreteMedium, QString>(
+        &Medium::authorValidator, [](Medium& m) -> ValidatedSet<QString>& { return m.authors(); },
+        [](const Medium& m) -> const ValidatedSet<QString>& { return m.authors(); },
+        candidateAuthors, shouldBeValid);
 }
 
-void TestMedium::testLanguageValidator_data() {
-    QTest::addColumn<QString>("candidate");
-    QTest::addColumn<bool>("expected");
+void TestMedium::testLanguage_data() {
+    QTest::addColumn<QString>("candidateLanguage");
+    QTest::addColumn<bool>("shouldBeValid");
 
-    QTest::addRow("An empty string should be invalid") << QString{} << false;
-    QTest::addRow("Every non-empty string should be valid") << QString{"non-empty"} << true;
+    QTest::addRow("Empty strings are invalid languages") << QString{} << false;
+    QTest::addRow("Space and CR-only strings are invalid languages") << QString{"  \n "} << false;
+    QTest::addRow("Every non-empty string is a valid language") << QString{"non-empty"} << true;
 }
-void TestMedium::testLanguageValidator() {
-    QFETCH(QString, candidate);
-    QFETCH(bool, expected);
-    QCOMPARE(ConcreteMedium::languageValidator(candidate), expected);
-}
+
 void TestMedium::testLanguage() {
-    ConcreteMedium medium{};
+    QFETCH(QString, candidateLanguage);
+    QFETCH(bool, shouldBeValid);
 
-    const QString validLanguage{"EN"};
-    medium.language().set(validLanguage);
-    const ConcreteMedium constMediumValidLanguage{medium};
-    QCOMPARE(constMediumValidLanguage.language().get(), std::make_optional(validLanguage));
-
-    const QString invalidLanguage{};
-    medium.language().set(invalidLanguage);
-    const ConcreteMedium constMediumInvalidLanguage{medium};
-    QCOMPARE(constMediumInvalidLanguage.language().get(), std::nullopt);
+    TestValidatedField::testValidatedFieldHelper<ConcreteMedium, QString>(
+        &Medium::languageValidator,
+        [](Medium& m) -> ValidatedField<QString>& { return m.language(); },
+        [](const Medium& m) -> const ValidatedField<QString>& { return m.language(); },
+        candidateLanguage, shouldBeValid);
 }

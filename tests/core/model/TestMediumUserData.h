@@ -9,14 +9,13 @@ class TestMediumUserData : public QObject {
   private slots:
     static void testFavorite();
 
-    static void testTopicValidator_data();
-    static void testTopicValidator();
+    static void testTopics_data();
     static void testTopics();
 
-    static void testNotesValidator_data();
-    static void testNotesValidator();
+    static void testNotes_data();
     static void testNotes();
 
+    static void testPriority_data();
     static void testPriority();
 };
 

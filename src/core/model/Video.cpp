@@ -10,15 +10,15 @@ ValidatedField<QUrl>& Video::videoUrl() {
 const ValidatedField<QUrl>& Video::videoUrl() const {
     return videoUrl_;
 }
-bool Video::videoUrlValidator(const QUrl& url) {
-    if (!url.isValid()) {
+bool Video::videoUrlValidator(const QUrl& urlToValidate) {
+    if (!urlToValidate.isValid() || urlToValidate.scheme() != "https") {
         return false;
     }
 
-    const QString host{url.host()};
-    const QString path{url.path()};
+    const QString host{urlToValidate.host()};
+    const QString path{urlToValidate.path()};
     if (host == "www.youtube.com" && path == "/watch") {
-        const QUrlQuery query{url};
+        const QUrlQuery query{urlToValidate};
         return query.hasQueryItem("v");
     }
     if (host == "youtu.be" && !path.isEmpty() && path != "/") {
@@ -27,11 +27,14 @@ bool Video::videoUrlValidator(const QUrl& url) {
     return false;
 }
 
-OptionalField<unsigned>& Video::durationSeconds() {
+ValidatedField<unsigned>& Video::durationSeconds() {
     return durationSeconds_;
 }
-const OptionalField<unsigned>& Video::durationSeconds() const {
+const ValidatedField<unsigned>& Video::durationSeconds() const {
     return durationSeconds_;
+}
+bool Video::durationSecondsValidator(const unsigned int durationSecondsToValidate) {
+    return durationSecondsToValidate > 0;
 }
 
 ValidatedField<QDate>& Video::uploadDate() {
@@ -40,8 +43,8 @@ ValidatedField<QDate>& Video::uploadDate() {
 const ValidatedField<QDate>& Video::uploadDate() const {
     return uploadDate_;
 }
-bool Video::uploadDateValidator(const QDate& date) {
-    return date.isValid();
+bool Video::uploadDateValidator(const QDate& dateToValidate) {
+    return dateToValidate.isValid() && dateToValidate.year() >= 2005;
 }
 
 ValidatedField<QUrl>& Video::thumbnailUrl() {
@@ -50,18 +53,22 @@ ValidatedField<QUrl>& Video::thumbnailUrl() {
 const ValidatedField<QUrl>& Video::thumbnailUrl() const {
     return thumbnailUrl_;
 }
-bool Video::thumbnailUrlValidator(const QUrl& url) {
-    if (!url.isValid()) {
+bool Video::thumbnailUrlValidator(const QUrl& urlToValidate) {
+    if (!urlToValidate.isValid()) {
         return false;
     }
 
     const std::vector<QString> allowedExtensions{".png", ".jpg", ".jpeg"};
+    const std::vector<QString> allowedSchemes{"http", "https", "file"};
 
-    const QString path{url.path()};
-    const QString query{url.query()};
-
-    return std::ranges::any_of(allowedExtensions, [&](const QString& extension) {
-        return path.endsWith(extension) || query.endsWith(extension);
-    });
+    return std::ranges::any_of(allowedExtensions,
+                               [&](const QString& extension) {
+                                   return urlToValidate.path().endsWith(extension) ||
+                                          urlToValidate.query().endsWith(extension);
+                               }) &&
+           std::ranges::any_of(allowedSchemes, [&](const QString& scheme) {
+               return urlToValidate.scheme() == scheme;
+           });
 }
+
 }

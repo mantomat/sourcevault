@@ -6,7 +6,9 @@
 
 #include <QObject>
 
-class ConcreteMedium final : public Core::Model::Medium {
+using Core::Model::Medium;
+
+class ConcreteMedium final : public Medium {
   public:
     ~ConcreteMedium() override = default;
 };
@@ -17,20 +19,16 @@ class TestMedium final : public QObject {
   private slots:
     static void testUserData();
 
-    static void testDateAddedValidator_data();
-    static void testDateAddedValidator();
+    static void testDateAdded_data();
     static void testDateAdded();
 
-    static void testTitleValidator_data();
-    static void testTitleValidator();
+    static void testTitle_data();
     static void testTitle();
 
-    static void testAuthorValidator_data();
-    static void testAuthorValidator();
+    static void testAuthors_data();
     static void testAuthors();
 
-    static void testLanguageValidator_data();
-    static void testLanguageValidator();
+    static void testLanguage_data();
     static void testLanguage();
 };
 

@@ -1,107 +1,97 @@
 #include "TestArticle.h"
 
+#include "TestValidatedField.h"
 #include "model/Article.h"
 
 #include <QTest>
 
 using Core::Model::Article;
 
-void TestArticle::testArticleUrlValidator_data() {
+void TestArticle::testArticleUrl_data() {
     QTest::addColumn<QUrl>("candidateUrl");
-    QTest::addColumn<bool>("expected");
+    QTest::addColumn<bool>("shouldBeValid");
 
-    QTest::addRow("Empty url should be invalid") << QUrl{} << false;
-    QTest::addRow("Valid url should be valid") << QUrl{"https://example.com/article"} << true;
-}
-
-void TestArticle::testArticleUrlValidator() {
-    QFETCH(QUrl, candidateUrl);
-    QFETCH(bool, expected);
-
-    QCOMPARE(Article::articleUrlValidator(candidateUrl), expected);
+    QTest::addRow("Empty urls are invalid") << QUrl{} << false;
+    QTest::addRow("Valid https urls are valid") << QUrl{"https://example.com/article"} << true;
+    QTest::addRow("Valid http urls are valid") << QUrl{"http://example.com/article"} << true;
+    QTest::addRow("Every url other than http/https is invalid - ftp")
+        << QUrl{"ftp://user@host/foo/bar.txt"} << false;
+    QTest::addRow("Every url other than http/https is invalid - mailto")
+        << QUrl{"mailto:someone@example.com"} << false;
 }
 
 void TestArticle::testArticleUrl() {
-    Article article;
+    QFETCH(QUrl, candidateUrl);
+    QFETCH(bool, shouldBeValid);
 
-    const QUrl validUrl{"https://example.com/article"};
-    article.articleUrl().set(validUrl);
-    const Article constArticleValid{article};
-    QCOMPARE(constArticleValid.articleUrl().get(), std::make_optional(validUrl));
-
-    const QUrl invalidUrl{};
-    article.articleUrl().set(invalidUrl);
-    const Article constArticleInvalid{article};
-    QCOMPARE(constArticleInvalid.articleUrl().get(), std::nullopt);
+    TestValidatedField::testValidatedFieldHelper<Article, QUrl>(
+        &Article::articleUrlValidator,
+        [](Article& article) -> ValidatedField<QUrl>& { return article.articleUrl(); },
+        [](const Article& article) -> const ValidatedField<QUrl>& { return article.articleUrl(); },
+        candidateUrl, shouldBeValid);
 }
 
-void TestArticle::testSourceNameValidator_data() {
+void TestArticle::testSourceName_data() {
     QTest::addColumn<QString>("candidateSourceName");
-    QTest::addColumn<bool>("expected");
+    QTest::addColumn<bool>("shouldBeValid");
 
-    QTest::addRow("Empty source name should be invalid") << "" << false;
-    QTest::addRow("Valid source name should be valid") << "Nature" << true;
-}
-
-void TestArticle::testSourceNameValidator() {
-    QFETCH(QString, candidateSourceName);
-    QFETCH(bool, expected);
-
-    QCOMPARE(Article::sourceNameValidator(candidateSourceName), expected);
+    QTest::addRow("Empty strings are invalid source names") << "" << false;
+    QTest::addRow("Space and CR-only strings are invalid source names") << "  \n " << false;
+    QTest::addRow("Non-empty strings are valid source names") << "Nature" << true;
 }
 
 void TestArticle::testSourceName() {
-    Article article;
+    QFETCH(QString, candidateSourceName);
+    QFETCH(bool, shouldBeValid);
 
-    const QString validSourceName{"Nature"};
-    article.sourceName().set(validSourceName);
-    const Article constArticleValid{article};
-    QCOMPARE(constArticleValid.sourceName().get(), std::make_optional(validSourceName));
+    TestValidatedField::testValidatedFieldHelper<Article, QString>(
+        &Article::sourceNameValidator,
+        [](Article& article) -> ValidatedField<QString>& { return article.sourceName(); },
+        [](const Article& article) -> const ValidatedField<QString>& {
+            return article.sourceName();
+        },
+        candidateSourceName, shouldBeValid);
+}
 
-    const QString invalidSourceName{};
-    article.sourceName().set(invalidSourceName);
-    const Article constArticleInvalid{article};
-    QCOMPARE(constArticleInvalid.sourceName().get(), std::nullopt);
+void TestArticle::testReadTimeMinutes_data() {
+    QTest::addColumn<unsigned int>("candidateReadTimeMinutes");
+    QTest::addColumn<bool>("shouldBeValid");
+
+    QTest::addRow("Zero minutes is an invalid read time") << 0u << false;
+    QTest::addRow("Any integer greater than zero is a valid read time") << 1u << true;
+    QTest::addRow("Any integer greater than zero is a valid read time") << 100u << true;
 }
 
 void TestArticle::testReadTimeMinutes() {
-    Article article;
+    QFETCH(unsigned int, candidateReadTimeMinutes);
+    QFETCH(bool, shouldBeValid);
 
-    constexpr unsigned int validTime{15};
-    article.readTimeMinutes().set(validTime);
-    const Article constArticleValid{article};
-    QCOMPARE(constArticleValid.readTimeMinutes().get(), std::make_optional(validTime));
-
-    article.readTimeMinutes().unset();
-    const Article constArticleUnset{article};
-    QCOMPARE(constArticleUnset.readTimeMinutes().get(), std::nullopt);
+    TestValidatedField::testValidatedFieldHelper<Article, unsigned int>(
+        &Article::readTimeMinutesValidator,
+        [](Article& article) -> ValidatedField<unsigned int>& { return article.readTimeMinutes(); },
+        [](const Article& article) -> const ValidatedField<unsigned int>& {
+            return article.readTimeMinutes();
+        },
+        candidateReadTimeMinutes, shouldBeValid);
 }
 
-void TestArticle::testPublicationDateValidator_data() {
-    QTest::addColumn<QDate>("candidateDate");
-    QTest::addColumn<bool>("expected");
+void TestArticle::testPublicationDate_data() {
+    QTest::addColumn<QDate>("candidatePublicationDate");
+    QTest::addColumn<bool>("shouldBeValid");
 
-    QTest::addRow("Invalid date should be invalid") << QDate{} << false;
-    QTest::addRow("Valid date should be valid") << QDate{2023, 10, 5} << true;
-}
-
-void TestArticle::testPublicationDateValidator() {
-    QFETCH(QDate, candidateDate);
-    QFETCH(bool, expected);
-
-    QCOMPARE(Article::publicationDateValidator(candidateDate), expected);
+    QTest::addRow("An empty date is an invalid publication date") << QDate{} << false;
+    QTest::addRow("Every non-empty date is a valid publication date") << QDate{2023, 10, 5} << true;
 }
 
 void TestArticle::testPublicationDate() {
-    Article article;
+    QFETCH(QDate, candidatePublicationDate);
+    QFETCH(bool, shouldBeValid);
 
-    const QDate validDate{2023, 10, 5};
-    article.publicationDate().set(validDate);
-    const Article constArticleValid{article};
-    QCOMPARE(constArticleValid.publicationDate().get(), std::make_optional(validDate));
-
-    constexpr QDate invalidDate{};
-    article.publicationDate().set(invalidDate);
-    const Article constArticleInvalid{article};
-    QCOMPARE(constArticleInvalid.publicationDate().get(), std::nullopt);
+    TestValidatedField::testValidatedFieldHelper<Article, QDate>(
+        &Article::publicationDateValidator,
+        [](Article& article) -> ValidatedField<QDate>& { return article.publicationDate(); },
+        [](const Article& article) -> const ValidatedField<QDate>& {
+            return article.publicationDate();
+        },
+        candidatePublicationDate, shouldBeValid);
 }

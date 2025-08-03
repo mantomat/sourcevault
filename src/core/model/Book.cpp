@@ -1,6 +1,7 @@
 #include "Book.h"
 
 #include <QRegularExpression>
+#include <algorithm>
 
 namespace Core::Model {
 
@@ -37,18 +38,24 @@ bool Book::publisherValidator(const QString& publisherToValidate) {
     return !publisherToValidate.trimmed().isEmpty();
 }
 
-OptionalField<int>& Book::yearPublished() {
+ValidatedField<int>& Book::yearPublished() {
     return yearPublished_;
 }
-const OptionalField<int>& Book::yearPublished() const {
+const ValidatedField<int>& Book::yearPublished() const {
     return yearPublished_;
+}
+bool Book::yearPublishedValidator(const int yearPublishedToValidate) {
+    return yearPublishedToValidate >= -10000;
 }
 
-OptionalField<unsigned int>& Book::pageNumber() {
+ValidatedField<unsigned int>& Book::pageNumber() {
     return pageNumber_;
 }
-const OptionalField<unsigned int>& Book::pageNumber() const {
+const ValidatedField<unsigned int>& Book::pageNumber() const {
     return pageNumber_;
+}
+bool Book::pageNumberValidator(const unsigned int pageNumberToValidate) {
+    return pageNumberToValidate > 0;
 }
 
 ValidatedField<QString>& Book::description() {
@@ -67,19 +74,22 @@ ValidatedField<QUrl>& Book::thumbnailUrl() {
 const ValidatedField<QUrl>& Book::thumbnailUrl() const {
     return thumbnailUrl_;
 }
-bool Book::thumbnailUrlValidator(const QUrl& url) {
-    if (!url.isValid()) {
+bool Book::thumbnailUrlValidator(const QUrl& urlToValidate) {
+    if (!urlToValidate.isValid()) {
         return false;
     }
 
     const std::vector<QString> allowedExtensions{".png", ".jpg", ".jpeg"};
+    const std::vector<QString> allowedSchemes{"http", "https", "file"};
 
-    const QString path{url.path()};
-    const QString query{url.query()};
-
-    return std::ranges::any_of(allowedExtensions, [&](const QString& extension) {
-        return path.endsWith(extension) || query.endsWith(extension);
-    });
+    return std::ranges::any_of(allowedExtensions,
+                               [&](const QString& extension) {
+                                   return urlToValidate.path().endsWith(extension) ||
+                                          urlToValidate.query().endsWith(extension);
+                               }) &&
+           std::ranges::any_of(allowedSchemes, [&](const QString& scheme) {
+               return urlToValidate.scheme() == scheme;
+           });
 }
 
 }

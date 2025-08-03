@@ -8,28 +8,25 @@ class TestBook : public QObject {
 
   private slots:
 
-    static void testIsbnValidator_data();
-    static void testIsbnValidator();
+    static void testIsbn_data();
     static void testIsbn();
 
-    static void testEditionValidator_data();
-    static void testEditionValidator();
+    static void testEdition_data();
     static void testEdition();
 
-    static void testPublisherValidator_data();
-    static void testPublisherValidator();
+    static void testPublisher_data();
     static void testPublisher();
 
+    static void testYearPublished_data();
     static void testYearPublished();
 
+    static void testPageNumber_data();
     static void testPageNumber();
 
-    static void testDescriptionValidator_data();
-    static void testDescriptionValidator();
+    static void testDescription_data();
     static void testDescription();
 
-    static void testThumbnailUrlValidator_data();
-    static void testThumbnailUrlValidator();
+    static void testThumbnailUrl_data();
     static void testThumbnailUrl();
 };
 

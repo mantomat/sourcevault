@@ -7,7 +7,6 @@
 
 #include <QDate>
 #include <QString>
-#include <set>
 
 namespace Core::Model {
 

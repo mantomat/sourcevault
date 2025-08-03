@@ -30,7 +30,7 @@ void TestValidatedField::testUnset_data() {
     QTest::addColumn<ValidatedField<QString>>("validatedField");
 
     ValidatedField<QString> field{[](const QString&) { return true; }};
-    QTest::addRow("Unsetting a new field should do nothing") << field;
+    QTest::addRow("Unsetting an unset field should do nothing") << field;
 
     field.set(QString{"Valid value"});
     QTest::addRow("Unsetting a set field should unset the field") << field;
@@ -189,7 +189,7 @@ void TestValidatedField::testGetUnset() {
 void TestValidatedField::testSetUnsetTransition() {
     ValidatedField<QString> field{[](const QString&) { return true; }};
 
-    const char* firstValue{
+    auto firstValue{
         "Btw, this is a const char* which can't be tested with parametrized tests in Qt"};
     bool res{field.set(firstValue)};
     QCOMPARE(res, true);

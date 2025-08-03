@@ -4,7 +4,7 @@ namespace Core::Model {
 bool& MediumUserData::favorite() {
     return favorite_;
 }
-const bool& MediumUserData::favorite() const {
+bool MediumUserData::favorite() const {
     return favorite_;
 }
 
@@ -28,11 +28,19 @@ bool MediumUserData::notesValidator(const QString& notesToValidate) {
     return !notesToValidate.trimmed().isEmpty();
 }
 
-OptionalField<MediumUserData::PriorityLevel>& MediumUserData::priority() {
+ValidatedField<MediumUserData::PriorityLevel>& MediumUserData::priority() {
     return priority_;
 }
-const OptionalField<MediumUserData::PriorityLevel>& MediumUserData::priority() const {
+const ValidatedField<MediumUserData::PriorityLevel>& MediumUserData::priority() const {
     return priority_;
 }
+bool MediumUserData::priorityValidator(PriorityLevel priorityToValidate) {
+    const auto underlyingValue =
+        static_cast<std::underlying_type_t<PriorityLevel>>(priorityToValidate);
 
+    constexpr auto min = static_cast<std::underlying_type_t<PriorityLevel>>(PriorityLevel::min);
+    constexpr auto max = static_cast<std::underlying_type_t<PriorityLevel>>(PriorityLevel::max);
+
+    return underlyingValue >= min && underlyingValue <= max;
+}
 }

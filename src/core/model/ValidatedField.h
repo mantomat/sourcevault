@@ -2,17 +2,17 @@
 #define VALIDATEDFIELD_H
 
 #include <functional>
+#include <optional>
 
 namespace Core::Model {
 
 template <typename T> class ValidatedField final {
 
-public:
+  public:
     using Validator = std::function<bool(const T&)>;
 
     explicit ValidatedField(Validator newValidator)
         : validator(std::move(newValidator)) {}
-
     bool has() const {
         return data.has_value();
     }
@@ -37,7 +37,7 @@ public:
         data.reset();
     }
 
-private:
+  private:
     std::optional<T> data;
     Validator validator;
 };

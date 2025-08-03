@@ -1,120 +1,139 @@
 #include "TestVideo.h"
 
+#include "TestValidatedField.h"
 #include "model/Video.h"
 
 #include <QTest>
 
 using Core::Model::Video;
 
-void TestVideo::testVideoUrlValidator_data() {
+void TestVideo::testVideoUrl_data() {
     QTest::addColumn<QUrl>("candidateUrl");
-    QTest::addColumn<bool>("expected");
+    QTest::addColumn<bool>("shouldBeValid");
 
-    QTest::addRow("Empty url should be invalid") << QUrl{} << false;
-    QTest::addRow("Local url should be invalid") << QUrl::fromLocalFile("/etc/passwd") << false;
-    QTest::addRow("Non-YouTube url should be invalid")
+    QTest::addRow("Empty urls are invalid") << QUrl{} << false;
+    QTest::addRow("Local urls are invalid") << QUrl::fromLocalFile("/etc/passwd") << false;
+    QTest::addRow("Non-YouTube urls are invalid")
         << QUrl{"https://forum.qt.io/topic/56430/qurl-tolocalfile/3"} << false;
-    QTest::addRow("YouTube non-video url should be invalid")
+    QTest::addRow("YouTube non-video urls are invalid")
         << QUrl{"https://www.youtube.com/results?search_query=rickroll"} << false;
-    QTest::addRow("YouTube video (watch) url should be valid")
+    QTest::addRow("Only https urls are valid - i.e. http is invalid")
+        << QUrl{"http://www.youtube.com/watch?v=dQw4w9WgXcQ"} << false;
+
+    QTest::addRow("YouTube video (watch) urls are valid")
         << QUrl{"https://www.youtube.com/watch?v=dQw4w9WgXcQ"} << true;
-    QTest::addRow("YouTube video (share) url should be valid")
+    QTest::addRow("YouTube video (share) urls are valid")
         << QUrl{"https://youtu.be/dQw4w9WgXcQ?si=BMhfEOItLGnp2kd4"} << true;
-    QTest::addRow("Youtube video (share with start time) url should be valid")
+    QTest::addRow("Youtube video (share with start time) urls are valid")
         << QUrl{"https://youtu.be/dQw4w9WgXcQ?si=BMhfEOItLGnp2kd4&t=2"} << true;
 }
-void TestVideo::testVideoUrlValidator() {
-    QFETCH(QUrl, candidateUrl);
-    QFETCH(bool, expected);
 
-    QCOMPARE(Video::videoUrlValidator(candidateUrl), expected);
-}
 void TestVideo::testVideoUrl() {
-    Video video{};
+    QFETCH(QUrl, candidateUrl);
+    QFETCH(bool, shouldBeValid);
 
-    const QUrl validVideoUrl{"https://www.youtube.com/watch?v=dQw4w9WgXcQ"};
-    video.videoUrl().set(validVideoUrl);
-    const Video constVideoValidVideoUrl{video};
-    QCOMPARE(constVideoValidVideoUrl.videoUrl().get(), std::make_optional(validVideoUrl));
+    TestValidatedField::testValidatedFieldHelper<Video, QUrl>(
+        &Video::videoUrlValidator, [](Video& v) -> ValidatedField<QUrl>& { return v.videoUrl(); },
+        [](const Video& v) -> const ValidatedField<QUrl>& { return v.videoUrl(); }, candidateUrl,
+        shouldBeValid);
+}
 
-    const QUrl invalidUrl{};
-    video.videoUrl().set(invalidUrl);
-    const Video constVideoInvalidVideoUrl{video};
-    QCOMPARE(constVideoInvalidVideoUrl.videoUrl().get(), std::nullopt);
+void TestVideo::testDurationSeconds_data() {
+    QTest::addColumn<unsigned int>("candidateDurationSeconds");
+    QTest::addColumn<bool>("shouldBeValid");
+
+    QTest::addRow("Zero seconds is an invalid video duration") << 0u << false;
+    QTest::addRow("Every integer greater than zero is a valid video duration") << 1u << true;
+    QTest::addRow("Every integer greater than zero is a valid video duration") << 100u << true;
 }
 
 void TestVideo::testDurationSeconds() {
-    Video video{};
+    QFETCH(unsigned int, candidateDurationSeconds);
+    QFETCH(bool, shouldBeValid);
 
-    constexpr unsigned int validDurationSeconds{3456};
-    video.durationSeconds().set(validDurationSeconds);
-    const Video constVideoValidDurationSeconds{video};
-    QCOMPARE(constVideoValidDurationSeconds.durationSeconds().get(),
-             std::make_optional(validDurationSeconds));
-
-    video.durationSeconds().unset();
-    const Video constVideoInvalidDurationSeconds{video};
-    QCOMPARE(constVideoInvalidDurationSeconds.durationSeconds().get(), std::nullopt);
+    TestValidatedField::testValidatedFieldHelper<Video, unsigned int>(
+        &Video::durationSecondsValidator,
+        [](Video& v) -> ValidatedField<unsigned int>& { return v.durationSeconds(); },
+        [](const Video& v) -> const ValidatedField<unsigned int>& { return v.durationSeconds(); },
+        candidateDurationSeconds, shouldBeValid);
 }
 
-void TestVideo::testUploadDateValidator_data() {
-    QTest::addColumn<QDate>("candidateDate");
-    QTest::addColumn<bool>("expected");
+void TestVideo::testUploadDate_data() {
+    QTest::addColumn<QDate>("candidateUploadDate");
+    QTest::addColumn<bool>("shouldBeValid");
 
-    QTest::addRow("Newly created dates should be invalid") << QDate{} << false;
-    QTest::addRow("Any non-empty date should be valid") << QDate{2025, 04, 23} << true;
+    QTest::addRow("Empty dates are invalid") << QDate{} << false;
+    QTest::addRow("Dates before 2005-01-01 are invalid") << QDate{2004, 12, 31} << false;
+    QTest::addRow("Any non-empty date after 2005-01-01 (included) is valid")
+        << QDate{2005, 1, 1} << true;
+    QTest::addRow("Any non-empty date after 2005-01-01 is valid") << QDate{2025, 04, 23} << true;
 }
-void TestVideo::testUploadDateValidator() {
-    QFETCH(QDate, candidateDate);
-    QFETCH(bool, expected);
 
-    QCOMPARE(Video::uploadDateValidator(candidateDate), expected);
-}
 void TestVideo::testUploadDate() {
-    Video video{};
+    QFETCH(QDate, candidateUploadDate);
+    QFETCH(bool, shouldBeValid);
 
-    const QDate validUploadDate{2025, 04, 23};
-    video.uploadDate().set(validUploadDate);
-    const Video constVideoValidUploadDate{video};
-    QCOMPARE(constVideoValidUploadDate.uploadDate().get(), std::make_optional(validUploadDate));
-
-    const QDate invalidUploadDate{};
-    video.uploadDate().set(invalidUploadDate);
-    const Video constVideoInvalidUploadDate{video};
-    QCOMPARE(constVideoInvalidUploadDate.uploadDate().get(), std::nullopt);
+    TestValidatedField::testValidatedFieldHelper<Video, QDate>(
+        &Video::uploadDateValidator,
+        [](Video& v) -> ValidatedField<QDate>& { return v.uploadDate(); },
+        [](const Video& v) -> const ValidatedField<QDate>& { return v.uploadDate(); },
+        candidateUploadDate, shouldBeValid);
 }
 
-void TestVideo::testThumbnailUrlValidator_data() {
-    QTest::addColumn<QUrl>("candidateUrl");
-    QTest::addColumn<bool>("expected");
+void TestVideo::testThumbnailUrl_data() {
+    QTest::addColumn<QUrl>("candidateThumbnailUrl");
+    QTest::addColumn<bool>("shouldBeValid");
 
-    QTest::addRow("Empty url should be invalid") << QUrl{} << false;
-    QTest::addRow("Non-image url should be invalid")
-        << QUrl{"https://www.youtube.com/watch?v=dQw4w9WgXcQ"} << false;
+    QTest::addRow("Empty urls are invalid") << QUrl{} << false;
+
+    QTest::addRow("Only local paths, http and https - i.e. mailto is not")
+        << QUrl{"mailto:user@example.com"} << false;
+    QTest::addRow("Only local paths, http and https - i.e. ftp is not")
+        << QUrl{"ftp://user@host/foo/image.png"} << false;
+
+    QTest::addRow("Non-image http urls are invalid")
+        << QUrl{"http://www.example.com/book"} << false;
+    QTest::addRow("Non-image https urls are invalid")
+        << QUrl{"https://www.example.com/book"} << false;
+    QTest::addRow("Non-image file urls are invalid")
+        << QUrl{"file://www.example.com/book"} << false;
+    QTest::addRow("Non-image local paths are invalid")
+        << QUrl::fromLocalFile("/etc/passwd") << false;
+
+    QTest::addRow(".jpg image http urls are valid") << QUrl{"http://example.com/image.jpg"} << true;
+    QTest::addRow(".jpeg image http urls are valid")
+        << QUrl{"http://example.com/image.jpeg"} << true;
+    QTest::addRow(".png image http urls are valid")
+        << QUrl{"http://upload.wikimedia.org/wikipedia/commons/4/47/"
+                "PNG_transparency_demonstration_1.png"}
+        << true;
+
+    QTest::addRow(".jpg image https urls are valid")
+        << QUrl{"https://example.com/image.jpg"} << true;
+    QTest::addRow(".jpeg image https urls are valid")
+        << QUrl{"https://example.com/image.jpeg"} << true;
+    QTest::addRow(".png image https urls are valid")
+        << QUrl{"https://upload.wikimedia.org/wikipedia/commons/4/47/"
+                "PNG_transparency_demonstration_1.png"}
+        << true;
     QTest::addRow("YouTube thumbnail image url should be valid")
         << QUrl{"https://i.ytimg.com/vi/1m7PgAShgbk/sddefault.jpg"} << true;
-    QTest::addRow("Any image url should be valid (for now)")
-        << QUrl{"https://en.wikipedia.org/wiki/File:Image_created_with_a_mobile_phone.png"} << true;
-    QTest::addRow("Local image url should be valid")
+
+    QTest::addRow(".jpg local image urls are valid")
+        << QUrl::fromLocalFile("/Users/example/Pictures/cover.jpg") << true;
+    QTest::addRow(".jpeg local image urls are valid")
+        << QUrl::fromLocalFile("/Users/example/Pictures/cover.jpeg") << true;
+    QTest::addRow(".png local image urls are valid")
         << QUrl::fromLocalFile("/Users/example/Pictures/cover.png") << true;
 }
-void TestVideo::testThumbnailUrlValidator() {
-    QFETCH(QUrl, candidateUrl);
-    QFETCH(bool, expected);
 
-    QCOMPARE(Video::thumbnailUrlValidator(candidateUrl), expected);
-}
 void TestVideo::testThumbnailUrl() {
-    Video video{};
+    QFETCH(QUrl, candidateThumbnailUrl);
+    QFETCH(bool, shouldBeValid);
 
-    const QUrl validThumbnailUrl{"https://i.ytimg.com/vi/1m7PgAShgbk/sddefault.jpg"};
-    video.thumbnailUrl().set(validThumbnailUrl);
-    const Video constVideoValidThumbnailUrl{video};
-    QCOMPARE(constVideoValidThumbnailUrl.thumbnailUrl().get(),
-             std::make_optional(validThumbnailUrl));
-
-    const QUrl invalidUrl{};
-    video.thumbnailUrl().set(invalidUrl);
-    const Video constVideoInvalidThumbnailUrl{video};
-    QCOMPARE(constVideoInvalidThumbnailUrl.thumbnailUrl().get(), std::nullopt);
+    TestValidatedField::testValidatedFieldHelper<Video, QUrl>(
+        &Video::thumbnailUrlValidator,
+        [](Video& v) -> ValidatedField<QUrl>& { return v.thumbnailUrl(); },
+        [](const Video& v) -> const ValidatedField<QUrl>& { return v.thumbnailUrl(); },
+        candidateThumbnailUrl, shouldBeValid);
 }
