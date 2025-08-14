@@ -18,6 +18,10 @@ class ConcreteMedium final : public Medium {
     ConcreteMedium(ConcreteMedium&& m) = default;
     ConcreteMedium(const ConcreteMedium& m) = default;
 
+    std::unique_ptr<Medium> clone() const override {
+        return std::make_unique<ConcreteMedium>(*this);
+    }
+
     friend class TestMedium;
 };
 

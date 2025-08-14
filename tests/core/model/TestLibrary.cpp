@@ -124,8 +124,8 @@ void TestLibrary::testSetMedia() {
     QFETCH(size_t, expectedCountAfterSet);
 
     std::vector<std::unique_ptr<const Medium>> mediaToSet = mediaGenerator();
-    Library lib;
-    const QSignalSpy spy{&lib, &Library::mediaChanged};
+    Library lib{std::make_shared<LibrarySignals>()};
+    const QSignalSpy spy{lib.signalsEmitter(), &LibrarySignals::mediaChanged};
 
     lib.setMedia(std::move(mediaToSet));
 
@@ -142,50 +142,50 @@ void TestLibrary::testMerge_data() const {
     QTest::addColumn<bool>("expectedSignalEmission");
 
     QTest::addRow("Disjunct merge acts as a disjunct union") << LibraryGenerator{[this] {
-        auto lib{std::make_unique<Library>()};
+        auto lib{std::make_unique<Library>(std::make_shared<LibrarySignals>())};
         lib->addMedium(std::make_unique<Book>(book));
         lib->addMedium(std::make_unique<Video>(video));
         return lib;
     }} << LibraryGenerator{[this] {
-        auto lib{std::make_unique<Library>()};
+        auto lib{std::make_unique<Library>(std::make_shared<LibrarySignals>())};
         lib->addMedium(std::make_unique<Article>(article));
         return lib;
     }} << std::set{book.id(), video.id(), article.id()} << true;
 
     QTest::addRow("Merging with an empty library does nothing") << LibraryGenerator{[this] {
-        auto lib{std::make_unique<Library>()};
+        auto lib{std::make_unique<Library>(std::make_shared<LibrarySignals>())};
         lib->addMedium(std::make_unique<Book>(book));
         lib->addMedium(std::make_unique<Video>(video));
         return lib;
-    }} << LibraryGenerator{[] { return std::make_unique<Library>(); }}
-                                                                << std::set{book.id(), video.id()}
-                                                                << false;
+    }} << LibraryGenerator{[] {
+        return std::make_unique<Library>(std::make_shared<LibrarySignals>());
+    }} << std::set{book.id(), video.id()} << false;
 
     QTest::addRow("If duplicates are found, they are ignored") << LibraryGenerator{[this] {
-        auto lib{std::make_unique<Library>()};
+        auto lib{std::make_unique<Library>(std::make_shared<LibrarySignals>())};
         lib->addMedium(std::make_unique<Book>(book));
         lib->addMedium(std::make_unique<Video>(video));
         return lib;
     }} << LibraryGenerator{[this] {
-        auto lib{std::make_unique<Library>()};
+        auto lib{std::make_unique<Library>(std::make_shared<LibrarySignals>())};
         lib->addMedium(std::make_unique<Book>(book));
         return lib;
     }} << std::set{book.id(), video.id()} << false;
 
     QTest::addRow("If duplicates are found, they are ignored") << LibraryGenerator{[this] {
-        auto lib{std::make_unique<Library>()};
+        auto lib{std::make_unique<Library>(std::make_shared<LibrarySignals>())};
         lib->addMedium(std::make_unique<Book>(book));
         lib->addMedium(std::make_unique<Video>(video));
         return lib;
     }} << LibraryGenerator{[this] {
-        auto lib{std::make_unique<Library>()};
+        auto lib{std::make_unique<Library>(std::make_shared<LibrarySignals>())};
         lib->addMedium(std::make_unique<Book>(book));
         lib->addMedium(std::make_unique<Article>(article));
         return lib;
     }} << std::set{book.id(), video.id(), article.id()} << true;
 
     QTest::addRow("If source is nullptr, nothing happens") << LibraryGenerator{[this] {
-        auto lib{std::make_unique<Library>()};
+        auto lib{std::make_unique<Library>(std::make_shared<LibrarySignals>())};
         lib->addMedium(std::make_unique<Book>(book));
         lib->addMedium(std::make_unique<Video>(video));
         return lib;
@@ -201,7 +201,7 @@ void TestLibrary::testMerge() {
 
     const auto destination{destinationGenerator()};
     auto source{sourceGenerator()};
-    const QSignalSpy spy{destination.get(), &Library::mediaChanged};
+    const QSignalSpy spy{destination->signalsEmitter(), &LibrarySignals::mediaChanged};
 
     destination->merge(std::move(source));
 
@@ -221,20 +221,21 @@ void TestLibrary::testAddMedium_data() const {
     QTest::addColumn<MediumGenerator>("mediumToAddGenerator");
     QTest::addColumn<bool>("shouldBeAdded");
 
-    QTest::addRow("Adding a new (non-duplicate) medium returns true")
-        << LibraryGenerator{[] { return std::make_unique<Library>(); }}
-        << MediumGenerator{[this] { return std::make_unique<Book>(book); }} << true;
+    QTest::addRow("Adding a new (non-duplicate) medium returns true") << LibraryGenerator{[] {
+        return std::make_unique<Library>(std::make_shared<LibrarySignals>());
+    }} << MediumGenerator{[this] { return std::make_unique<Book>(book); }}
+                                                                      << true;
 
     QTest::addRow("Adding a duplicate medium does nothing and returns false")
         << LibraryGenerator{[this] {
-               auto lib{std::make_unique<Library>()};
+               auto lib{std::make_unique<Library>(std::make_shared<LibrarySignals>())};
                lib->addMedium(std::make_unique<Book>(book));
                return lib;
            }}
         << MediumGenerator{[this] { return std::make_unique<Book>(book); }} << false;
 
     QTest::addRow("Adding a nullptr does nothing and returns false") << LibraryGenerator{[this] {
-        auto lib{std::make_unique<Library>()};
+        auto lib{std::make_unique<Library>(std::make_shared<LibrarySignals>())};
         lib->addMedium(std::make_unique<Book>(book));
         return lib;
     }} << MediumGenerator{[] { return std::unique_ptr<Medium>{nullptr}; }}
@@ -246,7 +247,7 @@ void TestLibrary::testAddMedium() {
     QFETCH(bool, shouldBeAdded);
 
     const auto lib{libraryGenerator()};
-    const QSignalSpy spy{lib.get(), &Library::mediaChanged};
+    const QSignalSpy spy{lib->signalsEmitter(), &LibrarySignals::mediaChanged};
 
     const bool wasAdded{lib->addMedium(mediumToAddGenerator())};
 
@@ -263,7 +264,7 @@ void TestLibrary::testReplaceMedium_data() const {
     QTest::addColumn<bool>("shouldBeReplaced");
 
     QTest::addRow("Replacing existing medium returns true") << LibraryGenerator{[this] {
-        auto lib{std::make_unique<Library>()};
+        auto lib{std::make_unique<Library>(std::make_shared<LibrarySignals>())};
         lib->addMedium(std::make_unique<Book>(book));
         return lib;
     }} << MediumGenerator{[this] {
@@ -274,7 +275,7 @@ void TestLibrary::testReplaceMedium_data() const {
 
     QTest::addRow("Replacing absent medium does nothing and returns false")
         << LibraryGenerator{[this] {
-               auto lib{std::make_unique<Library>()};
+               auto lib{std::make_unique<Library>(std::make_shared<LibrarySignals>())};
                lib->addMedium(std::make_unique<Book>(book));
                return lib;
            }}
@@ -286,7 +287,7 @@ void TestLibrary::testReplaceMedium_data() const {
         << false;
 
     QTest::addRow("Passing nullptr does nothing and returns false") << LibraryGenerator{[this] {
-        auto lib{std::make_unique<Library>()};
+        auto lib{std::make_unique<Library>(std::make_shared<LibrarySignals>())};
         lib->addMedium(std::make_unique<Book>(book));
         return lib;
     }} << MediumGenerator{[] { return std::unique_ptr<Book>{nullptr}; }}
@@ -298,7 +299,7 @@ void TestLibrary::testReplaceMedium() {
     QFETCH(bool, shouldBeReplaced);
 
     const auto lib{libraryGenerator()};
-    const QSignalSpy spy{lib.get(), &Library::mediaChanged};
+    const QSignalSpy spy{lib->signalsEmitter(), &LibrarySignals::mediaChanged};
 
     const bool wasReplaced{lib->replaceMedium(newMediumGenerator())};
 
@@ -321,13 +322,13 @@ void TestLibrary::testRemoveMedium_data() const {
     QTest::addColumn<bool>("shouldBeRemoved");
 
     QTest::addRow("Removing an existing medium") << LibraryGenerator{[this] {
-        auto lib{std::make_unique<Library>()};
+        auto lib{std::make_unique<Library>(std::make_shared<LibrarySignals>())};
         lib->addMedium(std::make_unique<Book>(book));
         return lib;
     }} << book.id() << true;
 
     QTest::addRow("Trying to remove an absent medium does nothing") << LibraryGenerator{[this] {
-        auto lib{std::make_unique<Library>()};
+        auto lib{std::make_unique<Library>(std::make_shared<LibrarySignals>())};
         lib->addMedium(std::make_unique<Book>(book));
         return lib;
     }} << video.id() << false;
@@ -338,7 +339,7 @@ void TestLibrary::testRemoveMedium() {
     QFETCH(bool, shouldBeRemoved);
 
     const auto lib{libraryGenerator()};
-    const QSignalSpy spy{lib.get(), &Library::mediaChanged};
+    const QSignalSpy spy{lib->signalsEmitter(), &LibrarySignals::mediaChanged};
     const auto& wasMediumPresent{std::ranges::any_of(
         lib->getAllMedia(), [&](auto mPtr) { return mPtr->id() == mediumToRemoveId; })};
 
@@ -359,11 +360,12 @@ void TestLibrary::testClear_data() const {
     QTest::addColumn<LibraryGenerator>("libraryGenerator");
     QTest::addColumn<bool>("shouldEmit");
 
-    QTest::addRow("Clearing an empty library doesn't emit")
-        << LibraryGenerator{[] { return std::make_unique<Library>(); }} << false;
+    QTest::addRow("Clearing an empty library doesn't emit") << LibraryGenerator{[] {
+        return std::make_unique<Library>(std::make_shared<LibrarySignals>());
+    }} << false;
 
     QTest::addRow("Clearing a non-empty library emits a signal") << LibraryGenerator{[this] {
-        auto lib{std::make_unique<Library>()};
+        auto lib{std::make_unique<Library>(std::make_shared<LibrarySignals>())};
         lib->addMedium(std::make_unique<Book>(book));
         return lib;
     }} << true;
@@ -374,7 +376,7 @@ void TestLibrary::testClear() {
     QFETCH(bool, shouldEmit);
 
     const auto lib{libraryGenerator()};
-    const QSignalSpy spy{lib.get(), &Library::mediaChanged};
+    const QSignalSpy spy{lib->signalsEmitter(), &LibrarySignals::mediaChanged};
 
     lib->clear();
     QCOMPARE(lib->mediaCount(), size_t{0});

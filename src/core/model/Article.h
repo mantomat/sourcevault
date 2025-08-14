@@ -23,6 +23,8 @@ class Article : public Medium {
     Article(Article&&) = default;
     ~Article() override = default;
 
+    std::unique_ptr<Medium> clone() const override;
+
     static std::optional<Article> create(QString title, QUuid id = QUuid::createUuid(),
                                          QDate dateAdded = QDate::currentDate());
 

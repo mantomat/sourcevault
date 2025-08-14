@@ -7,6 +7,10 @@ namespace Core::Model {
 Video::Video(QString&& title, const QUuid id, const QDate dateAdded)
     : Medium{std::move(title), id, dateAdded} {}
 
+std::unique_ptr<Medium> Video::clone() const {
+    return std::make_unique<Video>(*this);
+}
+
 std::optional<Video> Video::create(QString title, const QUuid id, const QDate dateAdded) {
     if (!createValidator(title, id, dateAdded)) {
         return std::nullopt;

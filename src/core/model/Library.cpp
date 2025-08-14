@@ -5,6 +5,35 @@
 
 namespace Core::Model {
 
+void Library::emitMediaChanged() const {
+    if (sigsEmitter != nullptr)
+        emit sigsEmitter->mediaChanged();
+}
+
+Library::Library(const std::shared_ptr<LibrarySignals>& librarySignals)
+    : sigsEmitter{librarySignals} {}
+
+Library::Library(const Library& other) {
+    for (const auto& medium : other.media | std::views::values) {
+        media.insert({medium->id(), medium->clone()});
+    }
+}
+
+Library& Library::operator=(const Library& other) {
+    Library temp{other};
+    this->swap(temp);
+    return *this;
+}
+
+void Library::swap(Library& other) noexcept {
+    std::swap(media, other.media);
+    std::swap(sigsEmitter, other.sigsEmitter);
+}
+
+const LibrarySignals* Library::signalsEmitter() const {
+    return sigsEmitter.get();
+}
+
 std::vector<const Medium*> Library::getAllMedia() const {
     auto range = media | std::views::values |
                  std::views::transform([](const auto& ptr) { return ptr.get(); });
@@ -39,7 +68,7 @@ void Library::setMedia(std::vector<std::unique_ptr<const Medium>> newMedia) {
 
         media.emplace(medium->id(), std::move(medium));
     }
-    emit mediaChanged();
+    emitMediaChanged();
 }
 
 // The clangd warning on this line is a false positive.
@@ -55,7 +84,7 @@ void Library::merge(std::unique_ptr<Library> other) {
     media.merge(std::move(other->media));
 
     if (const auto countAfterMerge{mediaCount()}; countBeforeMerge != countAfterMerge)
-        emit mediaChanged();
+        emitMediaChanged();
 }
 
 bool Library::addMedium(std::unique_ptr<const Medium> newMedium) {
@@ -64,8 +93,8 @@ bool Library::addMedium(std::unique_ptr<const Medium> newMedium) {
 
     const auto [_, success]{media.insert({newMedium->id(), std::move(newMedium)})};
 
-    if (success)
-        emit mediaChanged();
+    if (sigsEmitter != nullptr && success)
+        emitMediaChanged();
 
     return success;
 }
@@ -75,14 +104,14 @@ bool Library::replaceMedium(std::unique_ptr<const Medium> newMedium) {
         return false;
     }
     media.at(newMedium->id()) = std::move(newMedium);
-    emit mediaChanged();
+    emitMediaChanged();
     return true;
 }
 
 bool Library::removeMedium(const QUuid& id) {
     const bool didRemove{media.erase(id) > 0};
     if (didRemove)
-        emit mediaChanged();
+        emitMediaChanged();
     return didRemove;
 }
 
@@ -90,7 +119,7 @@ void Library::clear() {
     const auto previousCount{mediaCount()};
     media.clear();
     if (previousCount > 0)
-        emit mediaChanged();
+        emitMediaChanged();
 }
 
 }

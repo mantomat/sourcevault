@@ -22,6 +22,8 @@ class Video : public Medium {
     Video(Video&&) = default;
     ~Video() override = default;
 
+    std::unique_ptr<Medium> clone() const override;
+
     static std::optional<Video> create(QString title, QUuid id = QUuid::createUuid(),
                                        QDate dateAdded = QDate::currentDate());
 

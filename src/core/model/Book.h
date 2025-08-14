@@ -24,6 +24,8 @@ class Book : public Medium {
     Book(Book&&) = default;
     ~Book() override = default;
 
+    std::unique_ptr<Medium> clone() const override;
+
     static std::optional<Book> create(QString title, QUuid id = QUuid::createUuid(),
                                       QDate dateAdded = QDate::currentDate());
 

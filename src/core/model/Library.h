@@ -1,21 +1,41 @@
 #ifndef LIBRARY_H
 #define LIBRARY_H
 
+#include "LibrarySignals.h"
 #include "Medium.h"
-
-#include <span>
 
 namespace Core::Model {
 
 /**
  * Manages the vector of media that are currently loaded in memory representing a library.
  */
-class Library final : public QObject {
-    Q_OBJECT
+class Library final {
 
     std::map<QUuid, std::unique_ptr<const Medium>> media;
+    std::shared_ptr<LibrarySignals> sigsEmitter;
+
+    void emitMediaChanged() const;
 
   public:
+    /**
+     * @brief Constructs a new library.
+     * This class uses dependency injection to decouple the non-copyable and non-movable signal
+     * emitter from the library, in order to allow for copy and moves.
+     *
+     * You can omit the parameter if you don't need to receive updates from the library.
+     */
+    explicit Library(const std::shared_ptr<LibrarySignals>& signalsEmitter = nullptr);
+
+    Library(Library&&) = default;
+    Library& operator=(Library&&) = default;
+
+    Library(const Library& other);
+    Library& operator=(const Library& other);
+
+    void swap(Library& other) noexcept;
+
+    const LibrarySignals* signalsEmitter() const;
+
     /**
      * @brief Returns a read-only view of all media in the library.
      *

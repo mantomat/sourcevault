@@ -65,6 +65,8 @@ class Medium {
     Medium(Medium&&) = default;
     virtual ~Medium() = 0;
 
+    virtual std::unique_ptr<Medium> clone() const = 0;
+
     QUuid id() const;
     static bool idValidator(const QUuid& idToValidate);
 

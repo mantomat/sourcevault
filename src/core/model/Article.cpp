@@ -5,6 +5,10 @@ namespace Core::Model {
 Article::Article(QString&& title, const QUuid id, const QDate dateAdded)
     : Medium{std::move(title), id, dateAdded} {}
 
+std::unique_ptr<Medium> Article::clone() const {
+    return std::make_unique<Article>(*this);
+}
+
 std::optional<Article> Article::create(QString title, const QUuid id, const QDate dateAdded) {
     if (!createValidator(title, id, dateAdded)) {
         return std::nullopt;
