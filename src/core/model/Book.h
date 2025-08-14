@@ -9,8 +9,23 @@ namespace Core::Model {
 
 class Book : public Medium {
 
+    ValidatedField<QString> isbn_{isbnValidator};
+    ValidatedField<QString> edition_{editionValidator};
+    ValidatedField<QString> publisher_{publisherValidator};
+    ValidatedField<int> yearPublished_{yearPublishedValidator};
+    ValidatedField<unsigned int> pageNumber_{pageNumberValidator};
+    ValidatedField<QString> description_{descriptionValidator};
+    ValidatedField<QUrl> thumbnailUrl_{thumbnailUrlValidator};
+
+    Book(QString&& title, QUuid id, QDate dateAdded);
+
   public:
+    Book(const Book&) = default;
+    Book(Book&&) = default;
     ~Book() override = default;
+
+    static std::optional<Book> create(QString title, QUuid id = QUuid::createUuid(),
+                                      QDate dateAdded = QDate::currentDate());
 
     ValidatedField<QString>& isbn();
     const ValidatedField<QString>& isbn() const;
@@ -39,15 +54,6 @@ class Book : public Medium {
     ValidatedField<QUrl>& thumbnailUrl();
     const ValidatedField<QUrl>& thumbnailUrl() const;
     static bool thumbnailUrlValidator(const QUrl& urlToValidate);
-
-  private:
-    ValidatedField<QString> isbn_{isbnValidator};
-    ValidatedField<QString> edition_{editionValidator};
-    ValidatedField<QString> publisher_{publisherValidator};
-    ValidatedField<int> yearPublished_{yearPublishedValidator};
-    ValidatedField<unsigned int> pageNumber_{pageNumberValidator};
-    ValidatedField<QString> description_{descriptionValidator};
-    ValidatedField<QUrl> thumbnailUrl_{thumbnailUrlValidator};
 };
 
 }

@@ -8,9 +8,12 @@ namespace Core::Model {
 
 template <typename T> class ValidatedField final {
 
-  public:
     using Validator = std::function<bool(const T&)>;
 
+    std::optional<T> data;
+    Validator validator;
+
+  public:
     explicit ValidatedField(Validator newValidator)
         : validator(std::move(newValidator)) {}
     bool has() const {
@@ -33,10 +36,6 @@ template <typename T> class ValidatedField final {
     void unset() {
         data.reset();
     }
-
-  private:
-    std::optional<T> data;
-    Validator validator;
 };
 
 }

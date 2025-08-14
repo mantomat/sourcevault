@@ -5,6 +5,16 @@
 
 namespace Core::Model {
 
+Book::Book(QString&& title, const QUuid id, const QDate dateAdded)
+    : Medium{std::move(title), id, dateAdded} {}
+
+std::optional<Book> Book::create(QString title, const QUuid id, const QDate dateAdded) {
+    if (!createValidator(title, id, dateAdded)) {
+        return std::nullopt;
+    }
+    return std::make_optional(Book{std::move(title), id, dateAdded});
+}
+
 ValidatedField<QString>& Book::isbn() {
     return isbn_;
 }

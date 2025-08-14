@@ -23,6 +23,7 @@ class TestValidatedField : public QObject {
      */
     template <typename MediumClass, typename FieldType>
     static void testValidatedFieldHelper(
+        const std::function<MediumClass()>& builder,
         const std::function<bool(const FieldType&)>& validator,
         const std::function<ValidatedField<FieldType>&(MediumClass&)>& fieldGetter,
         const std::function<const ValidatedField<FieldType>&(const MediumClass&)>& constFieldGetter,
@@ -31,7 +32,7 @@ class TestValidatedField : public QObject {
         const bool didPassValidation{validator(candidateValue)};
         QCOMPARE(didPassValidation, shouldBeValid);
 
-        MediumClass mediumInstance{};
+        MediumClass mediumInstance = builder();
         ValidatedField<FieldType>& field{fieldGetter(mediumInstance)};
 
         const bool didSet{field.set(candidateValue)};

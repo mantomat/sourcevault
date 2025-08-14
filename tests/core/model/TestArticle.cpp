@@ -1,11 +1,35 @@
 #include "TestArticle.h"
 
+#include "TestMedium.h"
 #include "TestValidatedField.h"
 #include "model/Article.h"
 
 #include <QTest>
 
 using Core::Model::Article;
+
+const auto articleBuilder{[] { return Article::create("default title").value(); }};
+
+void TestArticle::testCreate_data() {
+    TestMedium::testCreateData();
+}
+
+void TestArticle::testCreate() {
+    QFETCH(bool, shouldBeValid);
+    QFETCH(QString, candidateTitle);
+    QFETCH(QUuid, candidateId);
+    QFETCH(QDate, candidateDateAdded);
+
+    const auto optionalArticle{Article::create(candidateTitle, candidateId, candidateDateAdded)};
+    if (shouldBeValid) {
+        QVERIFY2(optionalArticle.has_value(), "The article must be created");
+        QCOMPARE(optionalArticle.value().title(), candidateTitle);
+        QCOMPARE(optionalArticle.value().id(), candidateId);
+        QCOMPARE(optionalArticle.value().dateAdded(), candidateDateAdded);
+    } else {
+        QVERIFY2(!optionalArticle.has_value(), "The article mustn't be created");
+    }
+}
 
 void TestArticle::testArticleUrl_data() {
     QTest::addColumn<QUrl>("candidateUrl");
@@ -25,7 +49,7 @@ void TestArticle::testArticleUrl() {
     QFETCH(bool, shouldBeValid);
 
     TestValidatedField::testValidatedFieldHelper<Article, QUrl>(
-        &Article::articleUrlValidator,
+        articleBuilder, &Article::articleUrlValidator,
         [](Article& article) -> ValidatedField<QUrl>& { return article.articleUrl(); },
         [](const Article& article) -> const ValidatedField<QUrl>& { return article.articleUrl(); },
         candidateUrl, shouldBeValid);
@@ -45,7 +69,7 @@ void TestArticle::testSourceName() {
     QFETCH(bool, shouldBeValid);
 
     TestValidatedField::testValidatedFieldHelper<Article, QString>(
-        &Article::sourceNameValidator,
+        articleBuilder, &Article::sourceNameValidator,
         [](Article& article) -> ValidatedField<QString>& { return article.sourceName(); },
         [](const Article& article) -> const ValidatedField<QString>& {
             return article.sourceName();
@@ -67,7 +91,7 @@ void TestArticle::testReadTimeMinutes() {
     QFETCH(bool, shouldBeValid);
 
     TestValidatedField::testValidatedFieldHelper<Article, unsigned int>(
-        &Article::readTimeMinutesValidator,
+        articleBuilder, &Article::readTimeMinutesValidator,
         [](Article& article) -> ValidatedField<unsigned int>& { return article.readTimeMinutes(); },
         [](const Article& article) -> const ValidatedField<unsigned int>& {
             return article.readTimeMinutes();
@@ -88,7 +112,7 @@ void TestArticle::testPublicationDate() {
     QFETCH(bool, shouldBeValid);
 
     TestValidatedField::testValidatedFieldHelper<Article, QDate>(
-        &Article::publicationDateValidator,
+        articleBuilder, &Article::publicationDateValidator,
         [](Article& article) -> ValidatedField<QDate>& { return article.publicationDate(); },
         [](const Article& article) -> const ValidatedField<QDate>& {
             return article.publicationDate();

@@ -4,6 +4,16 @@
 
 namespace Core::Model {
 
+Video::Video(QString&& title, const QUuid id, const QDate dateAdded)
+    : Medium{std::move(title), id, dateAdded} {}
+
+std::optional<Video> Video::create(QString title, const QUuid id, const QDate dateAdded) {
+    if (!createValidator(title, id, dateAdded)) {
+        return std::nullopt;
+    }
+    return std::make_optional(Video{std::move(title), id, dateAdded});
+}
+
 ValidatedField<QUrl>& Video::videoUrl() {
     return videoUrl_;
 }

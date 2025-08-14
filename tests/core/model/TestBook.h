@@ -8,6 +8,9 @@ class TestBook : public QObject {
 
   private slots:
 
+    static void testCreate_data();
+    static void testCreate();
+
     static void testIsbn_data();
     static void testIsbn();
 

@@ -8,10 +8,12 @@
 namespace Core::Model {
 
 template <typename T> class ValidatedSet {
-
-  public:
     using Validator = std::function<bool(const T&)>;
 
+    std::set<T> storedElements;
+    Validator validator;
+
+  public:
     explicit ValidatedSet(Validator newValidator)
         : validator{std::move(newValidator)} {}
 
@@ -46,10 +48,6 @@ template <typename T> class ValidatedSet {
     std::optional<std::set<T>> get() const {
         return has() ? std::make_optional(storedElements) : std::nullopt;
     }
-
-  private:
-    std::set<T> storedElements;
-    Validator validator;
 };
 
 }

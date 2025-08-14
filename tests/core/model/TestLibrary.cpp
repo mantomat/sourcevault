@@ -8,6 +8,7 @@
 
 #include <QSignalSpy>
 #include <QTest>
+#include <algorithm>
 #include <ranges>
 
 using Core::Model::Article;
@@ -16,304 +17,366 @@ using Core::Model::Library;
 using Core::Model::Medium;
 using Core::Model::Video;
 
-void TestLibrary::cleanup() {
-    // reset the library after every test function
-    const std::shared_ptr library{Library::getLibrary()};
-    library->clearMedia();
-
-    // Currently, the only two pointing at the library should be the library class and this
-    // function.
-    QCOMPARE(library.use_count(), 2);
+void TestLibrary::populateLib(Library& libToPopulate) const {
+    std::vector<std::unique_ptr<const Medium>> mediaToSet;
+    mediaToSet.push_back(std::make_unique<Book>(book));
+    mediaToSet.push_back(std::make_unique<Video>(video));
+    mediaToSet.push_back(std::make_unique<Article>(article));
+    libToPopulate.setMedia(std::move(mediaToSet));
 }
 
-void TestLibrary::testGetLibrary() {
-    const std::shared_ptr lib1{Library::getLibrary()};
-    const std::shared_ptr lib2{Library::getLibrary()};
+void TestLibrary::testGetAllMedia() const {
+    Library lib;
+    QCOMPARE(lib.getAllMedia().size(), 0);
 
-    // the two should point at the same library
-    QCOMPARE(lib1->getMediaView().size(), 0);
-    QCOMPARE(lib1->getMediaView(), lib2->getMediaView());
+    populateLib(lib);
+    std::set expected{expectedIds};
 
-    // when the library is updated somewhere, changes are reflected on all the pointers
-    lib1->addMedium(std::make_unique<Book>());
-    QCOMPARE(lib1->getMediaView().size(), 1);
-    QCOMPARE(lib1->getMediaView(), lib2->getMediaView());
-
-    // when the library is updated somewhere, changes are reflected on all the pointers
-    lib2->removeMedium(lib1->getMediaView().at(0));
-    QCOMPARE(lib1->getMediaView().size(), 0);
-    QCOMPARE(lib1->getMediaView(), lib2->getMediaView());
+    const auto mediaView{lib.getAllMedia()};
+    QCOMPARE(mediaView.size(), expected.size());
+    for (const Medium* mediumPtr : mediaView) {
+        QVERIFY(mediumPtr != nullptr);
+        QVERIFY(expected.contains(mediumPtr->id()));
+        expected.erase(mediumPtr->id());
+    }
 }
 
-void TestLibrary::testGetMediaView() {
-    const std::shared_ptr lib{Library::getLibrary()};
+void TestLibrary::testGetAllTopics() const {
+    Library lib;
+    QCOMPARE(lib.getAllTopics().size(), 0);
 
-    std::unique_ptr<Medium> firstMedium{std::make_unique<Book>()};
-    QString firstTitle{"This is the first medium in the library"};
-    firstMedium->title().set(firstTitle);
-    lib->addMedium(std::move(firstMedium));
+    populateLib(lib);
+    std::set expected{expectedTopics};
 
-    std::unique_ptr<Medium> secondMedium{std::make_unique<Video>()};
-    QString secondTitle{"This is the second medium in the library"};
-    secondMedium->title().set(secondTitle);
-    lib->addMedium(std::move(secondMedium));
-
-    const std::vector mediaView{lib->getMediaView()};
-    QCOMPARE(mediaView.size(), 2);
-    QCOMPARE(mediaView.at(0)->title().get(), firstTitle);
-    QCOMPARE(mediaView.at(1)->title().get(), secondTitle);
+    const auto actualTopics{lib.getAllTopics()};
+    QCOMPARE(actualTopics.size(), expected.size());
+    for (const auto& topic : actualTopics) {
+        QVERIFY(expected.contains(topic));
+        expected.erase(topic);
+    }
 }
 
+void TestLibrary::testGetMedium_data() const {
+    QTest::addColumn<QUuid>("idToGet");
+    QTest::addColumn<bool>("shouldBeFound");
+
+    Library lib;
+    populateLib(lib);
+
+    QTest::addRow("A null id must never be found") << QUuid{} << false;
+    QTest::addRow("An absent id must never be found") << QUuid{QUuid::createUuid()} << false;
+    QTest::addRow("A present id must return the corresponding medium") << book.id() << true;
+}
+
+void TestLibrary::testGetMedium() const {
+    QFETCH(QUuid, idToGet);
+    QFETCH(bool, shouldBeFound);
+
+    // Creating this every time could slow down the tests, but it's the easiest thing to do.
+    Library lib;
+    populateLib(lib);
+
+    const auto optionalMedium{lib.getMedium(idToGet)};
+    QCOMPARE(optionalMedium.has_value(), shouldBeFound);
+}
+
+void TestLibrary::testMediaCount() const {
+    Library lib;
+    QCOMPARE(lib.mediaCount(), 0);
+
+    populateLib(lib);
+
+    QCOMPARE(lib.mediaCount(), expectedCount);
+}
+
+void TestLibrary::testSetMedia_data() {
+    using cMediaPtr = std::unique_ptr<const Medium>;
+    using MediaVector = std::vector<cMediaPtr>;
+    using MediaGenerator = std::function<MediaVector()>;
+
+    // A generator is used because vectors of unique_ptrs are not copyable, thus they cannot be
+    // passed to data driven test functions in Qt.
+    QTest::addColumn<MediaGenerator>("mediaGenerator");
+    QTest::addColumn<size_t>("expectedCountAfterSet");
+
+    QTest::addRow("Setting an empty vector")
+        << MediaGenerator{[] { return MediaVector{}; }} << size_t{0};
+
+    QTest::addRow("Nullptr's must be ignored") << MediaGenerator{[] {
+        MediaVector vec;
+        vec.push_back(std::make_unique<Book>(Book::create("Valid Book").value()));
+        vec.push_back(nullptr);
+        vec.push_back(std::make_unique<Article>(Article::create("Valid Article").value()));
+        vec.push_back(nullptr);
+        return vec;
+    }} << size_t{2};
+
+    QTest::addRow("Duplicates are ignored") << MediaGenerator{[] {
+        MediaVector vec;
+        const auto book = Book::create("Same ID Book").value();
+        vec.push_back(std::make_unique<Book>(book));
+        vec.push_back(std::make_unique<Book>(book));
+        return vec;
+    }} << size_t{1};
+}
 void TestLibrary::testSetMedia() {
-    const std::shared_ptr library{Library::getLibrary()};
-    const QSignalSpy mediaChangedSpy{library.get(), &Library::mediaChanged};
+    QFETCH(std::function<std::vector<std::unique_ptr<const Medium>>()>, mediaGenerator);
+    QFETCH(size_t, expectedCountAfterSet);
 
-    std::vector<std::unique_ptr<const Medium>> media{};
-    media.push_back(std::make_unique<Book>());
-    media.push_back(std::make_unique<Video>());
-    const bool hasBeenSet{library->setMedia(std::move(media))};
+    std::vector<std::unique_ptr<const Medium>> mediaToSet = mediaGenerator();
+    Library lib;
+    const QSignalSpy spy{&lib, &Library::mediaChanged};
 
-    auto view = library->getMediaView();
-    QCOMPARE(hasBeenSet, true);
-    QCOMPARE(view.size(), 2);
-    QVERIFY(dynamic_cast<const Book*>(view.at(0)) != nullptr);
-    QVERIFY(dynamic_cast<const Video*>(view.at(1)) != nullptr);
-    QCOMPARE(mediaChangedSpy.count(), 1);
-    QCOMPARE(mediaChangedSpy.at(0).at(0).value<std::vector<const Medium*>>(), view);
+    lib.setMedia(std::move(mediaToSet));
 
-    // Overwrite the vector that has just been set
-    std::vector<std::unique_ptr<const Medium>> newMedia{};
-    newMedia.push_back(std::make_unique<Video>());
-    newMedia.push_back(std::make_unique<Book>());
-    newMedia.push_back(std::make_unique<Article>());
-    const bool newHasBeenSet{library->setMedia(std::move(newMedia))};
-
-    view = library->getMediaView();
-    QCOMPARE(newHasBeenSet, true);
-    QCOMPARE(view.size(), 3);
-    QVERIFY(dynamic_cast<const Video*>(view.at(0)) != nullptr);
-    QVERIFY(dynamic_cast<const Book*>(view.at(1)) != nullptr);
-    QVERIFY(dynamic_cast<const Article*>(view.at(2)) != nullptr);
-    QCOMPARE(mediaChangedSpy.count(), 2);
-    QCOMPARE(mediaChangedSpy.at(1).at(0).value<std::vector<const Medium*>>(), view);
-}
-void TestLibrary::testSetMediaInvalid() {
-    const std::shared_ptr lib{Library::getLibrary()};
-    const QSignalSpy mediaChangedSpy{lib.get(), &Library::mediaChanged};
-
-    std::vector<std::unique_ptr<const Medium>> invalidMedia{};
-    invalidMedia.push_back(std::make_unique<Book>());
-    invalidMedia.push_back(nullptr);
-    const bool result{lib->setMedia(std::move(invalidMedia))};
-    QCOMPARE(result, false);
-    QCOMPARE(lib->getMediaView().size(), 0);
-    QCOMPARE(mediaChangedSpy.count(), 0);
+    QCOMPARE(lib.mediaCount(), expectedCountAfterSet);
+    QCOMPARE(spy.count(), 1);
 }
 
-void TestLibrary::testAddMedia() {
-    const std::shared_ptr library{Library::getLibrary()};
-    const QSignalSpy mediaChangedSpy{library.get(), &Library::mediaChanged};
+void TestLibrary::testMerge_data() const {
+    using LibraryGenerator = std::function<std::unique_ptr<Library>()>;
 
-    std::unique_ptr<Medium> firstMedium{std::make_unique<Book>()};
-    QString firstTitle{"This is the first medium in the library"};
-    firstMedium->title().set(firstTitle);
+    QTest::addColumn<LibraryGenerator>("destinationGenerator");
+    QTest::addColumn<LibraryGenerator>("sourceGenerator");
+    QTest::addColumn<std::set<QUuid>>("expectedFinalIds");
+    QTest::addColumn<bool>("expectedSignalEmission");
 
-    std::unique_ptr<Medium> secondMedium{std::make_unique<Video>()};
-    QString secondTitle{"This is the second medium in the library"};
-    secondMedium->title().set(secondTitle);
+    QTest::addRow("Disjunct merge acts as a disjunct union") << LibraryGenerator{[this] {
+        auto lib{std::make_unique<Library>()};
+        lib->addMedium(std::make_unique<Book>(book));
+        lib->addMedium(std::make_unique<Video>(video));
+        return lib;
+    }} << LibraryGenerator{[this] {
+        auto lib{std::make_unique<Library>()};
+        lib->addMedium(std::make_unique<Article>(article));
+        return lib;
+    }} << std::set{book.id(), video.id(), article.id()} << true;
 
-    std::vector<std::unique_ptr<const Medium>> mediaVec{};
-    mediaVec.push_back(std::move(firstMedium));
-    mediaVec.push_back(std::move(secondMedium));
+    QTest::addRow("Merging with an empty library does nothing") << LibraryGenerator{[this] {
+        auto lib{std::make_unique<Library>()};
+        lib->addMedium(std::make_unique<Book>(book));
+        lib->addMedium(std::make_unique<Video>(video));
+        return lib;
+    }} << LibraryGenerator{[] { return std::make_unique<Library>(); }}
+                                                                << std::set{book.id(), video.id()}
+                                                                << false;
 
-    const bool result{library->addMedia(std::move(mediaVec))};
-    const auto mediaView = library->getMediaView();
-    QCOMPARE(result, true);
-    QCOMPARE(mediaView.size(), 2);
-    QCOMPARE(mediaView.at(0)->title().get(), firstTitle);
-    QCOMPARE(mediaView.at(1)->title().get(), secondTitle);
-    QCOMPARE(mediaChangedSpy.count(), 1);
-    QCOMPARE(mediaChangedSpy.at(0).at(0).value<std::vector<const Medium*>>(), mediaView);
+    QTest::addRow("If duplicates are found, they are ignored") << LibraryGenerator{[this] {
+        auto lib{std::make_unique<Library>()};
+        lib->addMedium(std::make_unique<Book>(book));
+        lib->addMedium(std::make_unique<Video>(video));
+        return lib;
+    }} << LibraryGenerator{[this] {
+        auto lib{std::make_unique<Library>()};
+        lib->addMedium(std::make_unique<Book>(book));
+        return lib;
+    }} << std::set{book.id(), video.id()} << false;
+
+    QTest::addRow("If duplicates are found, they are ignored") << LibraryGenerator{[this] {
+        auto lib{std::make_unique<Library>()};
+        lib->addMedium(std::make_unique<Book>(book));
+        lib->addMedium(std::make_unique<Video>(video));
+        return lib;
+    }} << LibraryGenerator{[this] {
+        auto lib{std::make_unique<Library>()};
+        lib->addMedium(std::make_unique<Book>(book));
+        lib->addMedium(std::make_unique<Article>(article));
+        return lib;
+    }} << std::set{book.id(), video.id(), article.id()} << true;
+
+    QTest::addRow("If source is nullptr, nothing happens") << LibraryGenerator{[this] {
+        auto lib{std::make_unique<Library>()};
+        lib->addMedium(std::make_unique<Book>(book));
+        lib->addMedium(std::make_unique<Video>(video));
+        return lib;
+    }} << LibraryGenerator{[=] { return std::unique_ptr<Library>{nullptr}; }}
+                                                           << std::set{book.id(), video.id()}
+                                                           << false;
 }
-void TestLibrary::testAddMediaInvalid() {
-    const std::shared_ptr lib{Library::getLibrary()};
-    const QSignalSpy mediaChangedSpy{lib.get(), &Library::mediaChanged};
+void TestLibrary::testMerge() {
+    QFETCH(std::function<std::unique_ptr<Library>()>, destinationGenerator);
+    QFETCH(std::function<std::unique_ptr<Library>()>, sourceGenerator);
+    QFETCH(std::set<QUuid>, expectedFinalIds);
+    QFETCH(bool, expectedSignalEmission);
 
-    std::vector<std::unique_ptr<const Medium>> invalidMedia{};
-    invalidMedia.push_back(std::make_unique<Book>());
-    invalidMedia.push_back(nullptr);
-    const bool result{lib->addMedia(std::move(invalidMedia))};
-    QCOMPARE(result, false);
-    QCOMPARE(lib->getMediaView().size(), 0);
-    QCOMPARE(lib->getMediaView().size(), 0);
-    QCOMPARE(mediaChangedSpy.count(), 0);
+    const auto destination{destinationGenerator()};
+    auto source{sourceGenerator()};
+    const QSignalSpy spy{destination.get(), &Library::mediaChanged};
+
+    destination->merge(std::move(source));
+
+    auto media{destination->getAllMedia()};
+    auto idView{media | std::views::transform([](auto m) { return m->id(); })};
+    const std::set<QUuid> actualIds{idView.begin(), idView.end()};
+
+    QCOMPARE(actualIds, expectedFinalIds);
+    QCOMPARE(spy.count(), expectedSignalEmission ? 1 : 0);
 }
 
+void TestLibrary::testAddMedium_data() const {
+    using LibraryGenerator = std::function<std::unique_ptr<Library>()>;
+    using MediumGenerator = std::function<std::unique_ptr<const Medium>()>;
+
+    QTest::addColumn<LibraryGenerator>("libraryGenerator");
+    QTest::addColumn<MediumGenerator>("mediumToAddGenerator");
+    QTest::addColumn<bool>("shouldBeAdded");
+
+    QTest::addRow("Adding a new (non-duplicate) medium returns true")
+        << LibraryGenerator{[] { return std::make_unique<Library>(); }}
+        << MediumGenerator{[this] { return std::make_unique<Book>(book); }} << true;
+
+    QTest::addRow("Adding a duplicate medium does nothing and returns false")
+        << LibraryGenerator{[this] {
+               auto lib{std::make_unique<Library>()};
+               lib->addMedium(std::make_unique<Book>(book));
+               return lib;
+           }}
+        << MediumGenerator{[this] { return std::make_unique<Book>(book); }} << false;
+
+    QTest::addRow("Adding a nullptr does nothing and returns false") << LibraryGenerator{[this] {
+        auto lib{std::make_unique<Library>()};
+        lib->addMedium(std::make_unique<Book>(book));
+        return lib;
+    }} << MediumGenerator{[] { return std::unique_ptr<Medium>{nullptr}; }}
+                                                                     << false;
+}
 void TestLibrary::testAddMedium() {
-    const std::shared_ptr library{Library::getLibrary()};
-    const QSignalSpy mediaChangedSpy{library.get(), &Library::mediaChanged};
+    QFETCH(std::function<std::unique_ptr<Library>()>, libraryGenerator);
+    QFETCH(std::function<std::unique_ptr<const Medium>()>, mediumToAddGenerator);
+    QFETCH(bool, shouldBeAdded);
 
-    std::vector<std::unique_ptr<const Medium>> media{};
-    library->addMedium(std::make_unique<Book>());
-    library->addMedium(std::make_unique<Video>());
+    const auto lib{libraryGenerator()};
+    const QSignalSpy spy{lib.get(), &Library::mediaChanged};
 
-    auto view = library->getMediaView();
-    QCOMPARE(view.size(), 2);
-    QVERIFY(dynamic_cast<const Book*>(view.at(0)) != nullptr);
-    QVERIFY(dynamic_cast<const Video*>(view.at(1)) != nullptr);
-    QCOMPARE(mediaChangedSpy.count(), 2);
-    QCOMPARE(mediaChangedSpy.at(1).at(0).value<std::vector<const Medium*>>(), view);
+    const bool wasAdded{lib->addMedium(mediumToAddGenerator())};
 
-    // Overwrite the vector that has just been set
-    std::vector<std::unique_ptr<const Medium>> addedMedia{};
-    library->addMedium(std::make_unique<Video>());
-    library->addMedium(std::make_unique<Book>());
-    library->addMedium(std::make_unique<Article>());
-
-    view = library->getMediaView();
-    QCOMPARE(view.size(), 5);
-    QVERIFY(dynamic_cast<const Book*>(view.at(0)) != nullptr);
-    QVERIFY(dynamic_cast<const Video*>(view.at(1)) != nullptr);
-    QVERIFY(dynamic_cast<const Video*>(view.at(2)) != nullptr);
-    QVERIFY(dynamic_cast<const Book*>(view.at(3)) != nullptr);
-    QVERIFY(dynamic_cast<const Article*>(view.at(4)) != nullptr);
-    QCOMPARE(mediaChangedSpy.count(), 5);
-    QCOMPARE(mediaChangedSpy.at(4).at(0).value<std::vector<const Medium*>>(), view);
-}
-void TestLibrary::testAddMediumInvalid() {
-    const std::shared_ptr library{Library::getLibrary()};
-    const QSignalSpy mediaChangedSpy{library.get(), &Library::mediaChanged};
-
-    const bool res{library->addMedium(nullptr)};
-    QCOMPARE(res, false);
-    QCOMPARE(library->getMediaView().size(), 0);
-    QCOMPARE(mediaChangedSpy.count(), 0);
+    QCOMPARE(wasAdded, shouldBeAdded);
+    QCOMPARE(spy.count(), shouldBeAdded ? 1 : 0);
 }
 
+void TestLibrary::testReplaceMedium_data() const {
+    using LibraryGenerator = std::function<std::unique_ptr<Library>()>;
+    using MediumGenerator = std::function<std::unique_ptr<const Medium>()>;
+
+    QTest::addColumn<LibraryGenerator>("libraryGenerator");
+    QTest::addColumn<MediumGenerator>("newMediumGenerator");
+    QTest::addColumn<bool>("shouldBeReplaced");
+
+    QTest::addRow("Replacing existing medium returns true") << LibraryGenerator{[this] {
+        auto lib{std::make_unique<Library>()};
+        lib->addMedium(std::make_unique<Book>(book));
+        return lib;
+    }} << MediumGenerator{[this] {
+        auto replacedBook{std::make_unique<Book>(book)};
+        replacedBook->setTitle("replaced");
+        return replacedBook;
+    }} << true;
+
+    QTest::addRow("Replacing absent medium does nothing and returns false")
+        << LibraryGenerator{[this] {
+               auto lib{std::make_unique<Library>()};
+               lib->addMedium(std::make_unique<Book>(book));
+               return lib;
+           }}
+        << MediumGenerator{[this] {
+               auto replacedBook{std::make_unique<Video>(video)};
+               replacedBook->setTitle("replaced");
+               return replacedBook;
+           }}
+        << false;
+
+    QTest::addRow("Passing nullptr does nothing and returns false") << LibraryGenerator{[this] {
+        auto lib{std::make_unique<Library>()};
+        lib->addMedium(std::make_unique<Book>(book));
+        return lib;
+    }} << MediumGenerator{[] { return std::unique_ptr<Book>{nullptr}; }}
+                                                                    << false;
+}
 void TestLibrary::testReplaceMedium() {
-    const std::shared_ptr lib{Library::getLibrary()};
-    const QSignalSpy mediaChangedSpy{lib.get(), &Library::mediaChanged};
+    QFETCH(std::function<std::unique_ptr<Library>()>, libraryGenerator);
+    QFETCH(std::function<std::unique_ptr<const Medium>()>, newMediumGenerator);
+    QFETCH(bool, shouldBeReplaced);
 
-    lib->addMedium(std::make_unique<Book>());
-    const auto mediumToReplacePtr{dynamic_cast<const Book*>(lib->getMediaView().at(0))};
+    const auto lib{libraryGenerator()};
+    const QSignalSpy spy{lib.get(), &Library::mediaChanged};
 
-    auto newMedium{std::make_unique<Video>()};
-    const QString title{"This is totally new"};
-    newMedium->title().set(title);
-    const bool res{lib->replaceMedium(mediumToReplacePtr, std::move(newMedium))};
-    const auto view{lib->getMediaView()};
-    QCOMPARE(res, true);
-    QCOMPARE(view.size(), 1);
-    QCOMPARE(view.at(0)->title().get(), title);
-    QCOMPARE(mediaChangedSpy.count(), 2);
-    QCOMPARE(mediaChangedSpy.at(1).at(0).value<std::vector<const Medium*>>(), view);
-}
-void TestLibrary::testReplaceMediumInvalid() {
-    const std::shared_ptr lib{Library::getLibrary()};
-    const QSignalSpy mediaChangedSpy{lib.get(), &Library::mediaChanged};
+    const bool wasReplaced{lib->replaceMedium(newMediumGenerator())};
 
-    lib->addMedium(std::make_unique<Book>());
-    const auto mediumToReplacePtr{dynamic_cast<const Book*>(lib->getMediaView().at(0))};
+    QCOMPARE(wasReplaced, shouldBeReplaced);
+    QCOMPARE(spy.count(), shouldBeReplaced ? 1 : 0);
 
-    const bool res{lib->replaceMedium(mediumToReplacePtr, nullptr)};
-    QCOMPARE(res, false);
-    QCOMPARE(lib->getMediaView().size(), 1);
-    QCOMPARE(lib->getMediaView().at(0)->title().get(), std::nullopt);
-    QCOMPARE(mediaChangedSpy.count(), 1);
+    // A medium named "replaced" must be present iff shouldBeReplaced is true in this test.
+    const auto& media = lib->getAllMedia();
+    const bool isThereReplaced{
+        std::ranges::any_of(media | std::views::transform([](auto m) { return m->title(); }),
+                            [](const auto& title) { return title == "replaced"; })};
+    QVERIFY((shouldBeReplaced && isThereReplaced) || (!shouldBeReplaced && !isThereReplaced));
 }
 
+void TestLibrary::testRemoveMedium_data() const {
+    using LibraryGenerator = std::function<std::unique_ptr<Library>()>;
+
+    QTest::addColumn<LibraryGenerator>("libraryGenerator");
+    QTest::addColumn<QUuid>("mediumToRemoveId");
+    QTest::addColumn<bool>("shouldBeRemoved");
+
+    QTest::addRow("Removing an existing medium") << LibraryGenerator{[this] {
+        auto lib{std::make_unique<Library>()};
+        lib->addMedium(std::make_unique<Book>(book));
+        return lib;
+    }} << book.id() << true;
+
+    QTest::addRow("Trying to remove an absent medium does nothing") << LibraryGenerator{[this] {
+        auto lib{std::make_unique<Library>()};
+        lib->addMedium(std::make_unique<Book>(book));
+        return lib;
+    }} << video.id() << false;
+}
 void TestLibrary::testRemoveMedium() {
-    const std::shared_ptr lib{Library::getLibrary()};
-    const QSignalSpy mediaChangedSpy{lib.get(), &Library::mediaChanged};
-    auto mediaView = lib->getMediaView();
+    QFETCH(std::function<std::unique_ptr<Library>()>, libraryGenerator);
+    QFETCH(QUuid, mediumToRemoveId);
+    QFETCH(bool, shouldBeRemoved);
 
-    // Trying to remove something from an empty library should do nothing
-    const auto mediumNotInLibrary{std::make_unique<Video>()};
-    mediaView = lib->getMediaView();
-    bool res{lib->removeMedium(mediumNotInLibrary.get())};
-    QCOMPARE(res, false);
-    QCOMPARE(mediaView.size(), 0);
-    QCOMPARE(mediaChangedSpy.count(), 0);
+    const auto lib{libraryGenerator()};
+    const QSignalSpy spy{lib.get(), &Library::mediaChanged};
+    const auto& wasMediumPresent{std::ranges::any_of(
+        lib->getAllMedia(), [&](auto mPtr) { return mPtr->id() == mediumToRemoveId; })};
 
-    lib->addMedium(std::make_unique<Book>());
-    lib->addMedium(std::make_unique<Video>());
-    lib->addMedium(std::make_unique<Article>());
-    mediaView = lib->getMediaView();
+    const bool wasRemoved{lib->removeMedium(mediumToRemoveId)};
 
-    // remove a medium that is actually present
-    QCOMPARE(mediaView.size(), 3);
-    res = lib->removeMedium(mediaView.at(1));
-    mediaView = lib->getMediaView();
-    QCOMPARE(res, true);
-    QCOMPARE(mediaView.size(), 2);
-    QVERIFY(dynamic_cast<const Book*>(mediaView.at(0)) != nullptr);
-    QVERIFY(dynamic_cast<const Article*>(mediaView.at(1)) != nullptr);
-    QCOMPARE(mediaChangedSpy.count(), 4);
-    QCOMPARE(mediaChangedSpy.at(3).at(0).value<std::vector<const Medium*>>(), mediaView);
+    QCOMPARE(wasRemoved, shouldBeRemoved);
+    QCOMPARE(spy.count(), shouldBeRemoved ? 1 : 0);
 
-    // trying to remove nullptr should do nothing
-    lib->removeMedium(nullptr);
-    mediaView = lib->getMediaView();
-    QCOMPARE(mediaView.size(), 2);
-    QVERIFY(dynamic_cast<const Book*>(mediaView.at(0)) != nullptr);
-    QVERIFY(dynamic_cast<const Article*>(mediaView.at(1)) != nullptr);
-    QCOMPARE(mediaChangedSpy.count(), 4);
-    QCOMPARE(mediaChangedSpy.at(3).at(0).value<std::vector<const Medium*>>(), mediaView);
-
-    // trying to remove a medium that is not present should do nothing
-    lib->removeMedium(mediumNotInLibrary.get());
-    mediaView = lib->getMediaView();
-    QCOMPARE(mediaView.size(), 2);
-    QVERIFY(dynamic_cast<const Book*>(mediaView.at(0)) != nullptr);
-    QVERIFY(dynamic_cast<const Article*>(mediaView.at(1)) != nullptr);
-    QCOMPARE(mediaChangedSpy.count(), 4);
-    QCOMPARE(mediaChangedSpy.at(3).at(0).value<std::vector<const Medium*>>(), mediaView);
+    // If the medium was present and shouldBeRemoved is true, then it must be now absent
+    const bool isMediumPresent{std::ranges::any_of(
+        lib->getAllMedia(), [&](auto mPtr) { return mPtr->id() == mediumToRemoveId; })};
+    QVERIFY(!(wasMediumPresent && shouldBeRemoved) || !isMediumPresent);
 }
 
-void TestLibrary::testClearMedia() {
-    const std::shared_ptr lib{Library::getLibrary()};
-    const QSignalSpy mediaChangedSpy{lib.get(), &Library::mediaChanged};
-    auto mediaView = lib->getMediaView();
+void TestLibrary::testClear_data() const {
+    using LibraryGenerator = std::function<std::unique_ptr<Library>()>;
 
-    // clearing an empty library should do nothing
-    lib->clearMedia();
-    mediaView = lib->getMediaView();
-    QCOMPARE(mediaView.size(), 0);
-    QCOMPARE(mediaChangedSpy.count(), 0);
+    QTest::addColumn<LibraryGenerator>("libraryGenerator");
+    QTest::addColumn<bool>("shouldEmit");
 
-    // clearing a non-empty library should remove all elements from the media array
-    lib->addMedium(std::make_unique<Book>());
-    lib->addMedium(std::make_unique<Video>());
-    lib->addMedium(std::make_unique<Article>());
-    lib->clearMedia();
-    mediaView = lib->getMediaView();
-    QCOMPARE(mediaView.size(), 0);
-    QCOMPARE(mediaChangedSpy.count(), 4);
-    QCOMPARE(mediaChangedSpy.at(3).at(0).value<std::vector<const Medium*>>(), mediaView);
+    QTest::addRow("Clearing an empty library doesn't emit")
+        << LibraryGenerator{[] { return std::make_unique<Library>(); }} << false;
+
+    QTest::addRow("Clearing a non-empty library emits a signal") << LibraryGenerator{[this] {
+        auto lib{std::make_unique<Library>()};
+        lib->addMedium(std::make_unique<Book>(book));
+        return lib;
+    }} << true;
 }
 
-void TestLibrary::testGetAllTopics() {
-    const std::shared_ptr lib{Library::getLibrary()};
-    auto mediaView = lib->getMediaView();
+void TestLibrary::testClear() {
+    QFETCH(std::function<std::unique_ptr<Library>()>, libraryGenerator);
+    QFETCH(bool, shouldEmit);
 
-    const QString compsci{"Computer science"};
-    const QString physics{"Physics"};
-    const QString math{"Math"};
-    const QString philosophy{"Philosophy"};
-    const QString painting{"Painting"};
+    const auto lib{libraryGenerator()};
+    const QSignalSpy spy{lib.get(), &Library::mediaChanged};
 
-    auto book{std::make_unique<Book>()};
-    book->userData().topics().set(std::set{compsci, physics, math});
-    lib->addMedium(std::move(book));
-
-    auto video{std::make_unique<Video>()};
-    video->userData().topics().set(std::set{math, philosophy, painting});
-    lib->addMedium(std::move(video));
-
-    auto article{std::make_unique<Article>()};
-    lib->addMedium(std::move(article));
-
-    const std::set expectedPresent{compsci, physics, math, philosophy, painting};
-
-    QCOMPARE(lib->getAllTopics(), expectedPresent);
+    lib->clear();
+    QCOMPARE(lib->mediaCount(), size_t{0});
+    QCOMPARE(spy.count(), shouldEmit ? 1 : 0);
 }

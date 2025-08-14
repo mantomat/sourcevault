@@ -1,11 +1,35 @@
 #include "TestBook.h"
 
+#include "TestMedium.h"
 #include "TestValidatedField.h"
 #include "model/Book.h"
 
 #include <QTest>
 
 using Core::Model::Book;
+
+const auto bookBuilder{[] { return Book::create("default title").value(); }};
+
+void TestBook::testCreate_data() {
+    TestMedium::testCreateData();
+}
+
+void TestBook::testCreate() {
+    QFETCH(bool, shouldBeValid);
+    QFETCH(QString, candidateTitle);
+    QFETCH(QUuid, candidateId);
+    QFETCH(QDate, candidateDateAdded);
+
+    const auto optionalBook{Book::create(candidateTitle, candidateId, candidateDateAdded)};
+    if (shouldBeValid) {
+        QVERIFY2(optionalBook.has_value(), "The book must be created");
+        QCOMPARE(optionalBook.value().title(), candidateTitle);
+        QCOMPARE(optionalBook.value().id(), candidateId);
+        QCOMPARE(optionalBook.value().dateAdded(), candidateDateAdded);
+    } else {
+        QVERIFY2(!optionalBook.has_value(), "The book mustn't be created");
+    }
+}
 
 void TestBook::testIsbn_data() {
     QTest::addColumn<QString>("candidateIsbn");
@@ -22,7 +46,8 @@ void TestBook::testIsbn() {
     QFETCH(bool, shouldBeValid);
 
     TestValidatedField::testValidatedFieldHelper<Book, QString>(
-        &Book::isbnValidator, [](Book& b) -> ValidatedField<QString>& { return b.isbn(); },
+        bookBuilder, &Book::isbnValidator,
+        [](Book& b) -> ValidatedField<QString>& { return b.isbn(); },
         [](const Book& b) -> const ValidatedField<QString>& { return b.isbn(); }, candidateIsbn,
         shouldBeValid);
 }
@@ -41,7 +66,8 @@ void TestBook::testEdition() {
     QFETCH(bool, shouldBeValid);
 
     TestValidatedField::testValidatedFieldHelper<Book, QString>(
-        &Book::editionValidator, [](Book& b) -> ValidatedField<QString>& { return b.edition(); },
+        bookBuilder, &Book::editionValidator,
+        [](Book& b) -> ValidatedField<QString>& { return b.edition(); },
         [](const Book& b) -> const ValidatedField<QString>& { return b.edition(); },
         candidateEdition, shouldBeValid);
 }
@@ -59,7 +85,7 @@ void TestBook::testPublisher() {
     QFETCH(QString, candidatePublisher);
     QFETCH(bool, shouldBeValid);
     TestValidatedField::testValidatedFieldHelper<Book, QString>(
-        &Book::publisherValidator,
+        bookBuilder, &Book::publisherValidator,
         [](Book& b) -> ValidatedField<QString>& { return b.publisher(); },
         [](const Book& b) -> const ValidatedField<QString>& { return b.publisher(); },
         candidatePublisher, shouldBeValid);
@@ -80,7 +106,7 @@ void TestBook::testYearPublished() {
     QFETCH(bool, shouldBeValid);
 
     TestValidatedField::testValidatedFieldHelper<Book, int>(
-        &Book::yearPublishedValidator,
+        bookBuilder, &Book::yearPublishedValidator,
         [](Book& b) -> ValidatedField<int>& { return b.yearPublished(); },
         [](const Book& b) -> const ValidatedField<int>& { return b.yearPublished(); },
         candidateYearPublished, shouldBeValid);
@@ -100,7 +126,7 @@ void TestBook::testPageNumber() {
     QFETCH(bool, shouldBeValid);
 
     TestValidatedField::testValidatedFieldHelper<Book, unsigned int>(
-        &Book::pageNumberValidator,
+        bookBuilder, &Book::pageNumberValidator,
         [](Book& b) -> ValidatedField<unsigned int>& { return b.pageNumber(); },
         [](const Book& b) -> const ValidatedField<unsigned int>& { return b.pageNumber(); },
         candidatePageNumber, shouldBeValid);
@@ -120,7 +146,7 @@ void TestBook::testDescription() {
     QFETCH(bool, shouldBeValid);
 
     TestValidatedField::testValidatedFieldHelper<Book, QString>(
-        &Book::descriptionValidator,
+        bookBuilder, &Book::descriptionValidator,
         [](Book& b) -> ValidatedField<QString>& { return b.description(); },
         [](const Book& b) -> const ValidatedField<QString>& { return b.description(); },
         candidateDescription, shouldBeValid);
@@ -176,7 +202,7 @@ void TestBook::testThumbnailUrl() {
     QFETCH(bool, shouldBeValid);
 
     TestValidatedField::testValidatedFieldHelper<Book, QUrl>(
-        &Book::thumbnailUrlValidator,
+        bookBuilder, &Book::thumbnailUrlValidator,
         [](Book& b) -> ValidatedField<QUrl>& { return b.thumbnailUrl(); },
         [](const Book& b) -> const ValidatedField<QUrl>& { return b.thumbnailUrl(); },
         candidateThumbnailUrl, shouldBeValid);

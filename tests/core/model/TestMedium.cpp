@@ -7,6 +7,49 @@
 
 using Core::Model::Medium;
 
+const auto concreteMediumBuilder{[] { return ConcreteMedium{}; }};
+
+void TestMedium::testCreateData() {
+    QTest::addColumn<bool>("shouldBeValid");
+    QTest::addColumn<QString>("candidateTitle");
+    QTest::addColumn<QUuid>("candidateId");
+    QTest::addColumn<QDate>("candidateDateAdded");
+
+    QTest::addRow("An invalid title invalidates creation")
+        << false << QString{} << QUuid::createUuid() << QDate::currentDate();
+    constexpr QUuid invalidId;
+    QTest::addRow("An invalid id invalidates creation")
+        << false << QString{"valid"} << invalidId << QDate::currentDate();
+    constexpr QDate invalidDate;
+    QTest::addRow("An invalid dateAdded invalidates creation")
+        << false << QString{"valid"} << QUuid::createUuid() << invalidDate;
+    QTest::addRow("Params must all be valid for a valid creation")
+        << true << QString{"valid"} << QUuid::createUuid() << QDate::currentDate();
+}
+
+void TestMedium::testCreateValidator_data() {
+    testCreateData();
+}
+
+void TestMedium::testCreateValidator() {
+    QFETCH(bool, shouldBeValid);
+    QFETCH(QString, candidateTitle);
+    QFETCH(QUuid, candidateId);
+    QFETCH(QDate, candidateDateAdded);
+
+    QCOMPARE(ConcreteMedium::createValidator(candidateTitle, candidateId, candidateDateAdded),
+             shouldBeValid);
+}
+
+void TestMedium::testId() {
+    const ConcreteMedium medium;
+    const QUuid id = medium.id();
+
+    QVERIFY2(!id.isNull(), "Ids should never be null");
+    QCOMPARE(id.version(), QUuid::Version::Random);
+    QCOMPARE(id.variant(), QUuid::Variant::DCE);
+}
+
 void TestMedium::testUserData() {
     ConcreteMedium medium;
 
@@ -36,18 +79,17 @@ void TestMedium::testDateAdded_data() {
     QTest::addColumn<bool>("shouldBeValid");
 
     QTest::addRow("A default constructed date is invalid") << QDate{} << false;
-    QTest::addRow("A defined date is be valid") << QDate{2025, 4, 22} << true;
+    QTest::addRow("A defined date is valid") << QDate{2025, 4, 22} << true;
 }
 
 void TestMedium::testDateAdded() {
     QFETCH(QDate, candidateDateAdded);
     QFETCH(bool, shouldBeValid);
 
-    TestValidatedField::testValidatedFieldHelper<ConcreteMedium, QDate>(
-        &Medium::dateAddedValidator,
-        [](Medium& m) -> ValidatedField<QDate>& { return m.dateAdded(); },
-        [](const Medium& m) -> const ValidatedField<QDate>& { return m.dateAdded(); },
-        candidateDateAdded, shouldBeValid);
+    QCOMPARE(Medium::dateAddedValidator(candidateDateAdded), shouldBeValid);
+
+    const ConcreteMedium m{"valid title", QUuid::createUuid(), candidateDateAdded};
+    QCOMPARE(m.dateAdded(), candidateDateAdded);
 }
 
 void TestMedium::testTitle_data() {
@@ -63,10 +105,14 @@ void TestMedium::testTitle() {
     QFETCH(QString, candidateTitle);
     QFETCH(bool, shouldBeValid);
 
-    TestValidatedField::testValidatedFieldHelper<ConcreteMedium, QString>(
-        &Medium::titleValidator, [](Medium& m) -> ValidatedField<QString>& { return m.title(); },
-        [](const Medium& m) -> const ValidatedField<QString>& { return m.title(); }, candidateTitle,
-        shouldBeValid);
+    QCOMPARE(Medium::titleValidator(candidateTitle), shouldBeValid);
+
+    const QString initialTitle{"valid title"};
+    ConcreteMedium medium{initialTitle};
+    QCOMPARE(medium.setTitle(candidateTitle), shouldBeValid);
+
+    const ConcreteMedium cmedium{std::move(medium)};
+    QCOMPARE(cmedium.title(), shouldBeValid ? candidateTitle : initialTitle);
 }
 
 void TestMedium::testAuthors_data() {
@@ -86,7 +132,8 @@ void TestMedium::testAuthors() {
     QFETCH(bool, shouldBeValid);
 
     TestValidatedSet::testValidatedFieldHelper<ConcreteMedium, QString>(
-        &Medium::authorValidator, [](Medium& m) -> ValidatedSet<QString>& { return m.authors(); },
+        concreteMediumBuilder, &Medium::authorValidator,
+        [](Medium& m) -> ValidatedSet<QString>& { return m.authors(); },
         [](const Medium& m) -> const ValidatedSet<QString>& { return m.authors(); },
         candidateAuthors, shouldBeValid);
 }
@@ -105,7 +152,7 @@ void TestMedium::testLanguage() {
     QFETCH(bool, shouldBeValid);
 
     TestValidatedField::testValidatedFieldHelper<ConcreteMedium, QString>(
-        &Medium::languageValidator,
+        concreteMediumBuilder, &Medium::languageValidator,
         [](Medium& m) -> ValidatedField<QString>& { return m.language(); },
         [](const Medium& m) -> const ValidatedField<QString>& { return m.language(); },
         candidateLanguage, shouldBeValid);

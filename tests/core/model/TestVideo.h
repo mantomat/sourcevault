@@ -7,6 +7,9 @@ class TestVideo : public QObject {
     Q_OBJECT
 
   private slots:
+    static void testCreate_data();
+    static void testCreate();
+
     static void testVideoUrl_data();
     static void testVideoUrl();
 

@@ -9,6 +9,7 @@
 namespace Core::Model {
 
 class MediumUserData {
+
   public:
     enum class PriorityLevel : unsigned short {
         min = 1,
@@ -18,6 +19,13 @@ class MediumUserData {
         max = 5,
     };
 
+  private:
+    bool favorite_{false};
+    ValidatedSet<QString> topics_{topicValidator};
+    ValidatedField<QString> notes_{notesValidator};
+    ValidatedField<PriorityLevel> priority_{priorityValidator};
+
+  public:
     bool& favorite();
     bool favorite() const;
 
@@ -32,12 +40,6 @@ class MediumUserData {
     ValidatedField<PriorityLevel>& priority();
     const ValidatedField<PriorityLevel>& priority() const;
     static bool priorityValidator(PriorityLevel priorityToValidate);
-
-  private:
-    bool favorite_{false};
-    ValidatedSet<QString> topics_{topicValidator};
-    ValidatedField<QString> notes_{notesValidator};
-    ValidatedField<PriorityLevel> priority_{priorityValidator};
 };
 
 }

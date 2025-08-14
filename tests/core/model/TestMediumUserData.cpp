@@ -9,6 +9,8 @@
 
 using Core::Model::MediumUserData;
 
+const auto mediumUserDataBuilder{[] { return MediumUserData(); }};
+
 void TestMediumUserData::testFavorite() {
     MediumUserData userData{};
     userData.favorite() = true;
@@ -39,7 +41,7 @@ void TestMediumUserData::testTopics() {
     QFETCH(bool, shouldBeValid);
 
     TestValidatedSet::testValidatedFieldHelper<MediumUserData, QString>(
-        &MediumUserData::topicValidator,
+        mediumUserDataBuilder, &MediumUserData::topicValidator,
         [](MediumUserData& mud) -> ValidatedSet<QString>& { return mud.topics(); },
         [](const MediumUserData& mud) -> const ValidatedSet<QString>& { return mud.topics(); },
         candidateTopics, shouldBeValid);
@@ -59,7 +61,7 @@ void TestMediumUserData::testNotes() {
     QFETCH(bool, shouldBeValid);
 
     TestValidatedField::testValidatedFieldHelper<MediumUserData, QString>(
-        &MediumUserData::notesValidator,
+        mediumUserDataBuilder, &MediumUserData::notesValidator,
         [](MediumUserData& mud) -> ValidatedField<QString>& { return mud.notes(); },
         [](const MediumUserData& mud) -> const ValidatedField<QString>& { return mud.notes(); },
         candidateNotes, shouldBeValid);
@@ -82,7 +84,7 @@ void TestMediumUserData::testPriority() {
     QFETCH(bool, shouldBeValid);
 
     TestValidatedField::testValidatedFieldHelper<MediumUserData, MediumUserData::PriorityLevel>(
-        &MediumUserData::priorityValidator,
+        mediumUserDataBuilder, &MediumUserData::priorityValidator,
         [](MediumUserData& mud) -> ValidatedField<MediumUserData::PriorityLevel>& {
             return mud.priority();
         },

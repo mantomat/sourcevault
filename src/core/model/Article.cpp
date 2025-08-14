@@ -2,6 +2,16 @@
 
 namespace Core::Model {
 
+Article::Article(QString&& title, const QUuid id, const QDate dateAdded)
+    : Medium{std::move(title), id, dateAdded} {}
+
+std::optional<Article> Article::create(QString title, const QUuid id, const QDate dateAdded) {
+    if (!createValidator(title, id, dateAdded)) {
+        return std::nullopt;
+    }
+    return std::make_optional(Article{std::move(title), id, dateAdded});
+}
+
 ValidatedField<QUrl>& Article::articleUrl() {
     return articleUrl_;
 }

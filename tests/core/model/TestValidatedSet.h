@@ -15,6 +15,7 @@ class TestValidatedSet : public QObject {
   public:
     template <typename MediumClass, typename ElementsType>
     static void testValidatedFieldHelper(
+        const std::function<MediumClass()>& builder,
         const std::function<bool(const ElementsType&)>& validator,
         const std::function<ValidatedSet<ElementsType>&(MediumClass&)>& setGetter,
         const std::function<const ValidatedSet<ElementsType>&(const MediumClass&)>& constSetGetter,
@@ -27,7 +28,7 @@ class TestValidatedSet : public QObject {
             })};
         QCOMPARE(didAllPassValidation, shouldBeValid);
 
-        MediumClass mediumInstance{};
+        MediumClass mediumInstance = builder();
         ValidatedSet<ElementsType>& validatedSet{setGetter(mediumInstance)};
 
         const bool didSet{validatedSet.set(candidateSet)};

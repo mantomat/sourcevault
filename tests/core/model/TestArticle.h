@@ -8,6 +8,9 @@ class TestArticle : public QObject {
 
   private slots:
 
+    static void testCreate_data();
+    static void testCreate();
+
     static void testArticleUrl_data();
     static void testArticleUrl();
 

@@ -7,6 +7,7 @@
 
 #include <QDate>
 #include <QString>
+#include <QUuid>
 
 namespace Core::Model {
 
@@ -43,19 +44,39 @@ namespace Core::Model {
  */
 class Medium {
 
+    const QUuid id_;
+    const QDate dateAdded_;
+    QString title_;
+    MediumUserData userData_;
+    ValidatedSet<QString> authors_{authorValidator};
+    ValidatedField<QString> language_{languageValidator};
+
+  protected:
+    /*
+     * Invariant: a Medium must always have a valid title, id and dateAdded.
+     * These methods are protected since they are used for construction through subclasses
+     * QUuid and QDate are trivially copyable
+     */
+    Medium(QString&& title, QUuid id, QDate dateAdded);
+    static bool createValidator(const QString& title, const QUuid& id, const QDate& dateAdded);
+
   public:
+    Medium(const Medium&) = default;
+    Medium(Medium&&) = default;
     virtual ~Medium() = 0;
+
+    QUuid id() const;
+    static bool idValidator(const QUuid& idToValidate);
+
+    QString title() const;
+    bool setTitle(QString titleToSet);
+    static bool titleValidator(const QString& titleToValidate);
+
+    QDate dateAdded() const;
+    static bool dateAddedValidator(const QDate& dateToValidate);
 
     const MediumUserData& userData() const;
     MediumUserData& userData();
-
-    const ValidatedField<QDate>& dateAdded() const;
-    ValidatedField<QDate>& dateAdded();
-    static bool dateAddedValidator(const QDate& dateToValidate);
-
-    const ValidatedField<QString>& title() const;
-    ValidatedField<QString>& title();
-    static bool titleValidator(const QString& titleToValidate);
 
     const ValidatedSet<QString>& authors() const;
     ValidatedSet<QString>& authors();
@@ -64,13 +85,6 @@ class Medium {
     const ValidatedField<QString>& language() const;
     ValidatedField<QString>& language();
     static bool languageValidator(const QString& languageToValidate);
-
-  private:
-    MediumUserData userData_;
-    ValidatedField<QDate> dateAdded_{dateAddedValidator};
-    ValidatedField<QString> title_{titleValidator};
-    ValidatedSet<QString> authors_{authorValidator};
-    ValidatedField<QString> language_{languageValidator};
 };
 
 }

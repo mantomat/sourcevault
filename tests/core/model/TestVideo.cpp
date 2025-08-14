@@ -1,11 +1,35 @@
 #include "TestVideo.h"
 
+#include "TestMedium.h"
 #include "TestValidatedField.h"
 #include "model/Video.h"
 
 #include <QTest>
 
 using Core::Model::Video;
+
+const auto videoBuilder{[] { return Video::create("default title").value(); }};
+
+void TestVideo::testCreate_data() {
+    TestMedium::testCreateData();
+}
+
+void TestVideo::testCreate() {
+    QFETCH(bool, shouldBeValid);
+    QFETCH(QString, candidateTitle);
+    QFETCH(QUuid, candidateId);
+    QFETCH(QDate, candidateDateAdded);
+
+    const auto optionalVideo{Video::create(candidateTitle, candidateId, candidateDateAdded)};
+    if (shouldBeValid) {
+        QVERIFY2(optionalVideo.has_value(), "The video must be created");
+        QCOMPARE(optionalVideo.value().title(), candidateTitle);
+        QCOMPARE(optionalVideo.value().id(), candidateId);
+        QCOMPARE(optionalVideo.value().dateAdded(), candidateDateAdded);
+    } else {
+        QVERIFY2(!optionalVideo.has_value(), "The video mustn't be created");
+    }
+}
 
 void TestVideo::testVideoUrl_data() {
     QTest::addColumn<QUrl>("candidateUrl");
@@ -33,7 +57,8 @@ void TestVideo::testVideoUrl() {
     QFETCH(bool, shouldBeValid);
 
     TestValidatedField::testValidatedFieldHelper<Video, QUrl>(
-        &Video::videoUrlValidator, [](Video& v) -> ValidatedField<QUrl>& { return v.videoUrl(); },
+        videoBuilder, &Video::videoUrlValidator,
+        [](Video& v) -> ValidatedField<QUrl>& { return v.videoUrl(); },
         [](const Video& v) -> const ValidatedField<QUrl>& { return v.videoUrl(); }, candidateUrl,
         shouldBeValid);
 }
@@ -52,7 +77,7 @@ void TestVideo::testDurationSeconds() {
     QFETCH(bool, shouldBeValid);
 
     TestValidatedField::testValidatedFieldHelper<Video, unsigned int>(
-        &Video::durationSecondsValidator,
+        videoBuilder, &Video::durationSecondsValidator,
         [](Video& v) -> ValidatedField<unsigned int>& { return v.durationSeconds(); },
         [](const Video& v) -> const ValidatedField<unsigned int>& { return v.durationSeconds(); },
         candidateDurationSeconds, shouldBeValid);
@@ -74,7 +99,7 @@ void TestVideo::testUploadDate() {
     QFETCH(bool, shouldBeValid);
 
     TestValidatedField::testValidatedFieldHelper<Video, QDate>(
-        &Video::uploadDateValidator,
+        videoBuilder, &Video::uploadDateValidator,
         [](Video& v) -> ValidatedField<QDate>& { return v.uploadDate(); },
         [](const Video& v) -> const ValidatedField<QDate>& { return v.uploadDate(); },
         candidateUploadDate, shouldBeValid);
@@ -132,7 +157,7 @@ void TestVideo::testThumbnailUrl() {
     QFETCH(bool, shouldBeValid);
 
     TestValidatedField::testValidatedFieldHelper<Video, QUrl>(
-        &Video::thumbnailUrlValidator,
+        videoBuilder, &Video::thumbnailUrlValidator,
         [](Video& v) -> ValidatedField<QUrl>& { return v.thumbnailUrl(); },
         [](const Video& v) -> const ValidatedField<QUrl>& { return v.thumbnailUrl(); },
         candidateThumbnailUrl, shouldBeValid);

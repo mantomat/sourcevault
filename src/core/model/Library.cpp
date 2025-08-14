@@ -1,97 +1,96 @@
 #include "Library.h"
 
+#include <algorithm>
 #include <ranges>
 
 namespace Core::Model {
 
-std::shared_ptr<Library> Library::library = nullptr;
-
-std::shared_ptr<Library> Library::getLibrary() {
-    if (library == nullptr) {
-        // ignore linting issues. Library can't be created with std::make_shared as it doesn't
-        // provide public constructors. Creating a shared pointer this way is perfectly fine.
-        library = std::shared_ptr<Library>{new Library{}}; // NOSONAR
-    }
-    return library;
-}
-
-std::vector<const Medium*> Library::getMediaView() const {
-    auto range = media | std::views::transform([](const auto& ptr) { return ptr.get(); });
+std::vector<const Medium*> Library::getAllMedia() const {
+    auto range = media | std::views::values |
+                 std::views::transform([](const auto& ptr) { return ptr.get(); });
     return {range.begin(), range.end()};
-}
-
-bool Library::setMedia(std::vector<std::unique_ptr<const Medium>>&& newMedia) {
-    if (std::ranges::any_of(newMedia, [](const auto& mediaPtr) { return mediaPtr == nullptr; })) {
-        return false;
-    }
-    media.clear();
-    addMedia(std::move(newMedia));
-    return true;
-}
-
-bool Library::addMedia(std::vector<std::unique_ptr<const Medium>>&& newMedia) {
-    if (std::ranges::any_of(newMedia, [](const auto& mediaPtr) { return mediaPtr == nullptr; })) {
-        return false;
-    }
-
-    for (auto& medium : newMedia) {
-        media.push_back(std::move(medium));
-    }
-    emit mediaChanged(getMediaView());
-    return true;
-}
-
-bool Library::addMedium(std::unique_ptr<const Medium> newMedium) {
-    if (newMedium == nullptr) {
-        return false;
-    }
-
-    media.push_back(std::move(newMedium));
-    emit mediaChanged(getMediaView());
-    return true;
-}
-
-bool Library::replaceMedium(const Medium* oldMedium, std::unique_ptr<const Medium> newMedium) {
-    if (const auto oldMediumIterator{
-            std::ranges::find_if(media,
-                                 [oldMedium](const std::unique_ptr<const Medium>& medium) {
-                                     return medium.get() == oldMedium;
-                                 })};
-        oldMediumIterator != media.end() && newMedium != nullptr) {
-        *oldMediumIterator = std::move(newMedium);
-        emit mediaChanged(getMediaView());
-        return true;
-    }
-    return false;
-}
-
-bool Library::removeMedium(const Medium* mediumToRemove) {
-    if (const auto mediumToRemoveIterator{
-            std::ranges::find_if(media,
-                                 [mediumToRemove](const std::unique_ptr<const Medium>& medium) {
-                                     return medium.get() == mediumToRemove;
-                                 })};
-        mediumToRemoveIterator != media.end()) {
-        media.erase(mediumToRemoveIterator);
-        emit mediaChanged(getMediaView());
-        return true;
-    }
-    return false;
-}
-
-void Library::clearMedia() {
-    if (!media.empty()) {
-        media.clear();
-        emit mediaChanged(getMediaView());
-    }
 }
 
 std::set<QString> Library::getAllTopics() const {
     std::set<QString> topics;
-    std::ranges::for_each(media, [&](const auto& medium) {
+    std::ranges::for_each(media, [&](const auto& pair) {
+        const auto& [_, medium]{pair};
         topics.merge(medium->userData().topics().get().value_or(std::set<QString>{}));
     });
     return topics;
+}
+
+std::optional<const Medium*> Library::getMedium(const QUuid& id) const {
+    if (!media.contains(id)) {
+        return std::nullopt;
+    }
+    return std::make_optional(media.at(id).get());
+}
+
+size_t Library::mediaCount() const {
+    return media.size();
+}
+
+void Library::setMedia(std::vector<std::unique_ptr<const Medium>> newMedia) {
+    media.clear();
+    for (auto& medium : newMedia) {
+        if (medium == nullptr)
+            continue;
+
+        media.emplace(medium->id(), std::move(medium));
+    }
+    emit mediaChanged();
+}
+
+// The clangd warning on this line is a false positive.
+// This is a sink function for a move-only type, so taking the
+// unique_ptr by value is the correct and idiomatic approach.
+// NOLINTNEXTLINE(performance-unnecessary-value-param)
+void Library::merge(std::unique_ptr<Library> other) {
+    if (other == nullptr) {
+        return;
+    }
+
+    const auto countBeforeMerge{mediaCount()};
+    media.merge(std::move(other->media));
+
+    if (const auto countAfterMerge{mediaCount()}; countBeforeMerge != countAfterMerge)
+        emit mediaChanged();
+}
+
+bool Library::addMedium(std::unique_ptr<const Medium> newMedium) {
+    if (newMedium == nullptr)
+        return false;
+
+    const auto [_, success]{media.insert({newMedium->id(), std::move(newMedium)})};
+
+    if (success)
+        emit mediaChanged();
+
+    return success;
+}
+
+bool Library::replaceMedium(std::unique_ptr<const Medium> newMedium) {
+    if (newMedium == nullptr || !media.contains(newMedium->id())) {
+        return false;
+    }
+    media.at(newMedium->id()) = std::move(newMedium);
+    emit mediaChanged();
+    return true;
+}
+
+bool Library::removeMedium(const QUuid& id) {
+    const bool didRemove{media.erase(id) > 0};
+    if (didRemove)
+        emit mediaChanged();
+    return didRemove;
+}
+
+void Library::clear() {
+    const auto previousCount{mediaCount()};
+    media.clear();
+    if (previousCount > 0)
+        emit mediaChanged();
 }
 
 }

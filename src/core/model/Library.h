@@ -8,55 +8,92 @@
 namespace Core::Model {
 
 /**
- * Manages the vector of media that are currently loaded in memory representing the library.
- * Implemented as a singleton.
+ * Manages the vector of media that are currently loaded in memory representing a library.
  */
 class Library final : public QObject {
     Q_OBJECT
 
-    std::vector<std::unique_ptr<const Medium>> media;
-    static std::shared_ptr<Library> library;
-
-    Library() = default;
+    std::map<QUuid, std::unique_ptr<const Medium>> media;
 
   public:
-    Library(Library& other) = delete;
-    Library(const Library& other) = delete;
-    Library(const Library&& other) = delete;
-    void operator=(const Library& other) = delete;
-    void operator=(const Library&& other) = delete;
-
-    static std::shared_ptr<Library> getLibrary();
-
     /**
-     * Returns a read-only view of the media currently stored in the library.
+     * @brief Returns a read-only view of all media in the library.
      *
      * The returned vector contains raw pointers to the immutable `Medium` objects owned by the
-     * library. These pointers are guaranteed to remain valid until the next change to the library's
-     * media, such as an insertion, removal, or replacement of a medium.
-     * To be notified of such changes and ensure your view remains consistent,
-     * connect to the `mediaChanged` signal of the Library class.
+     * library. These pointers are guaranteed to remain valid until the next change to the
+     * library's media, such as an insertion, removal, or replacement of a medium. To be
+     * notified of such changes and ensure your view remains consistent, connect to the
+     * `mediaChanged` signal of the Library class.
      *
      * @return A vector of raw pointers to immutable media objects.
      */
-    std::vector<const Medium*> getMediaView() const;
+    std::vector<const Medium*> getAllMedia() const;
 
-    bool setMedia(std::vector<std::unique_ptr<const Medium>>&& newMedia);
-
-    bool addMedia(std::vector<std::unique_ptr<const Medium>>&& newMedia);
-    bool addMedium(std::unique_ptr<const Medium> newMedium);
-
-    bool replaceMedium(const Medium* oldMedium, std::unique_ptr<const Medium> newMedium);
-
-    bool removeMedium(const Medium* mediumToRemove);
-
-    void clearMedia();
-
+    /**
+     * @brief Returns a set containing every distinct topic in the collection of media.
+     */
     std::set<QString> getAllTopics() const;
 
+    /**
+     * @brief Returns a non-owning pointer to a medium by its ID. If no such medium exists,
+     * std::nullopt is returned.
+     *
+     * The pointer is guaranteed to remain valid until the next change to the library's media, such
+     * as an insertion, removal, or replacement of a medium. To be notified of such changes and
+     * ensure your view remains consistent, connect to the `mediaChanged` signal of the Library
+     * class.
+     *
+     * @return A const pointer to the medium, or nullptr if not found.
+     */
+    std::optional<const Medium*> getMedium(const QUuid& id) const;
+
+    /**
+     * @brief Returns the total number of media in the library.
+     */
+    size_t mediaCount() const;
+
+    /**
+     * @brief Sets the entire media collection, erasing anything that was present before.
+     *
+     * Nullptr's and duplicates in `newMedia` are ignored.
+     */
+    void setMedia(std::vector<std::unique_ptr<const Medium>> newMedia);
+
+    /**
+     * @brief Merges this library with another one, consuming it.
+     */
+    void merge(std::unique_ptr<Library> other);
+
+    /**
+     * @brief Adds a new medium to the library, taking ownership.
+     * @return True if the medium was added, false if an item with that ID already exists or the
+     * argument was nullptr.
+     */
+    bool addMedium(std::unique_ptr<const Medium> newMedium);
+
+    /**
+     * @brief Replaces an existing medium with a new one, identified by ID.
+     * The new medium must have the same ID as the one it's replacing.
+     * @return True if the replacement was successful, false if no medium with that ID was found or
+     * the argument was nullptr.
+     */
+    bool replaceMedium(std::unique_ptr<const Medium> newMedium);
+
+    /**
+     * @brief Removes a medium from the library by its unique ID.
+     * @return True if a medium was found and removed, false otherwise.
+     */
+    bool removeMedium(const QUuid& id);
+
+    /**
+     * @brief Clears the entire collection
+     */
+    void clear();
+
   signals:
-    void mediaChanged(std::vector<const Core::Model::Medium*> newMedia);
+    void mediaChanged();
 };
+
 }
 
 #endif

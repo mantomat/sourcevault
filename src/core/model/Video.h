@@ -10,8 +10,20 @@ namespace Core::Model {
 
 class Video : public Medium {
 
+    ValidatedField<QUrl> videoUrl_{videoUrlValidator};
+    ValidatedField<unsigned int> durationSeconds_{durationSecondsValidator};
+    ValidatedField<QDate> uploadDate_{uploadDateValidator};
+    ValidatedField<QUrl> thumbnailUrl_{thumbnailUrlValidator};
+
+    Video(QString&& title, QUuid id, QDate dateAdded);
+
   public:
+    Video(const Video&) = default;
+    Video(Video&&) = default;
     ~Video() override = default;
+
+    static std::optional<Video> create(QString title, QUuid id = QUuid::createUuid(),
+                                       QDate dateAdded = QDate::currentDate());
 
     ValidatedField<QUrl>& videoUrl();
     const ValidatedField<QUrl>& videoUrl() const;
@@ -28,12 +40,6 @@ class Video : public Medium {
     ValidatedField<QUrl>& thumbnailUrl();
     const ValidatedField<QUrl>& thumbnailUrl() const;
     static bool thumbnailUrlValidator(const QUrl& urlToValidate);
-
-  private:
-    ValidatedField<QUrl> videoUrl_{videoUrlValidator};
-    ValidatedField<unsigned int> durationSeconds_{durationSecondsValidator};
-    ValidatedField<QDate> uploadDate_{uploadDateValidator};
-    ValidatedField<QUrl> thumbnailUrl_{thumbnailUrlValidator};
 };
 
 }
