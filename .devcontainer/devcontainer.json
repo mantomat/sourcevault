@@ -1,5 +1,5 @@
 {
-  "name": "C++",
+  "name": "sourcevault devcontainer",
   // Uncomment this to use the uploaded image
   "image": "mntmtt/sourcevaultdev",
   // Uncomment this to switch to local dockerfile build
@@ -7,7 +7,22 @@
   //   dockerfile: "Dockerfile",
   // },
 
+  "features": {
+    "ghcr.io/devcontainers/features/desktop-lite:1": {}
+  },
+  "forwardPorts": [6080, 5901],
+	"portsAttributes": {
+		"6080": {
+			"label": "VNC web client (noVNC)",
+			"onAutoForward": "silent"
+		},
+		"5901": {
+			"label": "VNC TCP port",
+			"onAutoForward": "silent"
+	},
+
   "workspaceFolder": "/workspace",
+  
   "customizations": {
     "jetbrains": {
       "backend": "CLion",
