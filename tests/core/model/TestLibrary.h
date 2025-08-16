@@ -17,17 +17,57 @@ using Core::Model::Video;
 class TestLibrary : public QObject {
     Q_OBJECT
 
-  private slots:
-    void testGetAllMedia() const;
+    /* The following is common, shared data used along the test suite */
+    const Book defaultBook{[] {
+        auto b{Book::create("book title").value()};
+        b.userData().topics().set({"t0", "t1"});
+        return b;
+    }()};
+    const Video defaultVideo{[] {
+        auto v{Video::create("video title").value()};
+        v.userData().topics().set({"t1", "t2"});
+        return v;
+    }()};
+    const Article defaultArticle{[] {
+        auto a{Article::create("article title").value()};
+        a.userData().topics().set({"t2", "t3"});
+        return a;
+    }()};
 
-    void testGetAllTopics() const;
+    /* A default library that contains `defaultBook`, `defaultArticle` and `defaultVideo` */
+    const Library defaultLibrary{[this] {
+        Library lib;
+
+        lib.addMedium(std::make_unique<Book>(defaultBook));
+        lib.addMedium(std::make_unique<Video>(defaultVideo));
+        lib.addMedium(std::make_unique<Article>(defaultArticle));
+
+        return lib;
+    }()};
+
+  private slots:
+    void testCopyConstructor_data() const;
+    static void testCopyConstructor();
+
+    void testCopyAssignment_data() const;
+    static void testCopyAssignment();
+
+    void testSwap_data() const;
+    static void testSwap();
+
+    void testGetAllMedia_data() const;
+    static void testGetAllMedia();
+
+    void testGetAllTopics_data() const;
+    static void testGetAllTopics();
 
     void testGetMedium_data() const;
-    void testGetMedium() const;
+    static void testGetMedium();
 
-    void testMediaCount() const;
+    void testMediaCount_data() const;
+    static void testMediaCount();
 
-    static void testSetMedia_data();
+    void testSetMedia_data() const;
     static void testSetMedia();
 
     void testMerge_data() const;
@@ -44,31 +84,6 @@ class TestLibrary : public QObject {
 
     void testClear_data() const;
     static void testClear();
-
-  private:
-    /* The following is common, shared data used along the test suite */
-
-    const Book book{[] {
-        auto b{Book::create("book title").value()};
-        b.userData().topics().set({"t0", "t1"});
-        return b;
-    }()};
-    const Video video{[] {
-        auto v{Video::create("video title").value()};
-        v.userData().topics().set({"t1", "t2"});
-        return v;
-    }()};
-    const Article article{[] {
-        auto a{Article::create("article title").value()};
-        a.userData().topics().set({"t2", "t3"});
-        return a;
-    }()};
-
-    const std::set<QUuid> expectedIds{book.id(), video.id(), article.id()};
-    std::set<QString> expectedTopics{"t0", "t1", "t2", "t3"};
-    size_t expectedCount{3};
-
-    void populateLib(Library& libToPopulate) const;
 };
 
 #endif

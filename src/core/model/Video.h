@@ -18,30 +18,35 @@ class Video : public Medium {
     Video(QString&& title, QUuid id, QDate dateAdded);
 
   public:
+    ~Video() override = default;
     Video(const Video&) = default;
     Video(Video&&) = default;
-    ~Video() override = default;
+    auto operator=(const Video&) -> Video& = delete;
+    auto operator=(Video&&) -> Video& = delete;
 
-    std::unique_ptr<Medium> clone() const override;
+    // TODO test!
+    [[nodiscard]] auto clone() const -> std::unique_ptr<Medium> override;
 
-    static std::optional<Video> create(QString title, QUuid id = QUuid::createUuid(),
-                                       QDate dateAdded = QDate::currentDate());
+    [[nodiscard]] static auto create(QString title, QUuid id = QUuid::createUuid(),
+                                     QDate dateAdded = QDate::currentDate())
+        -> std::optional<Video>;
 
-    ValidatedField<QUrl>& videoUrl();
-    const ValidatedField<QUrl>& videoUrl() const;
-    static bool videoUrlValidator(const QUrl& urlToValidate);
+    [[nodiscard]] auto videoUrl() -> ValidatedField<QUrl>&;
+    [[nodiscard]] auto videoUrl() const -> const ValidatedField<QUrl>&;
+    [[nodiscard]] static auto videoUrlValidator(const QUrl& urlToValidate) -> bool;
 
-    ValidatedField<unsigned int>& durationSeconds();
-    const ValidatedField<unsigned int>& durationSeconds() const;
-    static bool durationSecondsValidator(unsigned int durationSecondsToValidate);
+    [[nodiscard]] auto durationSeconds() -> ValidatedField<unsigned int>&;
+    [[nodiscard]] auto durationSeconds() const -> const ValidatedField<unsigned int>&;
+    [[nodiscard]] static auto durationSecondsValidator(unsigned int durationSecondsToValidate)
+        -> bool;
 
-    ValidatedField<QDate>& uploadDate();
-    const ValidatedField<QDate>& uploadDate() const;
-    static bool uploadDateValidator(const QDate& dateToValidate);
+    [[nodiscard]] auto uploadDate() -> ValidatedField<QDate>&;
+    [[nodiscard]] auto uploadDate() const -> const ValidatedField<QDate>&;
+    [[nodiscard]] static auto uploadDateValidator(const QDate& dateToValidate) -> bool;
 
-    ValidatedField<QUrl>& thumbnailUrl();
-    const ValidatedField<QUrl>& thumbnailUrl() const;
-    static bool thumbnailUrlValidator(const QUrl& urlToValidate);
+    [[nodiscard]] auto thumbnailUrl() -> ValidatedField<QUrl>&;
+    [[nodiscard]] auto thumbnailUrl() const -> const ValidatedField<QUrl>&;
+    [[nodiscard]] static auto thumbnailUrlValidator(const QUrl& urlToValidate) -> bool;
 };
 
 }

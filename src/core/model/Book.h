@@ -20,42 +20,45 @@ class Book : public Medium {
     Book(QString&& title, QUuid id, QDate dateAdded);
 
   public:
+    ~Book() override = default;
     Book(const Book&) = default;
     Book(Book&&) = default;
-    ~Book() override = default;
+    auto operator=(const Book&) -> Book& = delete;
+    auto operator=(Book&&) -> Book& = delete;
 
-    std::unique_ptr<Medium> clone() const override;
+    // TODO test!
+    [[nodiscard]] auto clone() const -> std::unique_ptr<Medium> override;
 
-    static std::optional<Book> create(QString title, QUuid id = QUuid::createUuid(),
-                                      QDate dateAdded = QDate::currentDate());
+    [[nodiscard]] static auto create(QString title, QUuid id = QUuid::createUuid(),
+                                     QDate dateAdded = QDate::currentDate()) -> std::optional<Book>;
 
-    ValidatedField<QString>& isbn();
-    const ValidatedField<QString>& isbn() const;
-    static bool isbnValidator(const QString& isbnToValidate);
+    [[nodiscard]] auto isbn() -> ValidatedField<QString>&;
+    [[nodiscard]] auto isbn() const -> const ValidatedField<QString>&;
+    [[nodiscard]] static auto isbnValidator(const QString& isbnToValidate) -> bool;
 
-    ValidatedField<QString>& edition();
-    const ValidatedField<QString>& edition() const;
-    static bool editionValidator(const QString& editionToValidate);
+    [[nodiscard]] auto edition() -> ValidatedField<QString>&;
+    [[nodiscard]] auto edition() const -> const ValidatedField<QString>&;
+    [[nodiscard]] static auto editionValidator(const QString& editionToValidate) -> bool;
 
-    ValidatedField<QString>& publisher();
-    const ValidatedField<QString>& publisher() const;
-    static bool publisherValidator(const QString& publisherToValidate);
+    [[nodiscard]] auto publisher() -> ValidatedField<QString>&;
+    [[nodiscard]] auto publisher() const -> const ValidatedField<QString>&;
+    [[nodiscard]] static auto publisherValidator(const QString& publisherToValidate) -> bool;
 
-    ValidatedField<int>& yearPublished();
-    const ValidatedField<int>& yearPublished() const;
-    static bool yearPublishedValidator(int yearPublishedToValidate);
+    [[nodiscard]] auto yearPublished() -> ValidatedField<int>&;
+    [[nodiscard]] auto yearPublished() const -> const ValidatedField<int>&;
+    [[nodiscard]] static auto yearPublishedValidator(int yearPublishedToValidate) -> bool;
 
-    ValidatedField<unsigned int>& pageNumber();
-    const ValidatedField<unsigned int>& pageNumber() const;
-    static bool pageNumberValidator(unsigned int pageNumberToValidate);
+    [[nodiscard]] auto pageNumber() -> ValidatedField<unsigned int>&;
+    [[nodiscard]] auto pageNumber() const -> const ValidatedField<unsigned int>&;
+    [[nodiscard]] static auto pageNumberValidator(unsigned int pageNumberToValidate) -> bool;
 
-    ValidatedField<QString>& description();
-    const ValidatedField<QString>& description() const;
-    static bool descriptionValidator(const QString& descriptionToValidate);
+    [[nodiscard]] auto description() -> ValidatedField<QString>&;
+    [[nodiscard]] auto description() const -> const ValidatedField<QString>&;
+    [[nodiscard]] static auto descriptionValidator(const QString& descriptionToValidate) -> bool;
 
-    ValidatedField<QUrl>& thumbnailUrl();
-    const ValidatedField<QUrl>& thumbnailUrl() const;
-    static bool thumbnailUrlValidator(const QUrl& urlToValidate);
+    [[nodiscard]] auto thumbnailUrl() -> ValidatedField<QUrl>&;
+    [[nodiscard]] auto thumbnailUrl() const -> const ValidatedField<QUrl>&;
+    [[nodiscard]] static auto thumbnailUrlValidator(const QUrl& urlToValidate) -> bool;
 };
 
 }

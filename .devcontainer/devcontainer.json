@@ -19,7 +19,8 @@
 		"5901": {
 			"label": "VNC TCP port",
 			"onAutoForward": "silent"
-	},
+	  }
+  },
 
   "workspaceFolder": "/workspace",
   
@@ -31,6 +32,15 @@
       ],
       "settings": {
       }
+    },
+    "vscode": {
+      "extensions": [
+        "xaver.clang-format",
+        "llvm-vs-code-extensions.vscode-clangd",
+        "ms-vscode.cmake-tools",
+        "CS128.cs128-clang-tidy",
+        "SonarSource.sonarlint-vscode"
+      ]   
     }
   }
 }

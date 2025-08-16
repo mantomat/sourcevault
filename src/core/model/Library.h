@@ -1,76 +1,94 @@
 #ifndef LIBRARY_H
 #define LIBRARY_H
 
-#include "LibrarySignals.h"
 #include "Medium.h"
 
 namespace Core::Model {
 
 /**
- * Manages the vector of media that are currently loaded in memory representing a library.
+ * This struct is designed to decouple the signal emitter (QObject) from Library.
+ *
+ * A QObject's purpose is to be a unique "identity" within Qt's object tree. It has a parent,
+ * children, and a unique identity that cannot be copied or moved.
+ *
+ * On the contrary, Library is a "value" class. It represents the data that lies beneath it, it
+ * doesn't have an identity. But we needed to design some kind of observer pattern for it, and
+ * overlooking the powerful Qt's signaling system would have been a bad choice.
+ */
+class LibrarySignals final : public QObject {
+    Q_OBJECT
+  signals:
+    void mediaChanged();
+};
+
+/**
+ * @brief Manages a collection of media representing a library.
  */
 class Library final {
 
     std::map<QUuid, std::unique_ptr<const Medium>> media;
-    std::shared_ptr<LibrarySignals> sigsEmitter;
-
-    void emitMediaChanged() const;
+    std::shared_ptr<LibrarySignals> sigsEmitter{std::make_shared<LibrarySignals>()};
 
   public:
-    /**
-     * @brief Constructs a new library.
-     * This class uses dependency injection to decouple the non-copyable and non-movable signal
-     * emitter from the library, in order to allow for copy and moves.
-     *
-     * You can omit the parameter if you don't need to receive updates from the library.
-     */
-    explicit Library(const std::shared_ptr<LibrarySignals>& signalsEmitter = nullptr);
-
+    ~Library() = default;
+    explicit Library() = default;
     Library(Library&&) = default;
-    Library& operator=(Library&&) = default;
+    auto operator=(Library&&) -> Library& = default;
 
+    /**
+     * @brief Copies a library, performing a deep copy of media.
+     */
     Library(const Library& other);
-    Library& operator=(const Library& other);
+    /**
+     * @brief Copy-assigns a library, performing a deep copy of media.
+     *
+     * If at least one between this library and `other` wasn't empty, emits a `mediaChanged` signal.
+     */
+    auto operator=(const Library& other) -> Library&;
 
+    /**
+     * @brief Swaps the current library with `other`.
+     * This operation will emit a `mediaChanged` signal on both libraries if they were not empty.
+     */
     void swap(Library& other) noexcept;
 
-    const LibrarySignals* signalsEmitter() const;
+    /**
+     * @brief Returns this library's signal emitter with shared ownership.
+     */
+    [[nodiscard]] auto emitter() const -> std::shared_ptr<const LibrarySignals>;
 
     /**
-     * @brief Returns a read-only view of all media in the library.
+     * @return A vector of raw pointers to immutable media objects.
      *
      * The returned vector contains raw pointers to the immutable `Medium` objects owned by the
      * library. These pointers are guaranteed to remain valid until the next change to the
      * library's media, such as an insertion, removal, or replacement of a medium. To be
      * notified of such changes and ensure your view remains consistent, connect to the
      * `mediaChanged` signal of the Library class.
-     *
-     * @return A vector of raw pointers to immutable media objects.
      */
-    std::vector<const Medium*> getAllMedia() const;
+    [[nodiscard]] auto getMedia() const -> std::vector<const Medium*>;
 
     /**
      * @brief Returns a set containing every distinct topic in the collection of media.
      */
-    std::set<QString> getAllTopics() const;
+    [[nodiscard]] auto getTopicsUnion() const -> std::set<QString>;
 
     /**
-     * @brief Returns a non-owning pointer to a medium by its ID. If no such medium exists,
-     * std::nullopt is returned.
+     * @brief Returns a non-owning pointer to a medium by its ID.
      *
      * The pointer is guaranteed to remain valid until the next change to the library's media, such
      * as an insertion, removal, or replacement of a medium. To be notified of such changes and
      * ensure your view remains consistent, connect to the `mediaChanged` signal of the Library
      * class.
      *
-     * @return A const pointer to the medium, or nullptr if not found.
+     * @return A const pointer to the medium, or nullopt if not found.
      */
-    std::optional<const Medium*> getMedium(const QUuid& id) const;
+    [[nodiscard]] auto getMedium(const QUuid& id) const -> std::optional<const Medium*>;
 
     /**
-     * @brief Returns the total number of media in the library.
+     * @return The total number of media in the library.
      */
-    size_t mediaCount() const;
+    [[nodiscard]] auto mediaCount() const -> size_t;
 
     /**
      * @brief Sets the entire media collection, erasing anything that was present before.
@@ -82,14 +100,14 @@ class Library final {
     /**
      * @brief Merges this library with another one, consuming it.
      */
-    void merge(std::unique_ptr<Library> other);
+    void merge(Library other);
 
     /**
      * @brief Adds a new medium to the library, taking ownership.
      * @return True if the medium was added, false if an item with that ID already exists or the
      * argument was nullptr.
      */
-    bool addMedium(std::unique_ptr<const Medium> newMedium);
+    auto addMedium(std::unique_ptr<const Medium> newMedium) -> bool;
 
     /**
      * @brief Replaces an existing medium with a new one, identified by ID.
@@ -97,21 +115,18 @@ class Library final {
      * @return True if the replacement was successful, false if no medium with that ID was found or
      * the argument was nullptr.
      */
-    bool replaceMedium(std::unique_ptr<const Medium> newMedium);
+    auto replaceMedium(std::unique_ptr<const Medium> newMedium) -> bool;
 
     /**
      * @brief Removes a medium from the library by its unique ID.
      * @return True if a medium was found and removed, false otherwise.
      */
-    bool removeMedium(const QUuid& id);
+    auto removeMedium(const QUuid& id) -> bool;
 
     /**
      * @brief Clears the entire collection
      */
     void clear();
-
-  signals:
-    void mediaChanged();
 };
 
 }

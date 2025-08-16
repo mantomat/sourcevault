@@ -19,30 +19,35 @@ class Article : public Medium {
     Article(QString&& title, QUuid id, QDate dateAdded);
 
   public:
+    ~Article() override = default;
     Article(const Article&) = default;
     Article(Article&&) = default;
-    ~Article() override = default;
+    auto operator=(const Article&) -> Article& = delete;
+    auto operator=(Article&&) -> Article& = delete;
 
-    std::unique_ptr<Medium> clone() const override;
+    // TODO test!
+    [[nodiscard]] auto clone() const -> std::unique_ptr<Medium> override;
 
-    static std::optional<Article> create(QString title, QUuid id = QUuid::createUuid(),
-                                         QDate dateAdded = QDate::currentDate());
+    [[nodiscard]] static auto create(QString title, QUuid id = QUuid::createUuid(),
+                                     QDate dateAdded = QDate::currentDate())
+        -> std::optional<Article>;
 
-    ValidatedField<QUrl>& articleUrl();
-    [[nodiscard]] const ValidatedField<QUrl>& articleUrl() const;
-    static bool articleUrlValidator(const QUrl& urlToValidate);
+    [[nodiscard]] auto articleUrl() -> ValidatedField<QUrl>&;
+    [[nodiscard]] auto articleUrl() const -> const ValidatedField<QUrl>&;
+    [[nodiscard]] static auto articleUrlValidator(const QUrl& urlToValidate) -> bool;
 
-    ValidatedField<QString>& sourceName();
-    [[nodiscard]] const ValidatedField<QString>& sourceName() const;
-    static bool sourceNameValidator(const QString& sourceNameToValidate);
+    [[nodiscard]] auto sourceName() -> ValidatedField<QString>&;
+    [[nodiscard]] auto sourceName() const -> const ValidatedField<QString>&;
+    [[nodiscard]] static auto sourceNameValidator(const QString& sourceNameToValidate) -> bool;
 
-    ValidatedField<unsigned int>& readTimeMinutes();
-    [[nodiscard]] const ValidatedField<unsigned int>& readTimeMinutes() const;
-    static bool readTimeMinutesValidator(unsigned int readTimeMinutesToValidate);
+    [[nodiscard]] auto readTimeMinutes() -> ValidatedField<unsigned int>&;
+    [[nodiscard]] auto readTimeMinutes() const -> const ValidatedField<unsigned int>&;
+    [[nodiscard]] static auto readTimeMinutesValidator(unsigned int readTimeMinutesToValidate)
+        -> bool;
 
-    ValidatedField<QDate>& publicationDate();
-    [[nodiscard]] const ValidatedField<QDate>& publicationDate() const;
-    static bool publicationDateValidator(const QDate& dateToValidate);
+    [[nodiscard]] auto publicationDate() -> ValidatedField<QDate>&;
+    [[nodiscard]] auto publicationDate() const -> const ValidatedField<QDate>&;
+    [[nodiscard]] static auto publicationDateValidator(const QDate& dateToValidate) -> bool;
 };
 
 }

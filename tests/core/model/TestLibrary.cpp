@@ -9,203 +9,305 @@
 #include <QSignalSpy>
 #include <QTest>
 #include <algorithm>
+#include <qtestcase.h>
 #include <ranges>
 
 using Core::Model::Article;
 using Core::Model::Book;
 using Core::Model::Library;
+using Core::Model::LibrarySignals;
 using Core::Model::Medium;
 using Core::Model::Video;
 
-void TestLibrary::populateLib(Library& libToPopulate) const {
-    std::vector<std::unique_ptr<const Medium>> mediaToSet;
-    mediaToSet.push_back(std::make_unique<Book>(book));
-    mediaToSet.push_back(std::make_unique<Video>(video));
-    mediaToSet.push_back(std::make_unique<Article>(article));
-    libToPopulate.setMedia(std::move(mediaToSet));
+void TestLibrary::testCopyConstructor_data() const {
+    QTest::addColumn<Library>("libraryToCopy");
+
+    QTest::addRow("Copying an empty library creates an empty library with a fresh new emitter.")
+        << Library{};
+    QTest::addRow(
+        "Copying a non-empty library creates a deep copy of the media and a fresh new emitter.")
+        << defaultLibrary;
 }
+void TestLibrary::testCopyConstructor() {
+    QFETCH(Library, libraryToCopy);
 
-void TestLibrary::testGetAllMedia() const {
-    Library lib;
-    QCOMPARE(lib.getAllMedia().size(), 0);
+    // Since it's exactly what we want:
+    // NOLINTNEXTLINE(performance-unnecessary-copy-initialization)
+    Library newLib{libraryToCopy};
 
-    populateLib(lib);
-    std::set expected{expectedIds};
+    QVERIFY(libraryToCopy.emitter() != newLib.emitter());
 
-    const auto mediaView{lib.getAllMedia()};
-    QCOMPARE(mediaView.size(), expected.size());
-    for (const Medium* mediumPtr : mediaView) {
-        QVERIFY(mediumPtr != nullptr);
-        QVERIFY(expected.contains(mediumPtr->id()));
-        expected.erase(mediumPtr->id());
+    const std::vector originals{libraryToCopy.getMedia()};
+    const std::vector deepCopies{newLib.getMedia()};
+    QCOMPARE(originals.size(), deepCopies.size());
+    for (size_t i = 0; i < originals.size(); i++) {
+        QVERIFY(originals[i] != deepCopies[i]);
+
+        // This doesn't verify they are exactly equal, but we only check the id for the sake of
+        // simplicity.
+        QCOMPARE(originals[i]->id(), deepCopies[i]->id());
     }
 }
 
-void TestLibrary::testGetAllTopics() const {
-    Library lib;
-    QCOMPARE(lib.getAllTopics().size(), 0);
+void TestLibrary::testCopyAssignment_data() const {
+    QTest::addColumn<Library>("library");
+    QTest::addColumn<Library>("libraryToCopyAssign");
+    QTest::addColumn<bool>("expectedSignalEmission");
 
-    populateLib(lib);
-    std::set expected{expectedTopics};
+    QTest::addRow(
+        "Copy-assigning an empty library to an empty library does nothing and doesn't emit.")
+        << Library{} << Library{} << false;
+    QTest::addRow("Copy-assigning a non empty library to an empty library performs a deep copy and "
+                  "emits a signal.")
+        << Library{} << defaultLibrary << true;
+    QTest::addRow("Copy-assigning an empty library to a non-empty library emits a signal.")
+        << Library{} << defaultLibrary << true;
+}
+void TestLibrary::testCopyAssignment() {
+    QFETCH(Library, library);
+    QFETCH(Library, libraryToCopyAssign);
+    QFETCH(bool, expectedSignalEmission);
 
-    const auto actualTopics{lib.getAllTopics()};
-    QCOMPARE(actualTopics.size(), expected.size());
-    for (const auto& topic : actualTopics) {
-        QVERIFY(expected.contains(topic));
-        expected.erase(topic);
+    QSignalSpy spy{library.emitter().get(), &LibrarySignals::mediaChanged};
+
+    library = libraryToCopyAssign;
+
+    const std::vector libraryToCopyMedia{libraryToCopyAssign.getMedia()};
+    const std::vector libraryMedia{library.getMedia()};
+    QCOMPARE(libraryToCopyMedia.size(), libraryMedia.size());
+    for (size_t i = 0; i < libraryToCopyMedia.size(); i++) {
+        QVERIFY(libraryToCopyMedia[i] != libraryMedia[i]);
+
+        // This doesn't verify they are exactly equal, but we only check the id for the sake of
+        // simplicity.
+        QCOMPARE(libraryToCopyMedia[i]->id(), libraryMedia[i]->id());
     }
+    QCOMPARE(spy.count(), expectedSignalEmission ? 1 : 0);
+}
+
+void TestLibrary::testSwap_data() const {
+    QTest::addColumn<Library>("library1");
+    QTest::addColumn<Library>("library2");
+    QTest::addColumn<bool>("expectedSignalEmission");
+
+    {
+        Library lib1;
+        Library lib2;
+        QTest::addRow("Swapping two empty libraries doesn't emit any signals")
+            << lib1 << lib2 << false;
+    }
+    {
+        Library lib1;
+        lib1.addMedium(std::make_unique<Book>(defaultBook));
+        Library lib2;
+        lib2.addMedium(std::make_unique<Video>(defaultVideo));
+        QTest::addRow("Swapping two non-empty libraries emits a signal on both libraries.")
+            << lib1 << lib2 << true;
+    }
+}
+void TestLibrary::testSwap() {
+    QFETCH(Library, library1);
+    QFETCH(Library, library2);
+    QFETCH(bool, expectedSignalEmission);
+
+    const auto prevLib1Media{library1.getMedia()};
+    const auto prevLib2Media{library2.getMedia()};
+    QSignalSpy lib1Spy{library1.emitter().get(), &LibrarySignals::mediaChanged};
+    QSignalSpy lib2Spy{library2.emitter().get(), &LibrarySignals::mediaChanged};
+
+    library1.swap(library2);
+
+    QCOMPARE(library1.getMedia(), prevLib2Media);
+    QCOMPARE(library2.getMedia(), prevLib1Media);
+    QCOMPARE(lib1Spy.count(), expectedSignalEmission ? 1 : 0);
+    QCOMPARE(lib2Spy.count(), expectedSignalEmission ? 1 : 0);
+}
+
+void TestLibrary::testGetAllMedia_data() const {
+    QTest::addColumn<Library>("library");
+    QTest::addColumn<std::set<QUuid>>("expectedMediaIds");
+
+    QTest::addRow("An empty library has no media in it") << Library{} << std::set<QUuid>{};
+    QTest::addRow("A library with some media")
+        << defaultLibrary
+        << std::set<QUuid>{defaultBook.id(), defaultArticle.id(), defaultVideo.id()};
+}
+void TestLibrary::testGetAllMedia() {
+    QFETCH(Library, library);
+    QFETCH(std::set<QUuid>, expectedMediaIds);
+
+    const auto& media = library.getMedia();
+    auto idView = media | std::views::transform([](const auto m) { return m->id(); });
+    std::set<QUuid> actualIds{idView.begin(), idView.end()};
+
+    QCOMPARE(actualIds, expectedMediaIds);
+}
+
+void TestLibrary::testGetAllTopics_data() const {
+    QTest::addColumn<Library>("library");
+    QTest::addColumn<std::set<QString>>("expectedTopics");
+
+    QTest::addRow("An empty library has no topics in it") << Library{} << std::set<QString>{};
+
+    std::set<QString> expectedTopics{};
+    expectedTopics.merge(defaultBook.userData().topics().get().value());
+    expectedTopics.merge(defaultArticle.userData().topics().get().value());
+    expectedTopics.merge(defaultVideo.userData().topics().get().value());
+    QTest::addRow("A library with some topics") << defaultLibrary << expectedTopics;
+}
+
+void TestLibrary::testGetAllTopics() {
+    QFETCH(Library, library);
+    QFETCH(std::set<QString>, expectedTopics);
+
+    QCOMPARE(library.getTopicsUnion(), expectedTopics);
 }
 
 void TestLibrary::testGetMedium_data() const {
+    QTest::addColumn<Library>("library");
     QTest::addColumn<QUuid>("idToGet");
     QTest::addColumn<bool>("shouldBeFound");
 
-    Library lib;
-    populateLib(lib);
-
-    QTest::addRow("A null id must never be found") << QUuid{} << false;
-    QTest::addRow("An absent id must never be found") << QUuid{QUuid::createUuid()} << false;
-    QTest::addRow("A present id must return the corresponding medium") << book.id() << true;
+    QTest::addRow("A null id must never be found") << defaultLibrary << QUuid{} << false;
+    QTest::addRow("An absent id must never be found")
+        << defaultLibrary << QUuid{QUuid::createUuid()} << false;
+    QTest::addRow("A present id must return the corresponding medium")
+        << defaultLibrary << defaultBook.id() << true;
 }
 
-void TestLibrary::testGetMedium() const {
+void TestLibrary::testGetMedium() {
+    QFETCH(Library, library);
     QFETCH(QUuid, idToGet);
     QFETCH(bool, shouldBeFound);
 
-    // Creating this every time could slow down the tests, but it's the easiest thing to do.
-    Library lib;
-    populateLib(lib);
-
-    const auto optionalMedium{lib.getMedium(idToGet)};
+    const auto optionalMedium{library.getMedium(idToGet)};
     QCOMPARE(optionalMedium.has_value(), shouldBeFound);
 }
 
-void TestLibrary::testMediaCount() const {
-    Library lib;
-    QCOMPARE(lib.mediaCount(), 0);
+void TestLibrary::testMediaCount_data() const {
+    QTest::addColumn<Library>("library");
+    QTest::addColumn<size_t>("expectedCount");
 
-    populateLib(lib);
-
-    QCOMPARE(lib.mediaCount(), expectedCount);
+    QTest::addRow("A (new) empty library has no media") << Library{} << size_t{0};
+    QTest::addRow("A library with some media") << defaultLibrary << size_t{3};
 }
 
-void TestLibrary::testSetMedia_data() {
-    using cMediaPtr = std::unique_ptr<const Medium>;
-    using MediaVector = std::vector<cMediaPtr>;
+void TestLibrary::testMediaCount() {
+    QFETCH(Library, library);
+    QFETCH(size_t, expectedCount);
+
+    QCOMPARE(library.mediaCount(), expectedCount);
+}
+
+void TestLibrary::testSetMedia_data() const {
+    using MediaVector = std::vector<std::unique_ptr<const Medium>>;
     using MediaGenerator = std::function<MediaVector()>;
 
+    QTest::addColumn<Library>("library");
     // A generator is used because vectors of unique_ptrs are not copyable, thus they cannot be
-    // passed to data driven test functions in Qt.
+    // passed to data driven test functions in Qt Test.
     QTest::addColumn<MediaGenerator>("mediaGenerator");
     QTest::addColumn<size_t>("expectedCountAfterSet");
+    QTest::addColumn<bool>("expectedSignalEmission");
 
-    QTest::addRow("Setting an empty vector")
-        << MediaGenerator{[] { return MediaVector{}; }} << size_t{0};
-
-    QTest::addRow("Nullptr's must be ignored") << MediaGenerator{[] {
+    QTest::addRow("Setting an empty vector on an empty library doesn't emit any signals")
+        << Library{} << MediaGenerator{[] { return MediaVector{}; }} << size_t{0} << false;
+    QTest::addRow("Setting an empty vector on a non-empty library emits a mediaChanged signal")
+        << defaultLibrary << MediaGenerator{[this] {
+               MediaVector vec;
+               vec.push_back(std::make_unique<Book>(defaultBook));
+               return vec;
+           }}
+        << size_t{1} << true;
+    QTest::addRow("Nullptr's are ignored") << defaultLibrary << MediaGenerator{[this] {
         MediaVector vec;
-        vec.push_back(std::make_unique<Book>(Book::create("Valid Book").value()));
+        vec.push_back(std::make_unique<Book>(defaultBook));
         vec.push_back(nullptr);
-        vec.push_back(std::make_unique<Article>(Article::create("Valid Article").value()));
+        vec.push_back(std::make_unique<Article>(defaultArticle));
         vec.push_back(nullptr);
         return vec;
-    }} << size_t{2};
-
-    QTest::addRow("Duplicates are ignored") << MediaGenerator{[] {
+    }} << size_t{2} << true;
+    QTest::addRow("Duplicates are ignored") << Library{} << MediaGenerator{[this] {
         MediaVector vec;
-        const auto book = Book::create("Same ID Book").value();
-        vec.push_back(std::make_unique<Book>(book));
-        vec.push_back(std::make_unique<Book>(book));
+        vec.push_back(std::make_unique<Book>(defaultBook));
+        vec.push_back(std::make_unique<Book>(defaultBook));
         return vec;
-    }} << size_t{1};
+    }} << size_t{1} << false;
 }
 void TestLibrary::testSetMedia() {
+    QFETCH(Library, library);
     QFETCH(std::function<std::vector<std::unique_ptr<const Medium>>()>, mediaGenerator);
     QFETCH(size_t, expectedCountAfterSet);
+    QFETCH(bool, expectedSignalEmission);
 
-    std::vector<std::unique_ptr<const Medium>> mediaToSet = mediaGenerator();
-    Library lib{std::make_shared<LibrarySignals>()};
-    const QSignalSpy spy{lib.signalsEmitter(), &LibrarySignals::mediaChanged};
+    std::vector<std::unique_ptr<const Medium>> mediaToSet{mediaGenerator()};
+    const QSignalSpy spy{library.emitter().get(), &LibrarySignals::mediaChanged};
 
-    lib.setMedia(std::move(mediaToSet));
+    library.setMedia(std::move(mediaToSet));
 
-    QCOMPARE(lib.mediaCount(), expectedCountAfterSet);
-    QCOMPARE(spy.count(), 1);
+    QCOMPARE(library.mediaCount(), expectedCountAfterSet);
+    QCOMPARE(spy.count(), expectedSignalEmission ? 1 : 0);
 }
 
 void TestLibrary::testMerge_data() const {
-    using LibraryGenerator = std::function<std::unique_ptr<Library>()>;
-
-    QTest::addColumn<LibraryGenerator>("destinationGenerator");
-    QTest::addColumn<LibraryGenerator>("sourceGenerator");
+    QTest::addColumn<Library>("destination");
+    QTest::addColumn<Library>("source");
     QTest::addColumn<std::set<QUuid>>("expectedFinalIds");
     QTest::addColumn<bool>("expectedSignalEmission");
 
-    QTest::addRow("Disjunct merge acts as a disjunct union") << LibraryGenerator{[this] {
-        auto lib{std::make_unique<Library>(std::make_shared<LibrarySignals>())};
-        lib->addMedium(std::make_unique<Book>(book));
-        lib->addMedium(std::make_unique<Video>(video));
-        return lib;
-    }} << LibraryGenerator{[this] {
-        auto lib{std::make_unique<Library>(std::make_shared<LibrarySignals>())};
-        lib->addMedium(std::make_unique<Article>(article));
-        return lib;
-    }} << std::set{book.id(), video.id(), article.id()} << true;
+    {
+        Library destination;
+        destination.addMedium(std::make_unique<Book>(defaultBook));
+        destination.addMedium(std::make_unique<Video>(defaultVideo));
+        Library source;
+        source.addMedium(std::make_unique<Article>(defaultArticle));
+        QTest::addRow("Disjunct merge acts as a disjunct union")
+            << destination << source
+            << std::set{defaultBook.id(), defaultVideo.id(), defaultArticle.id()} << true;
+    }
 
-    QTest::addRow("Merging with an empty library does nothing") << LibraryGenerator{[this] {
-        auto lib{std::make_unique<Library>(std::make_shared<LibrarySignals>())};
-        lib->addMedium(std::make_unique<Book>(book));
-        lib->addMedium(std::make_unique<Video>(video));
-        return lib;
-    }} << LibraryGenerator{[] {
-        return std::make_unique<Library>(std::make_shared<LibrarySignals>());
-    }} << std::set{book.id(), video.id()} << false;
+    {
+        Library destination;
+        destination.addMedium(std::make_unique<Book>(defaultBook));
+        destination.addMedium(std::make_unique<Video>(defaultVideo));
+        Library source;
+        QTest::addRow("Merging with an empty library does nothing")
+            << destination << source << std::set{defaultBook.id(), defaultVideo.id()} << false;
+    }
 
-    QTest::addRow("If duplicates are found, they are ignored") << LibraryGenerator{[this] {
-        auto lib{std::make_unique<Library>(std::make_shared<LibrarySignals>())};
-        lib->addMedium(std::make_unique<Book>(book));
-        lib->addMedium(std::make_unique<Video>(video));
-        return lib;
-    }} << LibraryGenerator{[this] {
-        auto lib{std::make_unique<Library>(std::make_shared<LibrarySignals>())};
-        lib->addMedium(std::make_unique<Book>(book));
-        return lib;
-    }} << std::set{book.id(), video.id()} << false;
+    {
+        Library destination;
+        destination.addMedium(std::make_unique<Book>(defaultBook));
+        destination.addMedium(std::make_unique<Video>(defaultVideo));
+        Library source;
+        source.addMedium(std::make_unique<Book>(defaultBook));
+        QTest::addRow("If duplicates are found, they are ignored")
+            << destination << source << std::set{defaultBook.id(), defaultVideo.id()} << false;
+    }
 
-    QTest::addRow("If duplicates are found, they are ignored") << LibraryGenerator{[this] {
-        auto lib{std::make_unique<Library>(std::make_shared<LibrarySignals>())};
-        lib->addMedium(std::make_unique<Book>(book));
-        lib->addMedium(std::make_unique<Video>(video));
-        return lib;
-    }} << LibraryGenerator{[this] {
-        auto lib{std::make_unique<Library>(std::make_shared<LibrarySignals>())};
-        lib->addMedium(std::make_unique<Book>(book));
-        lib->addMedium(std::make_unique<Article>(article));
-        return lib;
-    }} << std::set{book.id(), video.id(), article.id()} << true;
-
-    QTest::addRow("If source is nullptr, nothing happens") << LibraryGenerator{[this] {
-        auto lib{std::make_unique<Library>(std::make_shared<LibrarySignals>())};
-        lib->addMedium(std::make_unique<Book>(book));
-        lib->addMedium(std::make_unique<Video>(video));
-        return lib;
-    }} << LibraryGenerator{[=] { return std::unique_ptr<Library>{nullptr}; }}
-                                                           << std::set{book.id(), video.id()}
-                                                           << false;
+    {
+        Library destination;
+        destination.addMedium(std::make_unique<Book>(defaultBook));
+        destination.addMedium(std::make_unique<Video>(defaultVideo));
+        Library source;
+        source.addMedium(std::make_unique<Book>(defaultBook));
+        source.addMedium(std::make_unique<Article>(defaultArticle));
+        QTest::addRow("If duplicates are found, they are ignored")
+            << destination << source
+            << std::set{defaultBook.id(), defaultVideo.id(), defaultArticle.id()} << true;
+    }
 }
 void TestLibrary::testMerge() {
-    QFETCH(std::function<std::unique_ptr<Library>()>, destinationGenerator);
-    QFETCH(std::function<std::unique_ptr<Library>()>, sourceGenerator);
+    QFETCH(Library, destination);
+    QFETCH(Library, source);
     QFETCH(std::set<QUuid>, expectedFinalIds);
     QFETCH(bool, expectedSignalEmission);
 
-    const auto destination{destinationGenerator()};
-    auto source{sourceGenerator()};
-    const QSignalSpy spy{destination->signalsEmitter(), &LibrarySignals::mediaChanged};
+    const QSignalSpy spy{destination.emitter().get(), &LibrarySignals::mediaChanged};
 
-    destination->merge(std::move(source));
+    destination.merge(std::move(source));
 
-    auto media{destination->getAllMedia()};
+    auto media{destination.getMedia()};
     auto idView{media | std::views::transform([](auto m) { return m->id(); })};
     const std::set<QUuid> actualIds{idView.begin(), idView.end()};
 
@@ -214,100 +316,74 @@ void TestLibrary::testMerge() {
 }
 
 void TestLibrary::testAddMedium_data() const {
-    using LibraryGenerator = std::function<std::unique_ptr<Library>()>;
     using MediumGenerator = std::function<std::unique_ptr<const Medium>()>;
 
-    QTest::addColumn<LibraryGenerator>("libraryGenerator");
+    QTest::addColumn<Library>("library");
     QTest::addColumn<MediumGenerator>("mediumToAddGenerator");
     QTest::addColumn<bool>("shouldBeAdded");
 
-    QTest::addRow("Adding a new (non-duplicate) medium returns true") << LibraryGenerator{[] {
-        return std::make_unique<Library>(std::make_shared<LibrarySignals>());
-    }} << MediumGenerator{[this] { return std::make_unique<Book>(book); }}
-                                                                      << true;
-
-    QTest::addRow("Adding a duplicate medium does nothing and returns false")
-        << LibraryGenerator{[this] {
-               auto lib{std::make_unique<Library>(std::make_shared<LibrarySignals>())};
-               lib->addMedium(std::make_unique<Book>(book));
-               return lib;
-           }}
-        << MediumGenerator{[this] { return std::make_unique<Book>(book); }} << false;
-
-    QTest::addRow("Adding a nullptr does nothing and returns false") << LibraryGenerator{[this] {
-        auto lib{std::make_unique<Library>(std::make_shared<LibrarySignals>())};
-        lib->addMedium(std::make_unique<Book>(book));
-        return lib;
-    }} << MediumGenerator{[] { return std::unique_ptr<Medium>{nullptr}; }}
-                                                                     << false;
+    QTest::addRow("Adding a new (non-duplicate) medium returns true")
+        << Library{} << MediumGenerator{[this] { return std::make_unique<Book>(defaultBook); }}
+        << true;
+    QTest::addRow("Trying to add a duplicate medium does nothing and returns false")
+        << defaultLibrary << MediumGenerator{[this] { return std::make_unique<Book>(defaultBook); }}
+        << false;
+    QTest::addRow("Adding a nullptr does nothing and returns false")
+        << Library{} << MediumGenerator{[] { return std::unique_ptr<Medium>{nullptr}; }} << false;
 }
 void TestLibrary::testAddMedium() {
-    QFETCH(std::function<std::unique_ptr<Library>()>, libraryGenerator);
+    QFETCH(Library, library);
     QFETCH(std::function<std::unique_ptr<const Medium>()>, mediumToAddGenerator);
     QFETCH(bool, shouldBeAdded);
 
-    const auto lib{libraryGenerator()};
-    const QSignalSpy spy{lib->signalsEmitter(), &LibrarySignals::mediaChanged};
+    const QSignalSpy spy{library.emitter().get(), &LibrarySignals::mediaChanged};
 
-    const bool wasAdded{lib->addMedium(mediumToAddGenerator())};
+    const bool wasAdded{library.addMedium(mediumToAddGenerator())};
 
     QCOMPARE(wasAdded, shouldBeAdded);
     QCOMPARE(spy.count(), shouldBeAdded ? 1 : 0);
 }
 
 void TestLibrary::testReplaceMedium_data() const {
-    using LibraryGenerator = std::function<std::unique_ptr<Library>()>;
     using MediumGenerator = std::function<std::unique_ptr<const Medium>()>;
 
-    QTest::addColumn<LibraryGenerator>("libraryGenerator");
+    QTest::addColumn<Library>("library");
     QTest::addColumn<MediumGenerator>("newMediumGenerator");
     QTest::addColumn<bool>("shouldBeReplaced");
 
-    QTest::addRow("Replacing existing medium returns true") << LibraryGenerator{[this] {
-        auto lib{std::make_unique<Library>(std::make_shared<LibrarySignals>())};
-        lib->addMedium(std::make_unique<Book>(book));
-        return lib;
-    }} << MediumGenerator{[this] {
-        auto replacedBook{std::make_unique<Book>(book)};
-        replacedBook->setTitle("replaced");
-        return replacedBook;
-    }} << true;
-
-    QTest::addRow("Replacing absent medium does nothing and returns false")
-        << LibraryGenerator{[this] {
-               auto lib{std::make_unique<Library>(std::make_shared<LibrarySignals>())};
-               lib->addMedium(std::make_unique<Book>(book));
-               return lib;
+    // Convention: no media named "replaced" were present in the library.
+    QTest::addRow("Replacing existing medium returns true")
+        << defaultLibrary << MediumGenerator{[this] {
+               auto replacedBook{std::make_unique<Book>(defaultBook)};
+               replacedBook->setTitle("replaced");
+               return replacedBook;
            }}
-        << MediumGenerator{[this] {
-               auto replacedBook{std::make_unique<Video>(video)};
+        << true;
+    QTest::addRow("Trying to replace an absent medium does nothing and returns false")
+        << Library{} << MediumGenerator{[this] {
+               auto replacedBook{std::make_unique<Video>(defaultVideo)};
                replacedBook->setTitle("replaced");
                return replacedBook;
            }}
         << false;
-
-    QTest::addRow("Passing nullptr does nothing and returns false") << LibraryGenerator{[this] {
-        auto lib{std::make_unique<Library>(std::make_shared<LibrarySignals>())};
-        lib->addMedium(std::make_unique<Book>(book));
-        return lib;
-    }} << MediumGenerator{[] { return std::unique_ptr<Book>{nullptr}; }}
-                                                                    << false;
+    QTest::addRow("Passing nullptr does nothing and returns false")
+        << defaultLibrary << MediumGenerator{[] { return std::unique_ptr<Book>{nullptr}; }}
+        << false;
 }
 void TestLibrary::testReplaceMedium() {
-    QFETCH(std::function<std::unique_ptr<Library>()>, libraryGenerator);
+    QFETCH(Library, library);
     QFETCH(std::function<std::unique_ptr<const Medium>()>, newMediumGenerator);
     QFETCH(bool, shouldBeReplaced);
 
-    const auto lib{libraryGenerator()};
-    const QSignalSpy spy{lib->signalsEmitter(), &LibrarySignals::mediaChanged};
+    const QSignalSpy spy{library.emitter().get(), &LibrarySignals::mediaChanged};
 
-    const bool wasReplaced{lib->replaceMedium(newMediumGenerator())};
+    const bool wasReplaced{library.replaceMedium(newMediumGenerator())};
 
     QCOMPARE(wasReplaced, shouldBeReplaced);
     QCOMPARE(spy.count(), shouldBeReplaced ? 1 : 0);
 
     // A medium named "replaced" must be present iff shouldBeReplaced is true in this test.
-    const auto& media = lib->getAllMedia();
+    const auto& media = library.getMedia();
     const bool isThereReplaced{
         std::ranges::any_of(media | std::views::transform([](auto m) { return m->title(); }),
                             [](const auto& title) { return title == "replaced"; })};
@@ -315,70 +391,51 @@ void TestLibrary::testReplaceMedium() {
 }
 
 void TestLibrary::testRemoveMedium_data() const {
-    using LibraryGenerator = std::function<std::unique_ptr<Library>()>;
-
-    QTest::addColumn<LibraryGenerator>("libraryGenerator");
+    QTest::addColumn<Library>("library");
     QTest::addColumn<QUuid>("mediumToRemoveId");
     QTest::addColumn<bool>("shouldBeRemoved");
 
-    QTest::addRow("Removing an existing medium") << LibraryGenerator{[this] {
-        auto lib{std::make_unique<Library>(std::make_shared<LibrarySignals>())};
-        lib->addMedium(std::make_unique<Book>(book));
-        return lib;
-    }} << book.id() << true;
+    QTest::addRow("Removing an existing medium") << defaultLibrary << defaultBook.id() << true;
 
-    QTest::addRow("Trying to remove an absent medium does nothing") << LibraryGenerator{[this] {
-        auto lib{std::make_unique<Library>(std::make_shared<LibrarySignals>())};
-        lib->addMedium(std::make_unique<Book>(book));
-        return lib;
-    }} << video.id() << false;
+    QTest::addRow("Trying to remove an absent medium does nothing")
+        << Library{} << defaultVideo.id() << false;
 }
 void TestLibrary::testRemoveMedium() {
-    QFETCH(std::function<std::unique_ptr<Library>()>, libraryGenerator);
+    QFETCH(Library, library);
     QFETCH(QUuid, mediumToRemoveId);
     QFETCH(bool, shouldBeRemoved);
 
-    const auto lib{libraryGenerator()};
-    const QSignalSpy spy{lib->signalsEmitter(), &LibrarySignals::mediaChanged};
+    const QSignalSpy spy{library.emitter().get(), &LibrarySignals::mediaChanged};
     const auto& wasMediumPresent{std::ranges::any_of(
-        lib->getAllMedia(), [&](auto mPtr) { return mPtr->id() == mediumToRemoveId; })};
+        library.getMedia(), [&](auto mPtr) { return mPtr->id() == mediumToRemoveId; })};
 
-    const bool wasRemoved{lib->removeMedium(mediumToRemoveId)};
+    const bool wasRemoved{library.removeMedium(mediumToRemoveId)};
 
     QCOMPARE(wasRemoved, shouldBeRemoved);
     QCOMPARE(spy.count(), shouldBeRemoved ? 1 : 0);
 
     // If the medium was present and shouldBeRemoved is true, then it must be now absent
     const bool isMediumPresent{std::ranges::any_of(
-        lib->getAllMedia(), [&](auto mPtr) { return mPtr->id() == mediumToRemoveId; })};
+        library.getMedia(), [&](auto mPtr) { return mPtr->id() == mediumToRemoveId; })};
     QVERIFY(!(wasMediumPresent && shouldBeRemoved) || !isMediumPresent);
 }
 
 void TestLibrary::testClear_data() const {
-    using LibraryGenerator = std::function<std::unique_ptr<Library>()>;
-
-    QTest::addColumn<LibraryGenerator>("libraryGenerator");
+    QTest::addColumn<Library>("library");
     QTest::addColumn<bool>("shouldEmit");
 
-    QTest::addRow("Clearing an empty library doesn't emit") << LibraryGenerator{[] {
-        return std::make_unique<Library>(std::make_shared<LibrarySignals>());
-    }} << false;
+    QTest::addRow("Clearing an empty library doesn't emit") << Library{} << false;
 
-    QTest::addRow("Clearing a non-empty library emits a signal") << LibraryGenerator{[this] {
-        auto lib{std::make_unique<Library>(std::make_shared<LibrarySignals>())};
-        lib->addMedium(std::make_unique<Book>(book));
-        return lib;
-    }} << true;
+    QTest::addRow("Clearing a non-empty library emits a signal") << defaultLibrary << true;
 }
 
 void TestLibrary::testClear() {
-    QFETCH(std::function<std::unique_ptr<Library>()>, libraryGenerator);
+    QFETCH(Library, library);
     QFETCH(bool, shouldEmit);
 
-    const auto lib{libraryGenerator()};
-    const QSignalSpy spy{lib->signalsEmitter(), &LibrarySignals::mediaChanged};
+    const QSignalSpy spy{library.emitter().get(), &LibrarySignals::mediaChanged};
 
-    lib->clear();
-    QCOMPARE(lib->mediaCount(), size_t{0});
+    library.clear();
+    QCOMPARE(library.mediaCount(), size_t{0});
     QCOMPARE(spy.count(), shouldEmit ? 1 : 0);
 }
