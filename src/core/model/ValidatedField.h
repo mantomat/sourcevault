@@ -14,24 +14,25 @@ template <typename T> class ValidatedField final {
     Validator validator;
 
   public:
+    explicit ValidatedField(Validator newValidator)
+        : validator(std::move(newValidator)) {}
+
     /**
-     * @brief Compares the data, validator equality is ignored.
+     * @brief Compares the data. Validator equality is ignored.
      */
     auto operator==(const ValidatedField& other) const -> bool {
         return data == other.data;
     }
 
-    explicit ValidatedField(Validator newValidator)
-        : validator(std::move(newValidator)) {}
-    bool has() const {
+    [[nodiscard]] auto has() const -> bool {
         return data.has_value();
     }
 
-    std::optional<T> get() const {
+    [[nodiscard]] auto get() const -> std::optional<T> {
         return data;
     }
 
-    bool set(T newValue) {
+    auto set(T newValue) -> bool {
         if (!validator(newValue)) {
             unset();
             return false;

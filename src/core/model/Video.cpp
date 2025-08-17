@@ -7,24 +7,24 @@ namespace Core::Model {
 Video::Video(QString&& title, const QUuid id, const QDate dateAdded)
     : Medium{std::move(title), id, dateAdded} {}
 
-std::unique_ptr<Medium> Video::clone() const {
+auto Video::clone() const -> std::unique_ptr<Medium> {
     return std::make_unique<Video>(*this);
 }
 
-std::optional<Video> Video::create(QString title, const QUuid id, const QDate dateAdded) {
+auto Video::create(QString title, const QUuid id, const QDate dateAdded) -> std::optional<Video> {
     if (!createValidator(title, id, dateAdded)) {
         return std::nullopt;
     }
     return std::make_optional(Video{std::move(title), id, dateAdded});
 }
 
-ValidatedField<QUrl>& Video::videoUrl() {
+auto Video::videoUrl() -> ValidatedField<QUrl>& {
     return videoUrl_;
 }
-const ValidatedField<QUrl>& Video::videoUrl() const {
+auto Video::videoUrl() const -> const ValidatedField<QUrl>& {
     return videoUrl_;
 }
-bool Video::videoUrlValidator(const QUrl& urlToValidate) {
+auto Video::videoUrlValidator(const QUrl& urlToValidate) -> bool {
     if (!urlToValidate.isValid() || urlToValidate.scheme() != "https") {
         return false;
     }
@@ -41,33 +41,34 @@ bool Video::videoUrlValidator(const QUrl& urlToValidate) {
     return false;
 }
 
-ValidatedField<unsigned>& Video::durationSeconds() {
+auto Video::durationSeconds() -> ValidatedField<unsigned>& {
     return durationSeconds_;
 }
-const ValidatedField<unsigned>& Video::durationSeconds() const {
+auto Video::durationSeconds() const -> const ValidatedField<unsigned>& {
     return durationSeconds_;
 }
-bool Video::durationSecondsValidator(const unsigned int durationSecondsToValidate) {
+auto Video::durationSecondsValidator(const unsigned int durationSecondsToValidate) -> bool {
     return durationSecondsToValidate > 0;
 }
 
-ValidatedField<QDate>& Video::uploadDate() {
+auto Video::uploadDate() -> ValidatedField<QDate>& {
     return uploadDate_;
 }
-const ValidatedField<QDate>& Video::uploadDate() const {
+auto Video::uploadDate() const -> const ValidatedField<QDate>& {
     return uploadDate_;
 }
-bool Video::uploadDateValidator(const QDate& dateToValidate) {
-    return dateToValidate.isValid() && dateToValidate.year() >= 2005;
+constexpr int minUploadDateYear{2005};
+auto Video::uploadDateValidator(const QDate& dateToValidate) -> bool {
+    return dateToValidate.isValid() && dateToValidate.year() >= minUploadDateYear;
 }
 
-ValidatedField<QUrl>& Video::thumbnailUrl() {
+auto Video::thumbnailUrl() -> ValidatedField<QUrl>& {
     return thumbnailUrl_;
 }
-const ValidatedField<QUrl>& Video::thumbnailUrl() const {
+auto Video::thumbnailUrl() const -> const ValidatedField<QUrl>& {
     return thumbnailUrl_;
 }
-bool Video::thumbnailUrlValidator(const QUrl& urlToValidate) {
+auto Video::thumbnailUrlValidator(const QUrl& urlToValidate) -> bool {
     if (!urlToValidate.isValid()) {
         return false;
     }

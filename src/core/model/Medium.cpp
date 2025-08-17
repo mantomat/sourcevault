@@ -7,41 +7,42 @@ Medium::Medium(QString&& title, const QUuid id, const QDate dateAdded)
     , dateAdded_{dateAdded}
     , title_{std::move(title)} {}
 
-bool Medium::createValidator(const QString& title, const QUuid& id, const QDate& dateAdded) {
+auto Medium::createValidator(const QString& title, const QUuid& id, const QDate& dateAdded)
+    -> bool {
     return titleValidator(title) && dateAddedValidator(dateAdded) && idValidator(id);
 }
 
 Medium::~Medium() = default;
 
-QUuid Medium::id() const {
+auto Medium::id() const -> QUuid {
     return id_;
 }
-bool Medium::idValidator(const QUuid& idToValidate) {
+auto Medium::idValidator(const QUuid& idToValidate) -> bool {
     return !idToValidate.isNull() && idToValidate.version() == QUuid::Version::Random &&
            idToValidate.variant() == QUuid::Variant::DCE;
 }
 
-const MediumUserData& Medium::userData() const {
+auto Medium::userData() const -> const MediumUserData& {
     return userData_;
 }
 
-MediumUserData& Medium::userData() {
+auto Medium::userData() -> MediumUserData& {
     return userData_;
 }
 
-QDate Medium::dateAdded() const {
+auto Medium::dateAdded() const -> QDate {
     return dateAdded_;
 }
 
-bool Medium::dateAddedValidator(const QDate& dateToValidate) {
+auto Medium::dateAddedValidator(const QDate& dateToValidate) -> bool {
     return dateToValidate.isValid();
 }
 
-QString Medium::title() const {
+auto Medium::title() const -> QString {
     return title_;
 }
 
-bool Medium::setTitle(QString titleToSet) {
+auto Medium::setTitle(QString titleToSet) -> bool {
     if (!titleValidator(titleToSet)) {
         return false;
     }
@@ -49,27 +50,27 @@ bool Medium::setTitle(QString titleToSet) {
     return true;
 }
 
-bool Medium::titleValidator(const QString& titleToValidate) {
+auto Medium::titleValidator(const QString& titleToValidate) -> bool {
     return !titleToValidate.trimmed().isEmpty();
 }
 
-const ValidatedSet<QString>& Medium::authors() const {
+auto Medium::authors() const -> const ValidatedSet<QString>& {
     return authors_;
 }
-ValidatedSet<QString>& Medium::authors() {
+auto Medium::authors() -> ValidatedSet<QString>& {
     return authors_;
 }
-bool Medium::authorValidator(const QString& authorToValidate) {
+auto Medium::authorValidator(const QString& authorToValidate) -> bool {
     return !authorToValidate.trimmed().isEmpty();
 }
 
-const ValidatedField<QString>& Medium::language() const {
+auto Medium::language() const -> const ValidatedField<QString>& {
     return language_;
 }
-ValidatedField<QString>& Medium::language() {
+auto Medium::language() -> ValidatedField<QString>& {
     return language_;
 }
-bool Medium::languageValidator(const QString& languageToValidate) {
+auto Medium::languageValidator(const QString& languageToValidate) -> bool {
     return !languageToValidate.trimmed().isEmpty();
 }
 

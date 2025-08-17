@@ -1,40 +1,41 @@
 #include "MediumUserData.h"
 
 namespace Core::Model {
-bool& MediumUserData::favorite() {
+
+auto MediumUserData::favorite() -> bool& {
     return favorite_;
 }
-bool MediumUserData::favorite() const {
+auto MediumUserData::favorite() const -> bool {
     return favorite_;
 }
 
-ValidatedSet<QString>& MediumUserData::topics() {
+auto MediumUserData::topics() -> ValidatedSet<QString>& {
     return topics_;
 }
-const ValidatedSet<QString>& MediumUserData::topics() const {
+auto MediumUserData::topics() const -> const ValidatedSet<QString>& {
     return topics_;
 }
-bool MediumUserData::topicValidator(const QString& topicToValidate) {
+auto MediumUserData::topicValidator(const QString& topicToValidate) -> bool {
     return !topicToValidate.trimmed().isEmpty();
 }
 
-ValidatedField<QString>& MediumUserData::notes() {
+auto MediumUserData::notes() -> ValidatedField<QString>& {
     return notes_;
 }
-const ValidatedField<QString>& MediumUserData::notes() const {
+auto MediumUserData::notes() const -> const ValidatedField<QString>& {
     return notes_;
 }
-bool MediumUserData::notesValidator(const QString& notesToValidate) {
+auto MediumUserData::notesValidator(const QString& notesToValidate) -> bool {
     return !notesToValidate.trimmed().isEmpty();
 }
 
-ValidatedField<MediumUserData::PriorityLevel>& MediumUserData::priority() {
+auto MediumUserData::priority() -> ValidatedField<MediumUserData::PriorityLevel>& {
     return priority_;
 }
-const ValidatedField<MediumUserData::PriorityLevel>& MediumUserData::priority() const {
+auto MediumUserData::priority() const -> const ValidatedField<MediumUserData::PriorityLevel>& {
     return priority_;
 }
-bool MediumUserData::priorityValidator(PriorityLevel priorityToValidate) {
+auto MediumUserData::priorityValidator(PriorityLevel priorityToValidate) -> bool {
     const auto underlyingValue =
         static_cast<std::underlying_type_t<PriorityLevel>>(priorityToValidate);
 
@@ -43,4 +44,5 @@ bool MediumUserData::priorityValidator(PriorityLevel priorityToValidate) {
 
     return underlyingValue >= min && underlyingValue <= max;
 }
+
 }

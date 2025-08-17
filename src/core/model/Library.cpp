@@ -87,11 +87,9 @@ auto Library::addMedium(std::unique_ptr<const Medium> newMedium) -> bool {
     }
 
     const auto [_, success]{media.try_emplace(newMedium->id(), std::move(newMedium))};
-
     if (success) {
         emit sigsEmitter->mediaChanged();
     }
-
     return success;
 }
 

@@ -5,55 +5,56 @@ namespace Core::Model {
 Article::Article(QString&& title, const QUuid id, const QDate dateAdded)
     : Medium{std::move(title), id, dateAdded} {}
 
-std::unique_ptr<Medium> Article::clone() const {
+auto Article::clone() const -> std::unique_ptr<Medium> {
     return std::make_unique<Article>(*this);
 }
 
-std::optional<Article> Article::create(QString title, const QUuid id, const QDate dateAdded) {
+auto Article::create(QString title, const QUuid id, const QDate dateAdded)
+    -> std::optional<Article> {
     if (!createValidator(title, id, dateAdded)) {
         return std::nullopt;
     }
     return std::make_optional(Article{std::move(title), id, dateAdded});
 }
 
-ValidatedField<QUrl>& Article::articleUrl() {
+auto Article::articleUrl() -> ValidatedField<QUrl>& {
     return articleUrl_;
 }
-const ValidatedField<QUrl>& Article::articleUrl() const {
+auto Article::articleUrl() const -> const ValidatedField<QUrl>& {
     return articleUrl_;
 }
-bool Article::articleUrlValidator(const QUrl& urlToValidate) {
+auto Article::articleUrlValidator(const QUrl& urlToValidate) -> bool {
     const std::set<QString> allowedSchemes{"http", "https"};
     return urlToValidate.isValid() && allowedSchemes.contains(urlToValidate.scheme());
 }
 
-ValidatedField<QString>& Article::sourceName() {
+auto Article::sourceName() -> ValidatedField<QString>& {
     return sourceName_;
 }
-const ValidatedField<QString>& Article::sourceName() const {
+auto Article::sourceName() const -> const ValidatedField<QString>& {
     return sourceName_;
 }
-bool Article::sourceNameValidator(const QString& sourceNameToValidate) {
+auto Article::sourceNameValidator(const QString& sourceNameToValidate) -> bool {
     return !sourceNameToValidate.trimmed().isEmpty();
 }
 
-ValidatedField<unsigned int>& Article::readTimeMinutes() {
+auto Article::readTimeMinutes() -> ValidatedField<unsigned int>& {
     return readTimeMinutes_;
 }
-const ValidatedField<unsigned int>& Article::readTimeMinutes() const {
+auto Article::readTimeMinutes() const -> const ValidatedField<unsigned int>& {
     return readTimeMinutes_;
 }
-bool Article::readTimeMinutesValidator(const unsigned int readTimeMinutesToValidate) {
+auto Article::readTimeMinutesValidator(const unsigned int readTimeMinutesToValidate) -> bool {
     return readTimeMinutesToValidate > 0;
 }
 
-ValidatedField<QDate>& Article::publicationDate() {
+auto Article::publicationDate() -> ValidatedField<QDate>& {
     return publicationDate_;
 }
-const ValidatedField<QDate>& Article::publicationDate() const {
+auto Article::publicationDate() const -> const ValidatedField<QDate>& {
     return publicationDate_;
 }
-bool Article::publicationDateValidator(const QDate& dateToValidate) {
+auto Article::publicationDateValidator(const QDate& dateToValidate) -> bool {
     return dateToValidate.isValid();
 }
 

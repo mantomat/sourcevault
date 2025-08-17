@@ -8,23 +8,24 @@
 namespace Core::Model {
 
 template <typename T> class ValidatedSet {
+
     using Validator = std::function<bool(const T&)>;
 
     std::set<T> storedElements;
     Validator validator;
 
   public:
-    /**
-     * @brief Compares the two sets, ignoring validator equality.
-     */
-    auto operator==(const ValidatedSet<T>& other) const -> bool {
-        return storedElements == other.storedElements;
-    }
-
     explicit ValidatedSet(Validator newValidator)
         : validator{std::move(newValidator)} {}
 
-    bool set(std::set<T> newElements) {
+    /**
+     * @brief Compares the two sets. Validator equality is ignored.
+     */
+    auto operator==(const ValidatedSet& other) const -> bool {
+        return storedElements == other.storedElements;
+    }
+
+    auto set(std::set<T> newElements) -> bool {
         if (newElements.empty() ||
             std::ranges::any_of(newElements, [&](const T& item) { return !validator(item); })) {
             unset();
@@ -34,25 +35,26 @@ template <typename T> class ValidatedSet {
         return true;
     }
 
-    bool add(T newElement) {
-        if (!validator(newElement))
+    auto add(T newElement) -> bool {
+        if (!validator(newElement)) {
             return false;
+        }
         return storedElements.insert(std::move(newElement)).second;
     }
 
-    void remove(const T& elementToRemove) {
-        storedElements.erase(elementToRemove);
+    auto remove(const T& elementToRemove) -> bool {
+        return storedElements.erase(elementToRemove);
     }
 
     void unset() {
         storedElements.clear();
     }
 
-    bool has() const {
+    [[nodiscard]] auto has() const -> bool {
         return !storedElements.empty();
     }
 
-    std::optional<std::set<T>> get() const {
+    [[nodiscard]] auto get() const -> std::optional<std::set<T>> {
         return has() ? std::make_optional(storedElements) : std::nullopt;
     }
 };

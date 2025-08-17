@@ -15,7 +15,7 @@ namespace Core::Model {
  * doesn't have an identity. But we needed to design some kind of observer pattern for it, and
  * overlooking the powerful Qt's signaling system would have been a bad choice.
  */
-class LibrarySignals final : public QObject {
+struct LibrarySignals final : public QObject {
     Q_OBJECT
   signals:
     void mediaChanged();
@@ -39,6 +39,7 @@ class Library final {
      * @brief Copies a library, performing a deep copy of media.
      */
     Library(const Library& other);
+
     /**
      * @brief Copy-assigns a library, performing a deep copy of media.
      *

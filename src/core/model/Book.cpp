@@ -8,87 +8,88 @@ namespace Core::Model {
 Book::Book(QString&& title, const QUuid id, const QDate dateAdded)
     : Medium{std::move(title), id, dateAdded} {}
 
-std::unique_ptr<Medium> Book::clone() const {
+auto Book::clone() const -> std::unique_ptr<Medium> {
     return std::make_unique<Book>(*this);
 }
 
-std::optional<Book> Book::create(QString title, const QUuid id, const QDate dateAdded) {
+auto Book::create(QString title, const QUuid id, const QDate dateAdded) -> std::optional<Book> {
     if (!createValidator(title, id, dateAdded)) {
         return std::nullopt;
     }
     return std::make_optional(Book{std::move(title), id, dateAdded});
 }
 
-ValidatedField<QString>& Book::isbn() {
+auto Book::isbn() -> ValidatedField<QString>& {
     return isbn_;
 }
-const ValidatedField<QString>& Book::isbn() const {
+auto Book::isbn() const -> const ValidatedField<QString>& {
     return isbn_;
 }
-bool Book::isbnValidator(const QString& isbnToValidate) {
+auto Book::isbnValidator(const QString& isbnToValidate) -> bool {
     static const QRegularExpression regex(
         R"(^(?:ISBN(?:-1[03])?:?\s*)?(?=[-0-9\s]{13,17}$|[0-9X]{10}$|97[89][-0-9\s]{10,16}$)(?:97[89][- ]?)?[0-9]{1,5}[- ]?[0-9]+[- ]?[0-9]+[- ]?[0-9X]$)",
         QRegularExpression::CaseInsensitiveOption);
     return regex.match(isbnToValidate).hasMatch();
 }
 
-ValidatedField<QString>& Book::edition() {
+auto Book::edition() -> ValidatedField<QString>& {
     return edition_;
 }
-const ValidatedField<QString>& Book::edition() const {
+auto Book::edition() const -> const ValidatedField<QString>& {
     return edition_;
 }
-bool Book::editionValidator(const QString& editionToValidate) {
+auto Book::editionValidator(const QString& editionToValidate) -> bool {
     return !editionToValidate.trimmed().isEmpty();
 }
 
-ValidatedField<QString>& Book::publisher() {
+auto Book::publisher() -> ValidatedField<QString>& {
     return publisher_;
 }
-const ValidatedField<QString>& Book::publisher() const {
+auto Book::publisher() const -> const ValidatedField<QString>& {
     return publisher_;
 }
-bool Book::publisherValidator(const QString& publisherToValidate) {
+auto Book::publisherValidator(const QString& publisherToValidate) -> bool {
     return !publisherToValidate.trimmed().isEmpty();
 }
 
-ValidatedField<int>& Book::yearPublished() {
+auto Book::yearPublished() -> ValidatedField<int>& {
     return yearPublished_;
 }
-const ValidatedField<int>& Book::yearPublished() const {
+auto Book::yearPublished() const -> const ValidatedField<int>& {
     return yearPublished_;
 }
-bool Book::yearPublishedValidator(const int yearPublishedToValidate) {
-    return yearPublishedToValidate >= -10000;
+constexpr int minPublishingYear{-10000};
+auto Book::yearPublishedValidator(const int yearPublishedToValidate) -> bool {
+    return yearPublishedToValidate >= minPublishingYear;
 }
 
-ValidatedField<unsigned int>& Book::pageNumber() {
+auto Book::pageNumber() -> ValidatedField<unsigned int>& {
     return pageNumber_;
 }
-const ValidatedField<unsigned int>& Book::pageNumber() const {
+auto Book::pageNumber() const -> const ValidatedField<unsigned int>& {
     return pageNumber_;
 }
-bool Book::pageNumberValidator(const unsigned int pageNumberToValidate) {
+auto Book::pageNumberValidator(const unsigned int pageNumberToValidate) -> bool {
     return pageNumberToValidate > 0;
 }
 
-ValidatedField<QString>& Book::description() {
+auto Book::description() -> ValidatedField<QString>& {
     return description_;
 }
-const ValidatedField<QString>& Book::description() const {
+auto Book::description() const -> const ValidatedField<QString>& {
     return description_;
 }
-bool Book::descriptionValidator(const QString& descriptionToValidate) {
+auto Book::descriptionValidator(const QString& descriptionToValidate) -> bool {
     return !descriptionToValidate.trimmed().isEmpty();
 }
 
-ValidatedField<QUrl>& Book::thumbnailUrl() {
+auto Book::thumbnailUrl() -> ValidatedField<QUrl>& {
     return thumbnailUrl_;
 }
-const ValidatedField<QUrl>& Book::thumbnailUrl() const {
+auto Book::thumbnailUrl() const -> const ValidatedField<QUrl>& {
     return thumbnailUrl_;
 }
-bool Book::thumbnailUrlValidator(const QUrl& urlToValidate) {
+auto Book::thumbnailUrlValidator(const QUrl& urlToValidate) -> bool {
     if (!urlToValidate.isValid()) {
         return false;
     }

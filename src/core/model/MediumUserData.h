@@ -11,7 +11,7 @@ namespace Core::Model {
 class MediumUserData {
 
   public:
-    enum class PriorityLevel : unsigned short {
+    enum class PriorityLevel : std::uint8_t {
         min = 1,
         low = 2,
         mid = 3,
@@ -26,22 +26,22 @@ class MediumUserData {
     ValidatedField<PriorityLevel> priority_{priorityValidator};
 
   public:
-    auto operator==(const MediumUserData&) const -> bool = default;
+    [[nodiscard]] auto operator==(const MediumUserData&) const -> bool = default;
 
-    bool& favorite();
-    bool favorite() const;
+    [[nodiscard]] auto favorite() -> bool&;
+    [[nodiscard]] auto favorite() const -> bool;
 
-    ValidatedSet<QString>& topics();
-    const ValidatedSet<QString>& topics() const;
-    static bool topicValidator(const QString& topicToValidate);
+    [[nodiscard]] auto topics() -> ValidatedSet<QString>&;
+    [[nodiscard]] auto topics() const -> const ValidatedSet<QString>&;
+    [[nodiscard]] static auto topicValidator(const QString& topicToValidate) -> bool;
 
-    ValidatedField<QString>& notes();
-    const ValidatedField<QString>& notes() const;
-    static bool notesValidator(const QString& notesToValidate);
+    [[nodiscard]] auto notes() -> ValidatedField<QString>&;
+    [[nodiscard]] auto notes() const -> const ValidatedField<QString>&;
+    [[nodiscard]] static auto notesValidator(const QString& notesToValidate) -> bool;
 
-    ValidatedField<PriorityLevel>& priority();
-    const ValidatedField<PriorityLevel>& priority() const;
-    static bool priorityValidator(PriorityLevel priorityToValidate);
+    [[nodiscard]] auto priority() -> ValidatedField<PriorityLevel>&;
+    [[nodiscard]] auto priority() const -> const ValidatedField<PriorityLevel>&;
+    [[nodiscard]] static auto priorityValidator(PriorityLevel priorityToValidate) -> bool;
 };
 
 }

@@ -17,6 +17,11 @@ class Book : public Medium {
     ValidatedField<QString> description_{descriptionValidator};
     ValidatedField<QUrl> thumbnailUrl_{thumbnailUrlValidator};
 
+    /**
+     * @brief Constructs a new Book.
+     *
+     * QUuid and QDate are passed by value since they are trivially copyable.
+     */
     Book(QString&& title, QUuid id, QDate dateAdded);
 
   public:
@@ -26,7 +31,7 @@ class Book : public Medium {
     auto operator=(const Book&) -> Book& = delete;
     auto operator=(Book&&) -> Book& = delete;
 
-    auto operator==(const Book&) const -> bool = default;
+    [[nodiscard]] auto operator==(const Book&) const -> bool = default;
 
     [[nodiscard]] auto clone() const -> std::unique_ptr<Medium> override;
 

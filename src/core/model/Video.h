@@ -15,6 +15,11 @@ class Video : public Medium {
     ValidatedField<QDate> uploadDate_{uploadDateValidator};
     ValidatedField<QUrl> thumbnailUrl_{thumbnailUrlValidator};
 
+    /**
+     * @brief Constructs a new Video.
+     *
+     * QUuid and QDate are passed by value since they are trivially copyable.
+     */
     Video(QString&& title, QUuid id, QDate dateAdded);
 
   public:

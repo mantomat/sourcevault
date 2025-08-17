@@ -26,42 +26,64 @@ class Medium {
 
   protected:
     /*
-     * Invariant: a Medium must always have a valid title, id and dateAdded.
-     * These methods are protected since they are used for construction through subclasses
-     * QUuid and QDate are trivially copyable
+     * Every Medium maintains the following invariant: it always has a valid title, id and
+     * dateAdded.
+     *
+     * Since the whole system follows an exception-free design, we couldn't just throw an exception
+     * at construction time if the parameters were invalid. Hence, we decided to use the static
+     * factory method pattern.
+     *
+     * Note that since factory methods are static, we can't enforce their signature at compile time,
+     * but they *must* have the same signature. For a subclass T:
+     * `auto create(QString title, QUuid id, QDate dateAdded) -> std::optional<T>`
+     * Every subclass T must validate the create() method parameters with `Medium::createValidator`.
+     */
+
+    /**
+     * @brief Constructs a new Book.
+     *
+     * QUuid and QDate are passed by value since they are trivially copyable.
      */
     Medium(QString&& title, QUuid id, QDate dateAdded);
-    static bool createValidator(const QString& title, const QUuid& id, const QDate& dateAdded);
+
+    /**
+     * @brief Validates factory methods parameters.
+     * Every subclass T must validate the create() method parameters with this function.
+     */
+    static auto createValidator(const QString& title, const QUuid& id, const QDate& dateAdded)
+        -> bool;
 
   public:
+    virtual ~Medium() = 0;
     Medium(const Medium&) = default;
     Medium(Medium&&) = default;
-    virtual ~Medium() = 0;
+    auto operator=(const Medium&) -> Medium& = delete;
+    auto operator=(Medium&&) -> Medium& = delete;
 
-    auto operator==(const Medium&) const -> bool = default;
+    [[nodiscard]] auto operator==(const Medium&) const -> bool = default;
 
-    virtual std::unique_ptr<Medium> clone() const = 0;
+    [[nodiscard]] virtual auto clone() const -> std::unique_ptr<Medium> = 0;
 
-    QUuid id() const;
-    static bool idValidator(const QUuid& idToValidate);
+    [[nodiscard]] auto id() const -> QUuid;
+    [[nodiscard]] static auto idValidator(const QUuid& idToValidate) -> bool;
 
-    QString title() const;
-    bool setTitle(QString titleToSet);
-    static bool titleValidator(const QString& titleToValidate);
+    [[nodiscard]] auto title() const -> QString;
+    auto setTitle(QString titleToSet) -> bool;
+    [[nodiscard]] static auto titleValidator(const QString& titleToValidate) -> bool;
 
-    QDate dateAdded() const;
-    static bool dateAddedValidator(const QDate& dateToValidate);
+    [[nodiscard]] auto dateAdded() const -> QDate;
+    [[nodiscard]] static auto dateAddedValidator(const QDate& dateToValidate) -> bool;
 
-    const MediumUserData& userData() const;
-    MediumUserData& userData();
+    [[nodiscard]] auto userData() const -> const MediumUserData&;
+    [[nodiscard]] auto userData() -> MediumUserData&;
 
-    const ValidatedSet<QString>& authors() const;
-    ValidatedSet<QString>& authors();
-    static bool authorValidator(const QString& authorToValidate);
+    [[nodiscard]] auto authors() const -> const ValidatedSet<QString>&;
+    [[nodiscard]] auto authors() -> ValidatedSet<QString>&;
+    [[nodiscard]] static auto authorValidator(const QString& authorToValidate) -> bool;
 
-    const ValidatedField<QString>& language() const;
-    ValidatedField<QString>& language();
-    static bool languageValidator(const QString& languageToValidate);
+    [[nodiscard]] auto language() const -> const ValidatedField<QString>&;
+    [[nodiscard]] auto language() -> ValidatedField<QString>&;
+    [[nodiscard]] static auto languageValidator(const QString& languageToValidate) -> bool;
 };
 
 }

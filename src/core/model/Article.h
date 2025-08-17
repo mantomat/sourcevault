@@ -16,7 +16,7 @@ class Article : public Medium {
     ValidatedField<QDate> publicationDate_{publicationDateValidator};
 
     /**
-     * @brief Constructs a new article.
+     * @brief Constructs a new Article.
      *
      * QUuid and QDate are passed by value since they are trivially copyable.
      */
@@ -29,7 +29,7 @@ class Article : public Medium {
     auto operator=(const Article&) -> Article& = delete;
     auto operator=(Article&&) -> Article& = delete;
 
-    auto operator==(const Article&) const -> bool = default;
+    [[nodiscard]] auto operator==(const Article&) const -> bool = default;
 
     [[nodiscard]] auto clone() const -> std::unique_ptr<Medium> override;
 

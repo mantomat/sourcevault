@@ -42,6 +42,8 @@ class TestValidatedSet : public QObject {
     }
 
   private slots:
+    // TODO refactor and reduce methods
+
     static void testHas_data();
     static void testHas();
 
@@ -68,6 +70,7 @@ class TestValidatedSet : public QObject {
     static void testAddAlreadyPresent_data();
     static void testAddAlreadyPresent();
 
+    // TODO test for new boolean return
     static void testRemovePresent_data();
     static void testRemovePresent();
     static void testRemoveAbsent_data();
