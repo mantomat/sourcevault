@@ -110,7 +110,7 @@ void TestValidatedField::testSet() {
     QFETCH(int, valueToSet);
     QFETCH(bool, shouldSet);
 
-    bool wasSet{field.set(valueToSet)};
+    const bool wasSet{field.set(valueToSet)};
 
     QCOMPARE(wasSet, shouldSet);
     QCOMPARE(field.get(), shouldSet ? std::make_optional(valueToSet) : std::nullopt);

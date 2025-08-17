@@ -6,24 +6,200 @@
 
 using Core::Model::ValidatedSet;
 
+void TestValidatedSet::testEqualsOperator_data() {
+    QTest::addColumn<ValidatedSet<int>>("set1");
+    QTest::addColumn<ValidatedSet<int>>("set2");
+    QTest::addColumn<bool>("shouldBeEqual");
+
+    {
+        ValidatedSet<int> field{[](auto) { return true; }};
+        QTest::addRow("Same data, same validator => ValidatedSets are equal")
+            << field << field << true;
+    }
+    {
+        ValidatedSet<int> positiveSet{[](int data) { return data > 0; }};
+        positiveSet.set({1, 3});
+        ValidatedSet<int> oddSet{[](int data) { return data % 2 == 1; }};
+        oddSet.set({1, 3});
+        QTest::addRow("Same data, different validator => ValidatedSets are still equal")
+            << positiveSet << oddSet << true;
+    }
+    {
+        ValidatedSet<int> positiveSet{[](int data) { return data > 0; }};
+        positiveSet.add(1);
+        ValidatedSet<int> positiveSet2{positiveSet};
+        positiveSet.add(2);
+        QTest::addRow("Different data, same validator => ValidatedSets are not equal")
+            << positiveSet << positiveSet2 << false;
+    }
+    {
+        ValidatedSet<int> evenSet{[](int data) { return data % 2 == 0; }};
+        evenSet.add(2);
+        ValidatedSet<int> oddSet{[](int data) { return data % 2 == 1; }};
+        oddSet.add(1);
+        QTest::addRow("Different data, different validator => ValidatedSets are not equal")
+            << evenSet << oddSet << false;
+    }
+}
+void TestValidatedSet::testEqualsOperator() {
+    QFETCH(ValidatedSet<int>, set1);
+    QFETCH(ValidatedSet<int>, set2);
+    QFETCH(bool, shouldBeEqual);
+
+    QCOMPARE(set1 == set2, shouldBeEqual);
+}
+
 void TestValidatedSet::testHas_data() {
     QTest::addColumn<ValidatedSet<QString>>("validatedSet");
-    QTest::addColumn<bool>("expected");
+    QTest::addColumn<bool>("shouldBeSet");
 
-    ValidatedSet<QString> set{[](const QString&) { return true; }};
-    QTest::addRow("New set should be unset") << set << false;
-
-    set.add(QString{"Valid value"});
-    QTest::addRow("Set should have a value") << set << true;
-
-    set.unset();
-    QTest::addRow("Set should be unset") << set << false;
+    {
+        ValidatedSet<QString> set{[](const QString&) { return true; }};
+        QTest::addRow("New set should be unset") << set << false;
+    }
+    {
+        ValidatedSet<QString> set{[](const QString&) { return true; }};
+        set.add(QString{"Valid value"});
+        QTest::addRow("Set should have a value") << set << true;
+    }
 }
 void TestValidatedSet::testHas() {
     QFETCH(ValidatedSet<QString>, validatedSet);
-    QFETCH(bool, expected);
+    QFETCH(bool, shouldBeSet);
 
-    QCOMPARE(validatedSet.has(), expected);
+    QCOMPARE(validatedSet.has(), shouldBeSet);
+}
+
+void TestValidatedSet::testGet_data() {
+    using OptionalSet = std::optional<std::set<int>>;
+
+    QTest::addColumn<ValidatedSet<int>>("validatedSet");
+    QTest::addColumn<OptionalSet>("expectedData");
+
+    {
+        ValidatedSet<int> set{[](auto) { return true; }};
+        QTest::addRow("An empty set returns nullopt") << set << OptionalSet{std::nullopt};
+    }
+    {
+        ValidatedSet<int> set{[](auto) { return true; }};
+        const std::set values{1, 2, 3};
+        set.set(values);
+        QTest::addRow("A non-empty set returns its data") << set << OptionalSet{values};
+    }
+}
+void TestValidatedSet::testGet() {
+    QFETCH(ValidatedSet<int>, validatedSet);
+    QFETCH(std::optional<std::set<int>>, expectedData);
+
+    QCOMPARE(validatedSet.get(), expectedData);
+}
+
+void TestValidatedSet::testSet_data() {
+    QTest::addColumn<ValidatedSet<int>>("set");
+    QTest::addColumn<std::set<int>>("valueToSet");
+    QTest::addColumn<bool>("shouldSet");
+
+    ValidatedSet<int> positiveSet{[](auto d) { return d > 0; }};
+    positiveSet.set({1, 2, 3});
+
+    QTest::addRow("A set containing all valid elements is valid")
+        << positiveSet << std::set{2, 3, 4} << true;
+    QTest::addRow("An empty set is invalid and it unsets the set")
+        << positiveSet << std::set<int>{} << false;
+    QTest::addRow("A set containing an invalid element is invalid and triggers an unset")
+        << positiveSet << std::set{4, -1, 3} << false;
+    QTest::addRow("A set containing all invalid elements is invalid and triggers an unset")
+        << positiveSet << std::set{-1, -2, -3} << false;
+}
+void TestValidatedSet::testSet() {
+    QFETCH(ValidatedSet<int>, set);
+    QFETCH(std::set<int>, valueToSet);
+    QFETCH(bool, shouldSet);
+
+    const bool wasSet{set.set(valueToSet)};
+
+    QCOMPARE(wasSet, shouldSet);
+    QCOMPARE(set.get(), shouldSet ? std::make_optional(valueToSet) : std::nullopt);
+}
+
+void TestValidatedSet::testAdd_data() {
+    QTest::addColumn<ValidatedSet<int>>("set");
+    QTest::addColumn<int>("valueToAdd");
+    QTest::addColumn<bool>("shouldAdd");
+
+    {
+        ValidatedSet<int> positiveSet{[](auto d) { return d > 0; }};
+        QTest::addRow("Trying to add an invalid value does nothing and returns false")
+            << positiveSet << -1 << false;
+    }
+    {
+        ValidatedSet<int> positiveSet{[](auto d) { return d > 0; }};
+        positiveSet.set({1});
+        QTest::addRow("Trying to add a valid, present value does nothing and returns false")
+            << positiveSet << 1 << false;
+    }
+    {
+        ValidatedSet<int> positiveSet{[](auto d) { return d > 0; }};
+        QTest::addRow("Trying to add a valid, absent value returns true")
+            << positiveSet << 1 << true;
+    }
+}
+void TestValidatedSet::testAdd() {
+    QFETCH(ValidatedSet<int>, set);
+    QFETCH(int, valueToAdd);
+    QFETCH(bool, shouldAdd);
+
+    const size_t previousSize{set.has() ? set.get().value().size() : 0};
+
+    const bool wasAdded{set.add(valueToAdd)};
+
+    QCOMPARE(wasAdded, shouldAdd);
+
+    const size_t currentSize{set.has() ? set.get().value().size() : 0};
+    QCOMPARE(currentSize, shouldAdd ? previousSize + 1 : previousSize);
+
+    if (shouldAdd) {
+        QVERIFY(set.has());
+        QVERIFY(std::ranges::any_of(set.get().value(), [=](int d) { return d == valueToAdd; }));
+    }
+}
+
+void TestValidatedSet::testRemove_data() {
+    QTest::addColumn<ValidatedSet<int>>("validatedSet");
+    QTest::addColumn<int>("elementToRemove");
+    QTest::addColumn<bool>("shouldRemove");
+
+    {
+        ValidatedSet<int> set{[](auto) { return true; }};
+        QTest::addRow("Trying to remove an absent element does nothing and returns false")
+            << set << 1 << false;
+    }
+    {
+        ValidatedSet<int> set{[](auto) { return true; }};
+        set.set({1, 2, 3});
+        QTest::addRow("Removing a present element returns true") << set << 1 << true;
+    }
+}
+void TestValidatedSet::testRemove() {
+    QFETCH(ValidatedSet<int>, validatedSet);
+    QFETCH(int, elementToRemove);
+    QFETCH(bool, shouldRemove);
+
+    const size_t previousSize{validatedSet.has() ? validatedSet.get().value().size() : 0};
+
+    const bool wasRemoved{validatedSet.remove(elementToRemove)};
+
+    QCOMPARE(wasRemoved, shouldRemove);
+
+    if (shouldRemove) {
+        const size_t currentSize{validatedSet.has() ? validatedSet.get().value().size() : 0};
+        QCOMPARE(currentSize, previousSize - 1);
+    }
+
+    if (validatedSet.has()) {
+        QVERIFY(std::ranges::none_of(validatedSet.get().value(),
+                                     [=](int d) { return d == elementToRemove; }));
+    }
 }
 
 void TestValidatedSet::testUnset_data() {
@@ -41,311 +217,4 @@ void TestValidatedSet::testUnset() {
     validatedSet.unset();
     QCOMPARE(validatedSet.has(), false);
     QCOMPARE(validatedSet.get(), std::nullopt);
-}
-
-void TestValidatedSet::testSetValid_data() {
-    QTest::addColumn<ValidatedSet<QString>>("validatedSet");
-    QTest::addColumn<std::set<QString>>("validValueToSet");
-
-    const ValidatedSet<QString> set{[](const QString& str) { return !str.trimmed().isEmpty(); }};
-
-    QTest::addRow("Perfectly valid data") << set << std::set{QString{"     a   \t"}};
-    QTest::addRow("Perfectly valid data")
-        << set << std::set{QString{"吉伊杰杰勒, 吾勒艾杰迪!"}, QString{"non-empty string"}};
-}
-void TestValidatedSet::testSetValid() {
-    QFETCH(ValidatedSet<QString>, validatedSet);
-    QFETCH(std::set<QString>, validValueToSet);
-
-    const bool res{validatedSet.set(validValueToSet)};
-
-    QCOMPARE(res, true);
-    QCOMPARE(validatedSet.has(), true);
-    QCOMPARE(validatedSet.get(), validValueToSet);
-}
-
-void TestValidatedSet::testSetInvalid_data() {
-    QTest::addColumn<ValidatedSet<QString>>("validatedSet");
-    QTest::addColumn<std::set<QString>>("invalidValueToSet");
-
-    ValidatedSet<QString> set{
-        [](const QString& str) { return !str.trimmed().isEmpty() && str != QString{"invalid"}; }};
-
-    QTest::addRow("Empty sets are invalid") << set << std::set<QString>{};
-    QTest::addRow("Set made of invalid elements are invalid")
-        << set << std::set{QString{" "}, QString{}, QString{"invalid"}};
-    QTest::addRow("Just one invalid element invalidates the entire set")
-        << set << std::set{QString{"Perfectly valid"}, QString{"   valid"}, QString{"invalid"}};
-}
-void TestValidatedSet::testSetInvalid() {
-    QFETCH(ValidatedSet<QString>, validatedSet);
-    QFETCH(std::set<QString>, invalidValueToSet);
-
-    const bool res{validatedSet.set(invalidValueToSet)};
-
-    QCOMPARE(res, false);
-    QCOMPARE(validatedSet.has(), false);
-    QCOMPARE(validatedSet.get(), std::nullopt);
-}
-
-void TestValidatedSet::testSetWithMovedParameter_data() {
-    QTest::addColumn<ValidatedSet<QString>>("validatedSet");
-    QTest::addColumn<std::set<QString>>("validValueToSet");
-
-    const ValidatedSet<QString> set{[](const QString&) { return true; }};
-
-    QTest::addRow("Perfectly valid data")
-        << set << std::set{QString{"     a   \t"}, QString{"Another one"}};
-    QTest::addRow("Perfectly valid data")
-        << set << std::set{QString{"吉伊杰杰勒, 吾勒艾杰迪!"}, QString{"non-empty string"}};
-}
-void TestValidatedSet::testSetWithMovedParameter() {
-    QFETCH(ValidatedSet<QString>, validatedSet);
-    QFETCH(std::set<QString>, validValueToSet);
-
-    std::set validValueToSetCopy{validValueToSet};
-    const bool hasBeenSet{validatedSet.set(std::move(validValueToSetCopy))};
-
-    QCOMPARE(hasBeenSet, true);
-    QCOMPARE(validatedSet.has(), true);
-    QCOMPARE(validatedSet.get(), validValueToSet);
-}
-
-void TestValidatedSet::testOverwriteValue_data() {
-    QTest::addColumn<ValidatedSet<QString>>("validatedSet");
-    QTest::addColumn<std::set<QString>>("firstValueToBeSet");
-    QTest::addColumn<std::set<QString>>("secondValueToBeSet");
-
-    const ValidatedSet<QString> set{[](const QString&) { return true; }};
-
-    QTest::addRow("The first value should be completely overwritten by the second")
-        << set << std::set{QString{"first"}, QString{"second"}}
-        << std::set{QString{"third"}, QString{"fourth"}};
-}
-void TestValidatedSet::testOverwriteValue() {
-    QFETCH(ValidatedSet<QString>, validatedSet);
-    QFETCH(std::set<QString>, firstValueToBeSet);
-    QFETCH(std::set<QString>, secondValueToBeSet);
-
-    bool res{validatedSet.set(firstValueToBeSet)};
-    QCOMPARE(res, true);
-    QCOMPARE(validatedSet.has(), true);
-    QCOMPARE(validatedSet.get(), firstValueToBeSet);
-
-    res = validatedSet.set(secondValueToBeSet);
-    QCOMPARE(res, true);
-    QCOMPARE(validatedSet.has(), true);
-    QCOMPARE(validatedSet.get(), secondValueToBeSet);
-}
-
-void TestValidatedSet::testAddValid_data() {
-    QTest::addColumn<ValidatedSet<QString>>("validatedSet");
-    QTest::addColumn<std::set<QString>>("validElementsToAdd");
-
-    const ValidatedSet<QString> set{[](const QString&) { return true; }};
-
-    QTest::addRow("Three valid elements")
-        << set << std::set{QString{"First"}, QString{"Second"}, QString{"Third"}};
-    QTest::addRow("Perfectly valid data")
-        << set << std::set{QString{"吉伊杰杰勒, 吾勒艾杰迪!"}, QString{"non-empty string"}};
-}
-void TestValidatedSet::testAddValid() {
-    QFETCH(ValidatedSet<QString>, validatedSet);
-    QFETCH(std::set<QString>, validElementsToAdd);
-
-    bool hasBeenAdded{false};
-    std::set<QString> expected{};
-    for (const auto& element : validElementsToAdd) {
-        hasBeenAdded = validatedSet.add(element);
-        expected.insert(element);
-
-        QCOMPARE(hasBeenAdded, true);
-        QCOMPARE(validatedSet.has(), true);
-        QCOMPARE(validatedSet.get(), expected);
-    }
-}
-
-void TestValidatedSet::testAddInvalid_data() {
-    QTest::addColumn<ValidatedSet<QString>>("validatedSet");
-    QTest::addColumn<QString>("invalidElementToAdd");
-
-    const ValidatedSet<QString> set{[](const QString& el) { return !el.isEmpty(); }};
-
-    QTest::addRow("Invalid elements shouldn't be added (empty string)") << set << QString{""};
-    QTest::addRow("Invalid elements shouldn't be added (null string)") << set << QString{};
-}
-void TestValidatedSet::testAddInvalid() {
-    QFETCH(ValidatedSet<QString>, validatedSet);
-    QFETCH(QString, invalidElementToAdd);
-
-    const bool res{validatedSet.add(invalidElementToAdd)};
-
-    QCOMPARE(res, false);
-    QCOMPARE(validatedSet.has(), false);
-    QCOMPARE(validatedSet.get(), std::nullopt);
-}
-
-void TestValidatedSet::testAddParameterTypeCoercion_data() {
-    QTest::addColumn<ValidatedSet<double>>("validatedSet");
-    QTest::addColumn<int>("validElementToAdd");
-
-    const ValidatedSet<double> set{[](const double&) { return true; }};
-
-    QTest::addRow("Valid element, coercion from int to double") << set << 200;
-}
-void TestValidatedSet::testAddParameterTypeCoercion() {
-    QFETCH(ValidatedSet<double>, validatedSet);
-    QFETCH(int, validElementToAdd);
-
-    const bool res{validatedSet.add(validElementToAdd)};
-
-    QCOMPARE(res, true);
-    QCOMPARE(validatedSet.has(), true);
-    QCOMPARE(validatedSet.get(), std::set{static_cast<double>(validElementToAdd)});
-}
-
-void TestValidatedSet::testAddWithMovedParameter_data() {
-    QTest::addColumn<ValidatedSet<QString>>("validatedSet");
-    QTest::addColumn<std::vector<QString>>("validElementsToAdd");
-
-    const ValidatedSet<QString> set{[](const QString&) { return true; }};
-
-    QTest::addRow("Three valid elements")
-        << set << std::vector{QString{"First"}, QString{"Second"}, QString{"Third"}};
-    QTest::addRow("Perfectly valid data")
-        << set << std::vector{QString{"吉伊杰杰勒, 吾勒艾杰迪!"}, QString{"non-empty string"}};
-}
-void TestValidatedSet::testAddWithMovedParameter() {
-    QFETCH(ValidatedSet<QString>, validatedSet);
-    QFETCH(std::vector<QString>, validElementsToAdd);
-
-    bool hasBeenAdded{false};
-    std::set<QString> expected{};
-    for (QString& element : validElementsToAdd) {
-        expected.insert(element);
-        hasBeenAdded = validatedSet.add(std::move(element));
-
-        QCOMPARE(hasBeenAdded, true);
-        QCOMPARE(validatedSet.has(), true);
-        QCOMPARE(validatedSet.get(), expected);
-    }
-}
-
-void TestValidatedSet::testAddAlreadyPresent_data() {
-    QTest::addColumn<ValidatedSet<QString>>("validatedSet");
-    QTest::addColumn<QString>("presentElementToAdd");
-
-    ValidatedSet<QString> set{[](const QString&) { return true; }};
-    set.set(std::set{QString{"one"}, QString{"two"}, QString{"three"}});
-
-    QTest::addRow("First already present element") << set << QString{"one"};
-    QTest::addRow("Second already present element") << set << QString{"two"};
-    QTest::addRow("First already present element") << set << QString{"three"};
-}
-void TestValidatedSet::testAddAlreadyPresent() {
-    QFETCH(ValidatedSet<QString>, validatedSet);
-    QFETCH(QString, presentElementToAdd);
-
-    const auto initialSet{validatedSet.get()};
-
-    const bool hasBeenAdded{validatedSet.add(presentElementToAdd)};
-
-    QCOMPARE(hasBeenAdded, false);
-    QCOMPARE(validatedSet.has(), true);
-    QCOMPARE(validatedSet.get(), initialSet);
-}
-
-void TestValidatedSet::testRemovePresent_data() {
-    QTest::addColumn<ValidatedSet<QString>>("validatedSet");
-    QTest::addColumn<QString>("presentElementToRemove");
-
-    ValidatedSet<QString> set{[](const QString&) { return true; }};
-    set.set(std::set{QString{"one"}, QString{"two"}, QString{"three"}});
-
-    QTest::addRow("Remove first element") << set << QString{"one"};
-    QTest::addRow("Remove element in the middle") << set << QString{"two"};
-    QTest::addRow("Remove last element") << set << QString{"three"};
-}
-void TestValidatedSet::testRemovePresent() {
-    QFETCH(ValidatedSet<QString>, validatedSet);
-    QFETCH(QString, presentElementToRemove);
-
-    auto initialSet{validatedSet.get()};
-    initialSet->erase(presentElementToRemove);
-
-    validatedSet.remove(presentElementToRemove);
-
-    QCOMPARE(validatedSet.get(), initialSet);
-}
-
-void TestValidatedSet::testRemoveAbsent_data() {
-    QTest::addColumn<ValidatedSet<QString>>("validatedSet");
-    QTest::addColumn<QString>("absentElementToRemove");
-
-    ValidatedSet<QString> set{[](const QString&) { return true; }};
-    set.set(std::set{QString{"one"}, QString{"two"}, QString{"three"}});
-
-    QTest::addRow("Remove fourth element") << set << QString{"four"};
-    QTest::addRow("Remove fifth in the middle") << set << QString{"five"};
-    QTest::addRow("Remove sixth element") << set << QString{"six"};
-}
-void TestValidatedSet::testRemoveAbsent() {
-    QFETCH(ValidatedSet<QString>, validatedSet);
-    QFETCH(QString, absentElementToRemove);
-
-    const auto initialSet{validatedSet.get()};
-
-    validatedSet.remove(absentElementToRemove);
-
-    QCOMPARE(validatedSet.get(), initialSet);
-}
-
-void TestValidatedSet::testGetValid_data() {
-    QTest::addColumn<ValidatedSet<QString>>("validatedSet");
-    QTest::addColumn<std::set<QString>>("expected");
-
-    ValidatedSet<QString> set{[](const QString&) { return true; }};
-    std::set expected{QString{"valid one"}, QString{"valid two"}};
-    set.set(expected);
-
-    QTest::addRow("Get should always return the value when a value is present") << set << expected;
-}
-
-void TestValidatedSet::testGetValid() {
-    QFETCH(ValidatedSet<QString>, validatedSet);
-    QFETCH(std::set<QString>, expected);
-
-    QCOMPARE(validatedSet.get(), expected);
-}
-
-void TestValidatedSet::testGetUnset_data() {
-    QTest::addColumn<ValidatedSet<QString>>("validatedSet");
-
-    ValidatedSet<QString> set{[](const QString&) { return true; }};
-
-    QTest::addRow("Get should always return nullopt when no value is present") << set;
-}
-void TestValidatedSet::testGetUnset() {
-    QFETCH(ValidatedSet<QString>, validatedSet);
-
-    QCOMPARE(validatedSet.get(), std::nullopt);
-}
-
-void TestValidatedSet::testSetUnsetTransition() {
-    ValidatedSet<QString> set{[](const QString&) { return true; }};
-
-    const std::set firstSet{QString{"1.1"}, QString{"1.2"}};
-    bool res{set.set(firstSet)};
-    QCOMPARE(res, true);
-    QCOMPARE(set.has(), true);
-    QCOMPARE(set.get(), firstSet);
-
-    set.unset();
-    QCOMPARE(set.has(), false);
-    QCOMPARE(set.get(), std::nullopt);
-
-    res = set.set(firstSet);
-    QCOMPARE(res, true);
-    QCOMPARE(set.has(), true);
-    QCOMPARE(set.get(), firstSet);
 }

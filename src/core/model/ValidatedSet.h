@@ -25,6 +25,19 @@ template <typename T> class ValidatedSet {
         return storedElements == other.storedElements;
     }
 
+    [[nodiscard]] auto has() const -> bool {
+        return !storedElements.empty();
+    }
+
+    [[nodiscard]] auto get() const -> std::optional<std::set<T>> {
+        return has() ? std::make_optional(storedElements) : std::nullopt;
+    }
+
+    /**
+     * @brief Sets the current set. If the parameter contains at least an invalid element, it unsets
+     * the set.
+     * @return True if the parameter contains all valid elements. False otherwise.
+     */
     auto set(std::set<T> newElements) -> bool {
         if (newElements.empty() ||
             std::ranges::any_of(newElements, [&](const T& item) { return !validator(item); })) {
@@ -35,6 +48,10 @@ template <typename T> class ValidatedSet {
         return true;
     }
 
+    /**
+     * @brief Adds an element to the set.
+     * @return True if the element is valid and was absent. False otherwise.
+     */
     auto add(T newElement) -> bool {
         if (!validator(newElement)) {
             return false;
@@ -48,14 +65,6 @@ template <typename T> class ValidatedSet {
 
     void unset() {
         storedElements.clear();
-    }
-
-    [[nodiscard]] auto has() const -> bool {
-        return !storedElements.empty();
-    }
-
-    [[nodiscard]] auto get() const -> std::optional<std::set<T>> {
-        return has() ? std::make_optional(storedElements) : std::nullopt;
     }
 };
 
