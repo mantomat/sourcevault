@@ -5,8 +5,7 @@
 
 namespace Core::Model {
 
-Library::Library(const Library& other)
-    : sigsEmitter{std::make_shared<LibrarySignals>()} {
+Library::Library(const Library& other) {
     for (const auto& medium : other.media | std::views::values) {
         media.try_emplace(medium->id(), medium->clone());
     }
