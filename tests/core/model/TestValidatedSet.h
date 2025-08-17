@@ -58,7 +58,6 @@ class TestValidatedSet : public QObject {
     static void testAdd_data();
     static void testAdd();
 
-    // TODO test for new boolean return
     static void testRemove_data();
     static void testRemove();
 

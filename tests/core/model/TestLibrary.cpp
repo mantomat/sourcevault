@@ -277,12 +277,11 @@ void TestLibrary::testMerge_data() const {
 
     {
         Library destination;
-        destination.addMedium(std::make_unique<Book>(defaultBook));
-        destination.addMedium(std::make_unique<Video>(defaultVideo));
         Library source;
         source.addMedium(std::make_unique<Book>(defaultBook));
-        QTest::addRow("If duplicates are found, they are ignored")
-            << destination << source << std::set{defaultBook.id(), defaultVideo.id()} << false;
+        source.addMedium(std::make_unique<Video>(defaultVideo));
+        QTest::addRow("Merging an empty library with a non-empty library acts as an assignment")
+            << destination << source << std::set{defaultBook.id(), defaultVideo.id()} << true;
     }
 
     {
