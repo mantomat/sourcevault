@@ -32,6 +32,12 @@ template <typename T> class ValidatedField final {
         return data;
     }
 
+    /**
+     * @brief Sets the field. If the parameter is invalid (i.e. the `validator` returns false), the
+     * field gets unset.
+     *
+     * @return True if the parameter is valid and gets set. False otherwise.
+     */
     auto set(T newValue) -> bool {
         if (!validator(newValue)) {
             unset();
