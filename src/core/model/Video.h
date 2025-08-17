@@ -24,7 +24,8 @@ class Video : public Medium {
     auto operator=(const Video&) -> Video& = delete;
     auto operator=(Video&&) -> Video& = delete;
 
-    // TODO test!
+    auto operator==(const Video&) const -> bool = default;
+
     [[nodiscard]] auto clone() const -> std::unique_ptr<Medium> override;
 
     [[nodiscard]] static auto create(QString title, QUuid id = QUuid::createUuid(),

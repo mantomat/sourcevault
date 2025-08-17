@@ -10,6 +10,19 @@ using Core::Model::Book;
 
 const auto bookBuilder{[] { return Book::create("default title").value(); }};
 
+void TestBook::testClone() {
+    auto bookToClone{std::make_unique<Book>(bookBuilder())};
+    bookToClone->authors().add("me");
+    bookToClone->pageNumber().set(1);
+    bookToClone->userData().favorite() = false;
+
+    auto clone{bookToClone->clone()};
+
+    QVERIFY(dynamic_cast<Book*>(clone.get()) != nullptr);
+    QVERIFY(bookToClone != clone);
+    QCOMPARE(*bookToClone, *clone);
+}
+
 void TestBook::testCreate_data() {
     TestMedium::testCreateData();
 }

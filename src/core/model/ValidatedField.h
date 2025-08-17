@@ -14,6 +14,13 @@ template <typename T> class ValidatedField final {
     Validator validator;
 
   public:
+    /**
+     * @brief Compares the data, validator equality is ignored.
+     */
+    auto operator==(const ValidatedField& other) const -> bool {
+        return data == other.data;
+    }
+
     explicit ValidatedField(Validator newValidator)
         : validator(std::move(newValidator)) {}
     bool has() const {

@@ -26,7 +26,8 @@ class Book : public Medium {
     auto operator=(const Book&) -> Book& = delete;
     auto operator=(Book&&) -> Book& = delete;
 
-    // TODO test!
+    auto operator==(const Book&) const -> bool = default;
+
     [[nodiscard]] auto clone() const -> std::unique_ptr<Medium> override;
 
     [[nodiscard]] static auto create(QString title, QUuid id = QUuid::createUuid(),

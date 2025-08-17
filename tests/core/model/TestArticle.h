@@ -7,6 +7,7 @@ class TestArticle : public QObject {
     Q_OBJECT
 
   private slots:
+    static void testClone();
 
     static void testCreate_data();
     static void testCreate();

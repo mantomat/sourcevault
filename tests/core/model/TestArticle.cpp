@@ -10,6 +10,19 @@ using Core::Model::Article;
 
 const auto articleBuilder{[] { return Article::create("default title").value(); }};
 
+void TestArticle::testClone() {
+    auto articleToClone{std::make_unique<Article>(articleBuilder())};
+    articleToClone->authors().add("me");
+    articleToClone->readTimeMinutes().set(1);
+    articleToClone->userData().favorite() = false;
+
+    auto clone{articleToClone->clone()};
+
+    QVERIFY(dynamic_cast<Article*>(clone.get()) != nullptr);
+    QVERIFY(articleToClone != clone);
+    QCOMPARE(*articleToClone, *clone);
+}
+
 void TestArticle::testCreate_data() {
     TestMedium::testCreateData();
 }

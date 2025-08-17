@@ -15,7 +15,11 @@ class Article : public Medium {
     ValidatedField<unsigned int> readTimeMinutes_{readTimeMinutesValidator};
     ValidatedField<QDate> publicationDate_{publicationDateValidator};
 
-    /* QUuid and QDate are trivially copyable */
+    /**
+     * @brief Constructs a new article.
+     *
+     * QUuid and QDate are passed by value since they are trivially copyable.
+     */
     Article(QString&& title, QUuid id, QDate dateAdded);
 
   public:
@@ -25,7 +29,8 @@ class Article : public Medium {
     auto operator=(const Article&) -> Article& = delete;
     auto operator=(Article&&) -> Article& = delete;
 
-    // TODO test!
+    auto operator==(const Article&) const -> bool = default;
+
     [[nodiscard]] auto clone() const -> std::unique_ptr<Medium> override;
 
     [[nodiscard]] static auto create(QString title, QUuid id = QUuid::createUuid(),

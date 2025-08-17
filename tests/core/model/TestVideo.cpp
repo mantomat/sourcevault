@@ -10,6 +10,19 @@ using Core::Model::Video;
 
 const auto videoBuilder{[] { return Video::create("default title").value(); }};
 
+void TestVideo::testClone() {
+    auto videoToClone{std::make_unique<Video>(videoBuilder())};
+    videoToClone->authors().add("me");
+    videoToClone->durationSeconds().set(1);
+    videoToClone->userData().favorite() = false;
+
+    auto clone{videoToClone->clone()};
+
+    QVERIFY(dynamic_cast<Video*>(clone.get()) != nullptr);
+    QVERIFY(videoToClone != clone);
+    QCOMPARE(*videoToClone, *clone);
+}
+
 void TestVideo::testCreate_data() {
     TestMedium::testCreateData();
 }
@@ -21,14 +34,16 @@ void TestVideo::testCreate() {
     QFETCH(QDate, candidateDateAdded);
 
     const auto optionalVideo{Video::create(candidateTitle, candidateId, candidateDateAdded)};
-    if (shouldBeValid) {
-        QVERIFY2(optionalVideo.has_value(), "The video must be created");
-        QCOMPARE(optionalVideo.value().title(), candidateTitle);
-        QCOMPARE(optionalVideo.value().id(), candidateId);
-        QCOMPARE(optionalVideo.value().dateAdded(), candidateDateAdded);
-    } else {
+
+    if (!shouldBeValid) {
         QVERIFY2(!optionalVideo.has_value(), "The video mustn't be created");
+        return;
     }
+
+    QVERIFY2(optionalVideo.has_value(), "The video must be created");
+    QCOMPARE(optionalVideo.value().title(), candidateTitle);
+    QCOMPARE(optionalVideo.value().id(), candidateId);
+    QCOMPARE(optionalVideo.value().dateAdded(), candidateDateAdded);
 }
 
 void TestVideo::testVideoUrl_data() {

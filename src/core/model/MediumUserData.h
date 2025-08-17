@@ -26,6 +26,8 @@ class MediumUserData {
     ValidatedField<PriorityLevel> priority_{priorityValidator};
 
   public:
+    auto operator==(const MediumUserData&) const -> bool = default;
+
     bool& favorite();
     bool favorite() const;
 

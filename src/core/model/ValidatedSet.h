@@ -14,6 +14,13 @@ template <typename T> class ValidatedSet {
     Validator validator;
 
   public:
+    /**
+     * @brief Compares the two sets, ignoring validator equality.
+     */
+    auto operator==(const ValidatedSet<T>& other) const -> bool {
+        return storedElements == other.storedElements;
+    }
+
     explicit ValidatedSet(Validator newValidator)
         : validator{std::move(newValidator)} {}
 
