@@ -3,7 +3,6 @@ Standard: c++20
 
 BasedOnStyle: LLVM
 ColumnLimit: 100
-PointerAlignment: Left
 IndentWidth: 4
 AllowShortFunctionsOnASingleLine: Empty
 

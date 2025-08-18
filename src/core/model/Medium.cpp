@@ -12,8 +12,6 @@ auto Medium::createValidator(const QString& title, const QUuid& id, const QDate&
     return titleValidator(title) && dateAddedValidator(dateAdded) && idValidator(id);
 }
 
-Medium::~Medium() = default;
-
 auto Medium::id() const -> QUuid {
     return id_;
 }

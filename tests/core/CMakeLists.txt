@@ -1,4 +1,7 @@
 add_executable(testscore CoreTestsMain.cpp
+        shared/TestMediumTypeVisitor.cpp
+        shared/TestMediumTypeVisitor.h
+
         model/TestMedium.cpp
         model/TestMedium.h
         model/TestValidatedField.cpp
@@ -15,6 +18,19 @@ add_executable(testscore CoreTestsMain.cpp
         model/TestArticle.h
         model/TestLibrary.cpp
         model/TestLibrary.h
+
+        queries/TestQueryBuilder.cpp
+        queries/TestQueryBuilder.h
+
+        queries/filters/TestFavoriteFilter.cpp
+        queries/filters/TestFavoriteFilter.h
+        queries/filters/TestMediumTypeFilter.cpp
+        queries/filters/TestMediumTypeFilter.h
+
+        queries/sortings/TestSort.cpp
+        queries/sortings/TestSort.h
+        queries/sortings/TestTitleSort.cpp
+        queries/sortings/TestTitleSort.h
 )
 target_link_libraries(testscore sourcevaultcore Qt6::Test)
 target_compile_options(testscore PRIVATE ${COMMON_COMPILE_OPTIONS})

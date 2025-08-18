@@ -12,8 +12,8 @@ Library::Library(const Library& other) {
 }
 
 auto Library::operator=(const Library& other) -> Library& {
-    Library temp{other};
-    this->swap(temp);
+    Library copy{other};
+    swap(copy);
     return *this;
 }
 

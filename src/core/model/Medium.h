@@ -4,10 +4,15 @@
 #include "MediumUserData.h"
 #include "ValidatedField.h"
 #include "ValidatedSet.h"
+#include "shared/Cloneable.h"
+#include "shared/MediumVisitor.h"
 
 #include <QDate>
 #include <QString>
 #include <QUuid>
+
+using Core::Shared::Cloneable;
+using Core::Shared::MediumVisitor;
 
 namespace Core::Model {
 
@@ -15,10 +20,10 @@ namespace Core::Model {
  * @brief The Medium class represents a medium, such as a book, video, or article.
  * A medium is an item that can be added to the library. Each attribute of a medium is validated.
  */
-class Medium {
+class Medium : public Cloneable<Medium> {
 
-    const QUuid id_;
-    const QDate dateAdded_;
+    QUuid id_;
+    QDate dateAdded_;
     QString title_;
     MediumUserData userData_;
     ValidatedSet<QString> authors_{authorValidator};
@@ -44,46 +49,46 @@ class Medium {
      *
      * QUuid and QDate are passed by value since they are trivially copyable.
      */
-    Medium(QString&& title, QUuid id, QDate dateAdded);
+    Medium(QString &&title, QUuid id, QDate dateAdded);
 
     /**
      * @brief Validates factory methods parameters.
      * Every subclass T must validate the create() method parameters with this function.
      */
-    static auto createValidator(const QString& title, const QUuid& id, const QDate& dateAdded)
+    static auto createValidator(const QString &title, const QUuid &id, const QDate &dateAdded)
         -> bool;
 
   public:
-    virtual ~Medium() = 0;
-    Medium(const Medium&) = default;
-    Medium(Medium&&) = default;
-    auto operator=(const Medium&) -> Medium& = delete;
-    auto operator=(Medium&&) -> Medium& = delete;
+    ~Medium() override = default;
+    Medium(const Medium &) = default;
+    Medium(Medium &&) = default;
+    auto operator=(const Medium &) -> Medium & = default;
+    auto operator=(Medium &&) -> Medium & = default;
 
-    [[nodiscard]] auto operator==(const Medium&) const -> bool = default;
-
-    [[nodiscard]] virtual auto clone() const -> std::unique_ptr<Medium> = 0;
+    [[nodiscard]] auto operator==(const Medium &) const -> bool = default;
 
     [[nodiscard]] auto id() const -> QUuid;
-    [[nodiscard]] static auto idValidator(const QUuid& idToValidate) -> bool;
+    [[nodiscard]] static auto idValidator(const QUuid &idToValidate) -> bool;
 
     [[nodiscard]] auto title() const -> QString;
     auto setTitle(QString titleToSet) -> bool;
-    [[nodiscard]] static auto titleValidator(const QString& titleToValidate) -> bool;
+    [[nodiscard]] static auto titleValidator(const QString &titleToValidate) -> bool;
 
     [[nodiscard]] auto dateAdded() const -> QDate;
-    [[nodiscard]] static auto dateAddedValidator(const QDate& dateToValidate) -> bool;
+    [[nodiscard]] static auto dateAddedValidator(const QDate &dateToValidate) -> bool;
 
-    [[nodiscard]] auto userData() const -> const MediumUserData&;
-    [[nodiscard]] auto userData() -> MediumUserData&;
+    [[nodiscard]] auto userData() const -> const MediumUserData &;
+    [[nodiscard]] auto userData() -> MediumUserData &;
 
-    [[nodiscard]] auto authors() const -> const ValidatedSet<QString>&;
-    [[nodiscard]] auto authors() -> ValidatedSet<QString>&;
-    [[nodiscard]] static auto authorValidator(const QString& authorToValidate) -> bool;
+    [[nodiscard]] auto authors() const -> const ValidatedSet<QString> &;
+    [[nodiscard]] auto authors() -> ValidatedSet<QString> &;
+    [[nodiscard]] static auto authorValidator(const QString &authorToValidate) -> bool;
 
-    [[nodiscard]] auto language() const -> const ValidatedField<QString>&;
-    [[nodiscard]] auto language() -> ValidatedField<QString>&;
-    [[nodiscard]] static auto languageValidator(const QString& languageToValidate) -> bool;
+    [[nodiscard]] auto language() const -> const ValidatedField<QString> &;
+    [[nodiscard]] auto language() -> ValidatedField<QString> &;
+    [[nodiscard]] static auto languageValidator(const QString &languageToValidate) -> bool;
+
+    virtual void accept(MediumVisitor &) const = 0;
 };
 
 }

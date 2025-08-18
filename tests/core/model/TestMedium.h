@@ -13,13 +13,17 @@ class ConcreteMedium final : public Medium {
     ~ConcreteMedium() override = default;
     explicit ConcreteMedium(QString title = "default title", QUuid id = QUuid::createUuid(),
                             QDate dateAdded = QDate::currentDate())
-        : Medium{std::move(title), std::move(id), std::move(dateAdded)} {};
+        : Medium{std::move(title), id, dateAdded} {};
 
-    ConcreteMedium(ConcreteMedium&& m) = default;
-    ConcreteMedium(const ConcreteMedium& m) = default;
+    ConcreteMedium(ConcreteMedium &&m) = default;
+    ConcreteMedium(const ConcreteMedium &m) = default;
 
-    std::unique_ptr<Medium> clone() const override {
+    [[nodiscard]] std::unique_ptr<Medium> clone() const override {
         return std::make_unique<ConcreteMedium>(*this);
+    }
+
+    void accept(MediumVisitor &) const override {
+        // never the case
     }
 
     friend class TestMedium;

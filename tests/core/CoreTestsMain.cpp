@@ -6,12 +6,15 @@
 #include "model/TestValidatedField.h"
 #include "model/TestValidatedSet.h"
 #include "model/TestVideo.h"
+#include "queries/TestQueryBuilder.h"
 
 #include <QTest>
+#include <qtestcase.h>
 
-int main(const int argc, char** argv) {
+auto main(const int argc, char **argv) -> int {
     int ret = 0;
 
+    // model
     ret |= QTest::qExec(std::make_unique<TestValidatedField>().get(), argc, argv);
     ret |= QTest::qExec(std::make_unique<TestValidatedSet>().get(), argc, argv);
     ret |= QTest::qExec(std::make_unique<TestMediumUserData>().get(), argc, argv);
@@ -20,6 +23,11 @@ int main(const int argc, char** argv) {
     ret |= QTest::qExec(std::make_unique<TestBook>().get(), argc, argv);
     ret |= QTest::qExec(std::make_unique<TestArticle>().get(), argc, argv);
     ret |= QTest::qExec(std::make_unique<TestLibrary>().get(), argc, argv);
+
+    // shared
+
+    // queries
+    ret |= QTest::qExec(std::make_unique<TestQueryBuilder>().get(), argc, argv);
 
     return ret;
 }
