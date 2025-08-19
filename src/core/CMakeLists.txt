@@ -32,6 +32,8 @@ add_library(sourcevaultcore STATIC
         queries/sortings/Sort.h
         queries/sortings/TitleSort.cpp
         queries/sortings/TitleSort.h
+        queries/sortings/DateAddedSort.cpp
+        queries/sortings/DateAddedSort.h
 )
 target_include_directories(sourcevaultcore PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(sourcevaultcore PUBLIC Qt6::Core Qt6::Network)

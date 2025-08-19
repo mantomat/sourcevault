@@ -7,6 +7,7 @@
 #include "model/Video.h"
 #include "queries/filters/FavoriteFilter.h"
 #include "queries/filters/MediumTypeFilter.h"
+#include "queries/sortings/TitleSort.h"
 
 #include <QTest>
 #include <ranges>
@@ -17,32 +18,52 @@ using Core::Model::Book;
 using Core::Model::Library;
 using Core::Model::Video;
 
-using FilterGenerator = std::function<std::unique_ptr<const Filter>()>;
-using QueryTester = std::function<void(const QueryBuilder &)>;
-
 using Core::Queries::Filters::FavoriteFilter;
 using Core::Queries::Filters::MediumTypeFilter;
+using Core::Queries::Sortings::TitleSort;
 
-void TestQueryBuilder::queryTestHelper(std::vector<std::unique_ptr<const Medium>> libraryMedia,
-                                       const QueryBuilder &queryBuilder,
-                                       const std::set<QUuid> &expectedIdsAfterQuery) {
-    Library lib;
-    lib.setMedia(std::move(libraryMedia));
+using FilterGenerator = std::function<std::unique_ptr<const Filter>()>;
+using SortGenerator = std::function<std::unique_ptr<const Sort>()>;
+using QueryTester = std::function<void(const QueryBuilder &)>;
 
+void TestQueryBuilder::queryTestHelper(const Library &lib, const QueryBuilder &queryBuilder,
+                                       const std::vector<QUuid> &expectedIdsAfterQuery) {
     const auto actualMediaAfterQuery{queryBuilder.query(lib)};
 
-    QCOMPARE(actualMediaAfterQuery.size(), expectedIdsAfterQuery.size());
     auto idView =
         actualMediaAfterQuery | std::views::transform([](const Medium *m) { return m->id(); });
-    const std::set<QUuid> actualIds{idView.begin(), idView.end()};
+    const std::vector<QUuid> actualIds{idView.begin(), idView.end()};
     QCOMPARE(actualIds, expectedIdsAfterQuery);
 }
 
-void TestQueryBuilder::testCopyConstruction() {}
+void TestQueryBuilder::testCopyConstruction() const {
+    QueryBuilder original;
+    original.addFilter(std::make_unique<MediumTypeFilter>(
+        std::unordered_set<std::type_index>{typeid(Book), typeid(Article)}));
+    original.addFilter(std::make_unique<FavoriteFilter>());
+    original.setSort(std::make_unique<TitleSort>());
 
-void TestQueryBuilder::testCopyAssignment() {}
+    const QueryBuilder copy{original};
 
-void TestQueryBuilder::testAddFilter_data() {
+    // Check that the copy has the same behavior expected from the original.
+    queryTestHelper(defaultLib, copy, std::vector{bookFavoriteA.id(), articleFavoriteC.id()});
+}
+
+void TestQueryBuilder::testCopyAssignment() const {
+    QueryBuilder original;
+    original.addFilter(std::make_unique<MediumTypeFilter>(
+        std::unordered_set<std::type_index>{typeid(Book), typeid(Article)}));
+    original.addFilter(std::make_unique<FavoriteFilter>());
+    original.setSort(std::make_unique<TitleSort>());
+
+    QueryBuilder copy;
+    copy = original;
+
+    // Check that the copy has the same behavior expected from the original.
+    queryTestHelper(defaultLib, copy, std::vector{bookFavoriteA.id(), articleFavoriteC.id()});
+}
+
+void TestQueryBuilder::testAddFilter_data() const {
     QTest::addColumn<QueryBuilder>("queryBuilder");
     QTest::addColumn<FilterGenerator>("filterToAddGenerator");
     QTest::addColumn<bool>("shouldBeAdded");
@@ -51,44 +72,34 @@ void TestQueryBuilder::testAddFilter_data() {
     {
         QTest::addRow("Adding a new, previously absent filter")
             << QueryBuilder{} << FilterGenerator{[] { return std::make_unique<FavoriteFilter>(); }}
-            << true << QueryTester{[](const QueryBuilder &qb) {
-                   auto favoriteBook{Book::create("favorite book").value()};
-                   favoriteBook.userData().favorite() = true;
+            << true << QueryTester{[this](const QueryBuilder &qb) {
+                   auto expectedIdsView{
+                       orderedIds | std::views::filter([this](const QUuid id) {
+                           return defaultLib.getMedium(id).value()->userData().favorite();
+                       })};
+                   const std::vector<QUuid> expectedIds{expectedIdsView.begin(),
+                                                        expectedIdsView.end()};
 
-                   std::vector<std::unique_ptr<const Medium>> media;
-                   media.push_back(std::make_unique<Book>(favoriteBook));
-                   media.push_back(std::make_unique<Book>(Book::create("useless book").value()));
-
-                   queryTestHelper(std::move(media), qb, std::set{favoriteBook.id()});
+                   queryTestHelper(defaultLib, qb, expectedIds);
                }};
     }
 
     {
-
         QueryBuilder queryBuilder;
-        MediumTypeVisitor visitor{{typeid(Book)}};
         queryBuilder.addFilter(
             std::make_unique<MediumTypeFilter>(MediumTypeFilter{{typeid(Book)}}));
-
         QTest::addRow("Replacing an old filter") << queryBuilder << FilterGenerator{[] {
             return std::make_unique<MediumTypeFilter>(MediumTypeFilter{{typeid(Article)}});
-        }} << true << QueryTester{[](const QueryBuilder &qb) {
-            auto article{Article::create("article").value()};
-
-            std::vector<std::unique_ptr<const Medium>> media;
-            media.push_back(std::make_unique<Book>(Book::create("book").value()));
-            media.push_back(std::make_unique<Article>(article));
-
-            queryTestHelper(std::move(media), qb, std::set{article.id()});
+        }} << true << QueryTester{[this](const QueryBuilder &qb) {
+            queryTestHelper(defaultLib, qb, std::vector{articleFavoriteC.id()});
         }};
     }
 
     {
-
         QTest::addRow("Trying to add a nullptr") << QueryBuilder{} << FilterGenerator{[] {
             return std::unique_ptr<FavoriteFilter>{nullptr};
         }} << false << QueryTester{[](const QueryBuilder &) {
-            // nothing to do here
+            // nothing to do here, this won't be called
         }};
     }
 }
@@ -109,11 +120,90 @@ void TestQueryBuilder::testAddFilter() {
     }
 }
 
-void TestQueryBuilder::testSetSort_data() {}
-void TestQueryBuilder::testSetSort() {}
+void TestQueryBuilder::testSetSort_data() const {
+    QTest::addColumn<SortGenerator>("sortToSetGenerator");
+    QTest::addColumn<bool>("shouldBeSet");
+    QTest::addColumn<QueryTester>("queryTester");
 
-void TestQueryBuilder::testReset_data() {}
-void TestQueryBuilder::testReset() {}
+    QTest::addRow("Setting a valid sort")
+        << SortGenerator{[] { return std::make_unique<TitleSort>(); }} << true
+        << QueryTester{[this](const QueryBuilder &qb) {
+               queryTestHelper(defaultLib, qb,
+                               std::vector{bookFavoriteA.id(), bookB.id(), articleFavoriteC.id(),
+                                           videoFavoriteD.id()});
+           }};
 
-void TestQueryBuilder::testQuery_data() {}
+    QTest::addRow("Trying to set a nullptr")
+        << SortGenerator{[] { return std::unique_ptr<TitleSort>{nullptr}; }} << false
+        << QueryTester{[](const QueryBuilder &) {
+               // nothing to do here, this won't be called
+           }};
+}
+void TestQueryBuilder::testSetSort() {
+    QFETCH(SortGenerator, sortToSetGenerator);
+    QFETCH(bool, shouldBeSet);
+    QFETCH(QueryTester, queryTester);
+
+    QueryBuilder queryBuilder;
+    std::unique_ptr<const Sort> sortToSet{sortToSetGenerator()};
+
+    const bool wasSet{queryBuilder.setSort(std::move(sortToSet))};
+
+    QCOMPARE(wasSet, shouldBeSet);
+    if (shouldBeSet) {
+        queryTester(queryBuilder);
+    }
+}
+
+void TestQueryBuilder::testQuery_data() const {
+    QTest::addColumn<Library>("library");
+    QTest::addColumn<QueryBuilder>("queryBuilder");
+    QTest::addColumn<std::vector<QUuid>>("expectedQueryResultIds");
+
+    {
+        QTest::addRow("Identity query (no filters, no sort) returns all media")
+            << defaultLib << QueryBuilder{} << orderedIds;
+    }
+    {
+        QueryBuilder qb;
+        qb.addFilter(
+            std::make_unique<MediumTypeFilter>(std::unordered_set<std::type_index>{typeid(Video)}));
+        QTest::addRow("Single filter query returns only matching media")
+            << defaultLib << qb << std::vector{videoFavoriteD.id()};
+    }
+    {
+        QueryBuilder qb;
+        qb.addFilter(
+            std::make_unique<MediumTypeFilter>(std::unordered_set<std::type_index>{typeid(Book)}));
+        qb.addFilter(std::make_unique<FavoriteFilter>());
+        QTest::addRow("Multiple filters return intersection of results")
+            << defaultLib << qb << std::vector{bookFavoriteA.id()};
+    }
+    {
+        QueryBuilder qb;
+        qb.setSort(std::make_unique<TitleSort>());
+        QTest::addRow("Sort-only query reorders all media")
+            << defaultLib << qb
+            << std::vector{bookFavoriteA.id(), bookB.id(), articleFavoriteC.id(),
+                           videoFavoriteD.id()};
+    }
+    {
+        QueryBuilder qb;
+        qb.addFilter(
+            std::make_unique<MediumTypeFilter>(std::unordered_set<std::type_index>{typeid(Book)}));
+        qb.setSort(std::make_unique<TitleSort>());
+        QTest::addRow("Filter and sort returns sorted subset of media")
+            << defaultLib << qb << std::vector{bookFavoriteA.id(), bookB.id()};
+    }
+}
 void TestQueryBuilder::testQuery() {}
+
+void TestQueryBuilder::testReset() const {
+    QueryBuilder qb;
+    qb.addFilter(std::make_unique<FavoriteFilter>());
+    qb.setSort(std::make_unique<TitleSort>());
+
+    qb.reset();
+
+    queryTestHelper(defaultLib, qb, orderedIds);
+}

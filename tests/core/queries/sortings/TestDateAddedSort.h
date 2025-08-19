@@ -1,9 +1,9 @@
-#ifndef TESTTITLESORT_H
-#define TESTTITLESORT_H
+#ifndef TESTDATEADDEDSORT_H
+#define TESTDATEADDEDSORT_H
 
 #include <QObject>
 
-class TestTitleSort : public QObject {
+class TestDateAddedSort : public QObject {
     Q_OBJECT
 
   private slots:

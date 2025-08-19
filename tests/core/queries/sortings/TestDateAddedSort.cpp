@@ -1,9 +1,9 @@
-#include "TestTitleSort.h"
+#include "TestDateAddedSort.h"
 
 #include "model/Article.h"
 #include "model/Book.h"
 #include "model/Video.h"
-#include "queries/sortings/TitleSort.h"
+#include "queries/sortings/DateAddedSort.h"
 
 #include <QTest>
 #include <ranges>
@@ -11,39 +11,40 @@
 using Core::Model::Article;
 using Core::Model::Book;
 using Core::Model::Video;
-using Core::Queries::Sortings::TitleSort;
+using Core::Queries::Sortings::DateAddedSort;
 
 using MediaGenerator = std::function<std::vector<std::unique_ptr<Medium>>()>;
 
-void TestTitleSort::testConstructorAndIsAscending() {
-    const TitleSort asc{};
+void TestDateAddedSort::testConstructorAndIsAscending() {
+    const DateAddedSort asc{};
     QCOMPARE(asc.isAscending(), true);
 
-    const TitleSort desc{false};
+    const DateAddedSort desc{false};
     QCOMPARE(desc.isAscending(), false);
 }
 
-void TestTitleSort::testClone() {
-    const auto original{std::make_unique<TitleSort>(false)};
+void TestDateAddedSort::testClone() {
+    const auto original{std::make_unique<DateAddedSort>(false)};
 
     const auto clone{original->clone()};
 
     QVERIFY(original != clone);
-    QVERIFY(dynamic_cast<const TitleSort *>(clone.get()) != nullptr);
+    QVERIFY(dynamic_cast<const DateAddedSort *>(clone.get()) != nullptr);
     QCOMPARE(original->isAscending(), clone->isAscending());
 }
 
-void TestTitleSort::testApply_data() {
-    QTest::addColumn<TitleSort>("sort");
+void TestDateAddedSort::testApply_data() {
+    QTest::addColumn<DateAddedSort>("sort");
     QTest::addColumn<MediaGenerator>("mediaGenerator");
     QTest::addColumn<std::vector<QUuid>>("expectedIdsSorting");
 
-    const auto firstMedium{Book::create("AAAAA").value()};
-    const auto secondMedium{Article::create("BBBBB").value()};
-    const auto thirdMedium{Video::create("CCCCC").value()};
+    const auto firstMedium{Book::create("book", QUuid::createUuid(), QDate{2020, 1, 1}).value()};
+    const auto secondMedium{
+        Article::create("article", QUuid::createUuid(), QDate{2021, 1, 1}).value()};
+    const auto thirdMedium{Video::create("video", QUuid::createUuid(), QDate{2022, 1, 1}).value()};
 
     QTest::addRow("Ascending sort")
-        << TitleSort{} << MediaGenerator{[firstMedium, secondMedium, thirdMedium] {
+        << DateAddedSort{} << MediaGenerator{[firstMedium, secondMedium, thirdMedium] {
                std::vector<std::unique_ptr<Medium>> media;
                media.push_back(std::make_unique<Article>(secondMedium));
                media.push_back(std::make_unique<Video>(thirdMedium));
@@ -53,7 +54,7 @@ void TestTitleSort::testApply_data() {
         << std::vector{firstMedium.id(), secondMedium.id(), thirdMedium.id()};
 
     QTest::addRow("descending sort")
-        << TitleSort{false} << MediaGenerator{[firstMedium, secondMedium, thirdMedium]() {
+        << DateAddedSort{false} << MediaGenerator{[firstMedium, secondMedium, thirdMedium]() {
                std::vector<std::unique_ptr<Medium>> media;
                media.push_back(std::make_unique<Article>(secondMedium));
                media.push_back(std::make_unique<Video>(thirdMedium));
@@ -62,8 +63,8 @@ void TestTitleSort::testApply_data() {
            }}
         << std::vector{thirdMedium.id(), secondMedium.id(), firstMedium.id()};
 }
-void TestTitleSort::testApply() {
-    QFETCH(TitleSort, sort);
+void TestDateAddedSort::testApply() {
+    QFETCH(DateAddedSort, sort);
     QFETCH(MediaGenerator, mediaGenerator);
     QFETCH(std::vector<QUuid>, expectedIdsSorting);
 

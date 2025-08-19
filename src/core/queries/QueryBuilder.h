@@ -20,23 +20,23 @@ class QueryBuilder {
     std::unordered_map<std::type_index, std::unique_ptr<const Filter>> filters;
     std::unique_ptr<const Sort> sort;
 
-    void swap(QueryBuilder& other) noexcept;
+    void swap(QueryBuilder &other) noexcept;
 
   public:
     ~QueryBuilder() = default;
     QueryBuilder() = default;
-    QueryBuilder(QueryBuilder&&) = default;
-    auto operator=(QueryBuilder&&) -> QueryBuilder& = default;
+    QueryBuilder(QueryBuilder &&) = default;
+    auto operator=(QueryBuilder &&) -> QueryBuilder & = default;
 
     /**
      * @brief Copies a QueryBuilder, performing a deep copy.
      */
-    QueryBuilder(const QueryBuilder&);
+    QueryBuilder(const QueryBuilder &);
 
     /**
      * @brief Copy-assigns a QueryBuilder, performing a deep copy.
      */
-    auto operator=(const QueryBuilder&) -> QueryBuilder&;
+    auto operator=(const QueryBuilder &) -> QueryBuilder &;
 
     /**
      * @brief Adds a filter to the query pipeline. Only one filter per type is permitted.
@@ -48,13 +48,16 @@ class QueryBuilder {
     auto addFilter(std::unique_ptr<const Filter> newFilter) -> bool;
 
     /**
-     * @brief Sets the sort for the current
+     * @brief Sets the sort for the current builder.
      */
     auto setSort(std::unique_ptr<const Sort> newSort) -> bool;
 
     void reset();
 
-    [[nodiscard]] auto query(const Library& library) const -> std::vector<const Medium*>;
+    /**
+     * @brief Performs a query on the given library.
+     */
+    [[nodiscard]] auto query(const Library &library) const -> std::vector<const Medium *>;
 };
 
 }

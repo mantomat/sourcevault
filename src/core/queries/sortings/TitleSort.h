@@ -15,6 +15,8 @@ class TitleSort : public Sort {
     auto operator=(const TitleSort &) -> TitleSort & = default;
     auto operator=(TitleSort &&) -> TitleSort & = default;
 
+    [[nodiscard]] auto clone() const -> std::unique_ptr<Sort> override;
+
     [[nodiscard]] auto apply(std::vector<const Medium *> media) const
         -> std::vector<const Medium *> override;
 };

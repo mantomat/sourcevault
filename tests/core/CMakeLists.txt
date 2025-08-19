@@ -29,6 +29,8 @@ add_executable(testscore CoreTestsMain.cpp
 
         queries/sortings/TestSort.cpp
         queries/sortings/TestSort.h
+        queries/sortings/TestDateAddedSort.cpp
+        queries/sortings/TestDateAddedSort.h
         queries/sortings/TestTitleSort.cpp
         queries/sortings/TestTitleSort.h
 )
