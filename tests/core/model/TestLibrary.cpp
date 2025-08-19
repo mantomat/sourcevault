@@ -70,7 +70,7 @@ void TestLibrary::testCopyAssignment() {
     QFETCH(Library, libraryToCopyAssign);
     QFETCH(bool, expectedSignalEmission);
 
-    QSignalSpy spy{library.emitter().get(), &LibrarySignals::mediaChanged};
+    QSignalSpy spy{library.emitter(), &LibrarySignals::mediaChanged};
 
     library = libraryToCopyAssign;
 
@@ -207,7 +207,7 @@ void TestLibrary::testSetMedia() {
     QFETCH(bool, expectedSignalEmission);
 
     std::vector<std::unique_ptr<const Medium>> mediaToSet{mediaGenerator()};
-    const QSignalSpy spy{library.emitter().get(), &LibrarySignals::mediaChanged};
+    const QSignalSpy spy{library.emitter(), &LibrarySignals::mediaChanged};
 
     library.setMedia(std::move(mediaToSet));
 
@@ -268,7 +268,7 @@ void TestLibrary::testMerge() {
     QFETCH(std::set<QUuid>, expectedFinalIds);
     QFETCH(bool, expectedSignalEmission);
 
-    const QSignalSpy spy{destination.emitter().get(), &LibrarySignals::mediaChanged};
+    const QSignalSpy spy{destination.emitter(), &LibrarySignals::mediaChanged};
 
     destination.merge(std::move(source));
 
@@ -301,7 +301,7 @@ void TestLibrary::testAddMedium() {
     QFETCH(std::function<std::unique_ptr<const Medium>()>, mediumToAddGenerator);
     QFETCH(bool, shouldBeAdded);
 
-    const QSignalSpy spy{library.emitter().get(), &LibrarySignals::mediaChanged};
+    const QSignalSpy spy{library.emitter(), &LibrarySignals::mediaChanged};
 
     const bool wasAdded{library.addMedium(mediumToAddGenerator())};
 
@@ -340,7 +340,7 @@ void TestLibrary::testReplaceMedium() {
     QFETCH(std::function<std::unique_ptr<const Medium>()>, newMediumGenerator);
     QFETCH(bool, shouldBeReplaced);
 
-    const QSignalSpy spy{library.emitter().get(), &LibrarySignals::mediaChanged};
+    const QSignalSpy spy{library.emitter(), &LibrarySignals::mediaChanged};
 
     const bool wasReplaced{library.replaceMedium(newMediumGenerator())};
 
@@ -370,7 +370,7 @@ void TestLibrary::testRemoveMedium() {
     QFETCH(QUuid, mediumToRemoveId);
     QFETCH(bool, shouldBeRemoved);
 
-    const QSignalSpy spy{library.emitter().get(), &LibrarySignals::mediaChanged};
+    const QSignalSpy spy{library.emitter(), &LibrarySignals::mediaChanged};
     const auto &wasMediumPresent{std::ranges::any_of(
         library.getMedia(), [&](auto mPtr) { return mPtr->id() == mediumToRemoveId; })};
 
@@ -398,7 +398,7 @@ void TestLibrary::testClear() {
     QFETCH(Library, library);
     QFETCH(bool, shouldEmit);
 
-    const QSignalSpy spy{library.emitter().get(), &LibrarySignals::mediaChanged};
+    const QSignalSpy spy{library.emitter(), &LibrarySignals::mediaChanged};
 
     library.clear();
     QCOMPARE(library.mediaCount(), size_t{0});

@@ -7,6 +7,7 @@ namespace Core::Model {
 
 void Library::swap(Library &other) noexcept {
     std::swap(media, other.media);
+    std::swap(sigsEmitter, other.sigsEmitter);
     if (mediaCount() != 0 || other.mediaCount() != 0) {
         emit sigsEmitter->mediaChanged();
         emit other.sigsEmitter->mediaChanged();
@@ -20,13 +21,15 @@ Library::Library(const Library &other) {
 }
 
 auto Library::operator=(const Library &other) -> Library & {
-    Library copy{other};
-    swap(copy);
+    if (this != &other) {
+        Library copy{other};
+        swap(copy);
+    }
     return *this;
 }
 
-auto Library::emitter() const -> std::shared_ptr<const LibrarySignals> {
-    return sigsEmitter;
+auto Library::emitter() const -> const LibrarySignals * {
+    return sigsEmitter.get();
 }
 
 auto Library::getMedia() const -> std::vector<const Medium *> {

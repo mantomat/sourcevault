@@ -29,7 +29,7 @@ namespace Core::Model {
 struct LibrarySignals final : public QObject {
     Q_OBJECT
   signals:
-    void mediaChanged();
+    void mediaChanged() const;
 };
 
 /**
@@ -38,7 +38,7 @@ struct LibrarySignals final : public QObject {
 class Library final {
 
     std::unordered_map<QUuid, std::unique_ptr<const Medium>> media;
-    std::shared_ptr<LibrarySignals> sigsEmitter{std::make_shared<LibrarySignals>()};
+    std::unique_ptr<const LibrarySignals> sigsEmitter{std::make_unique<LibrarySignals>()};
 
     /**
      * @brief Swaps the current library with `other`.
@@ -65,9 +65,11 @@ class Library final {
     auto operator=(const Library &other) -> Library &;
 
     /**
-     * @brief Returns this library's signal emitter with shared ownership.
+     * @brief Returns a non-owning pointer to the library emitter.
+     *
+     * This pointer will be valid as long as the library lives.
      */
-    [[nodiscard]] auto emitter() const -> std::shared_ptr<const LibrarySignals>;
+    [[nodiscard]] auto emitter() const -> const LibrarySignals *;
 
     /**
      * @return An vector of raw pointers to immutable media objects, in a random order.
