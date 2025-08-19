@@ -37,14 +37,16 @@ void TestLibrary::testCopyConstructor() {
 
     QVERIFY(libraryToCopy.emitter() != newLib.emitter());
 
-    const std::vector originals{libraryToCopy.getMedia()};
-    const std::vector deepCopies{newLib.getMedia()};
+    std::vector originals{libraryToCopy.getMedia()};
+    std::vector deepCopies{newLib.getMedia()};
+
     QCOMPARE(originals.size(), deepCopies.size());
+
+    auto sortById = [](const Medium *a, const Medium *b) { return a->id() < b->id(); };
+    std::ranges::sort(originals, sortById);
+    std::ranges::sort(deepCopies, sortById);
     for (size_t i = 0; i < originals.size(); i++) {
         QVERIFY(originals[i] != deepCopies[i]);
-
-        // This doesn't verify they are exactly equal, but we only check the id for the sake of
-        // simplicity.
         QCOMPARE(originals[i]->id(), deepCopies[i]->id());
     }
 }
@@ -72,55 +74,19 @@ void TestLibrary::testCopyAssignment() {
 
     library = libraryToCopyAssign;
 
-    const std::vector libraryToCopyMedia{libraryToCopyAssign.getMedia()};
-    const std::vector libraryMedia{library.getMedia()};
+    std::vector libraryToCopyMedia{libraryToCopyAssign.getMedia()};
+    std::vector libraryMedia{library.getMedia()};
+
     QCOMPARE(libraryToCopyMedia.size(), libraryMedia.size());
+
+    auto sortById = [](const Medium *a, const Medium *b) { return a->id() < b->id(); };
+    std::ranges::sort(libraryToCopyMedia, sortById);
+    std::ranges::sort(libraryMedia, sortById);
     for (size_t i = 0; i < libraryToCopyMedia.size(); i++) {
         QVERIFY(libraryToCopyMedia[i] != libraryMedia[i]);
-
-        // This doesn't verify they are exactly equal, but we only check the id for the sake of
-        // simplicity.
         QCOMPARE(libraryToCopyMedia[i]->id(), libraryMedia[i]->id());
     }
     QCOMPARE(spy.count(), expectedSignalEmission ? 1 : 0);
-}
-
-void TestLibrary::testSwap_data() const {
-    QTest::addColumn<Library>("library1");
-    QTest::addColumn<Library>("library2");
-    QTest::addColumn<bool>("expectedSignalEmission");
-
-    {
-        Library lib1;
-        Library lib2;
-        QTest::addRow("Swapping two empty libraries doesn't emit any signals")
-            << lib1 << lib2 << false;
-    }
-    {
-        Library lib1;
-        lib1.addMedium(std::make_unique<Book>(defaultBook));
-        Library lib2;
-        lib2.addMedium(std::make_unique<Video>(defaultVideo));
-        QTest::addRow("Swapping two non-empty libraries emits a signal on both libraries.")
-            << lib1 << lib2 << true;
-    }
-}
-void TestLibrary::testSwap() {
-    QFETCH(Library, library1);
-    QFETCH(Library, library2);
-    QFETCH(bool, expectedSignalEmission);
-
-    const auto prevLib1Media{library1.getMedia()};
-    const auto prevLib2Media{library2.getMedia()};
-    QSignalSpy lib1Spy{library1.emitter().get(), &LibrarySignals::mediaChanged};
-    QSignalSpy lib2Spy{library2.emitter().get(), &LibrarySignals::mediaChanged};
-
-    library1.swap(library2);
-
-    QCOMPARE(library1.getMedia(), prevLib2Media);
-    QCOMPARE(library2.getMedia(), prevLib1Media);
-    QCOMPARE(lib1Spy.count(), expectedSignalEmission ? 1 : 0);
-    QCOMPARE(lib2Spy.count(), expectedSignalEmission ? 1 : 0);
 }
 
 void TestLibrary::testGetAllMedia_data() const {
@@ -136,7 +102,7 @@ void TestLibrary::testGetAllMedia() {
     QFETCH(Library, library);
     QFETCH(std::set<QUuid>, expectedMediaIds);
 
-    const auto& media = library.getMedia();
+    const auto &media = library.getMedia();
     auto idView = media | std::views::transform([](const auto m) { return m->id(); });
     std::set<QUuid> actualIds{idView.begin(), idView.end()};
 
@@ -382,10 +348,10 @@ void TestLibrary::testReplaceMedium() {
     QCOMPARE(spy.count(), shouldBeReplaced ? 1 : 0);
 
     // A medium named "replaced" must be present iff shouldBeReplaced is true in this test.
-    const auto& media = library.getMedia();
+    const auto &media = library.getMedia();
     const bool isThereReplaced{
         std::ranges::any_of(media | std::views::transform([](auto m) { return m->title(); }),
-                            [](const auto& title) { return title == "replaced"; })};
+                            [](const auto &title) { return title == "replaced"; })};
     QVERIFY((shouldBeReplaced && isThereReplaced) || (!shouldBeReplaced && !isThereReplaced));
 }
 
@@ -405,7 +371,7 @@ void TestLibrary::testRemoveMedium() {
     QFETCH(bool, shouldBeRemoved);
 
     const QSignalSpy spy{library.emitter().get(), &LibrarySignals::mediaChanged};
-    const auto& wasMediumPresent{std::ranges::any_of(
+    const auto &wasMediumPresent{std::ranges::any_of(
         library.getMedia(), [&](auto mPtr) { return mPtr->id() == mediumToRemoveId; })};
 
     const bool wasRemoved{library.removeMedium(mediumToRemoveId)};

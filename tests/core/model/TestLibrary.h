@@ -52,9 +52,6 @@ class TestLibrary : public QObject {
     void testCopyAssignment_data() const;
     static void testCopyAssignment();
 
-    void testSwap_data() const;
-    static void testSwap();
-
     void testGetAllMedia_data() const;
     static void testGetAllMedia();
 

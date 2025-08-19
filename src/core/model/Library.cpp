@@ -5,19 +5,7 @@
 
 namespace Core::Model {
 
-Library::Library(const Library& other) {
-    for (const auto& medium : other.media | std::views::values) {
-        media.try_emplace(medium->id(), medium->clone());
-    }
-}
-
-auto Library::operator=(const Library& other) -> Library& {
-    Library copy{other};
-    swap(copy);
-    return *this;
-}
-
-void Library::swap(Library& other) noexcept {
+void Library::swap(Library &other) noexcept {
     std::swap(media, other.media);
     if (mediaCount() != 0 || other.mediaCount() != 0) {
         emit sigsEmitter->mediaChanged();
@@ -25,26 +13,38 @@ void Library::swap(Library& other) noexcept {
     }
 }
 
+Library::Library(const Library &other) {
+    for (const auto &medium : other.media | std::views::values) {
+        media.try_emplace(medium->id(), medium->clone());
+    }
+}
+
+auto Library::operator=(const Library &other) -> Library & {
+    Library copy{other};
+    swap(copy);
+    return *this;
+}
+
 auto Library::emitter() const -> std::shared_ptr<const LibrarySignals> {
     return sigsEmitter;
 }
 
-auto Library::getMedia() const -> std::vector<const Medium*> {
-    auto range = media | std::views::values |
-                 std::views::transform([](const auto& ptr) { return ptr.get(); });
-    return {range.begin(), range.end()};
+auto Library::getMedia() const -> std::vector<const Medium *> {
+    auto view{media | std::views::values |
+              std::views::transform([](const auto &ptr) { return ptr.get(); })};
+    return {view.begin(), view.end()};
 }
 
 auto Library::getTopicsUnion() const -> std::set<QString> {
     std::set<QString> topics;
-    std::ranges::for_each(media, [&](const auto& pair) {
-        const auto& [_, medium]{pair};
+    std::ranges::for_each(media, [&](const auto &pair) {
+        const auto &[_, medium]{pair};
         topics.merge(medium->userData().topics().get().value_or(std::set<QString>{}));
     });
     return topics;
 }
 
-auto Library::getMedium(const QUuid& id) const -> std::optional<const Medium*> {
+auto Library::getMedium(const QUuid &id) const -> std::optional<const Medium *> {
     if (!media.contains(id)) {
         return std::nullopt;
     }
@@ -59,7 +59,7 @@ void Library::setMedia(std::vector<std::unique_ptr<const Medium>> newMedia) {
     const auto previousMediaCount{mediaCount()};
 
     media.clear();
-    for (auto& medium : newMedia) {
+    for (auto &medium : newMedia) {
         if (medium == nullptr) {
             continue;
         }
@@ -101,7 +101,7 @@ auto Library::replaceMedium(std::unique_ptr<const Medium> newMedium) -> bool {
     return true;
 }
 
-auto Library::removeMedium(const QUuid& id) -> bool {
+auto Library::removeMedium(const QUuid &id) -> bool {
     const bool didRemove{media.erase(id) > 0};
     if (didRemove) {
         emit sigsEmitter->mediaChanged();

@@ -3,6 +3,17 @@
 
 #include "Medium.h"
 
+#include <QUuid>
+
+/**
+ * Implementation of the std::hash function for QUuid, needed to use it as key in unordered_map
+ */
+template <> struct std::hash<QUuid> {
+    auto operator()(const QUuid &uuid) const -> std::size_t {
+        return qHash(uuid);
+    }
+};
+
 namespace Core::Model {
 
 /**
@@ -26,32 +37,32 @@ struct LibrarySignals final : public QObject {
  */
 class Library final {
 
-    std::map<QUuid, std::unique_ptr<const Medium>> media;
+    std::unordered_map<QUuid, std::unique_ptr<const Medium>> media;
     std::shared_ptr<LibrarySignals> sigsEmitter{std::make_shared<LibrarySignals>()};
+
+    /**
+     * @brief Swaps the current library with `other`.
+     * This operation will emit a `mediaChanged` signal on both libraries if they were not empty.
+     */
+    void swap(Library &other) noexcept;
 
   public:
     ~Library() = default;
     explicit Library() = default;
-    Library(Library&&) = default;
-    auto operator=(Library&&) -> Library& = default;
+    Library(Library &&) = default;
+    auto operator=(Library &&) -> Library & = default;
 
     /**
      * @brief Copies a library, performing a deep copy of media.
      */
-    Library(const Library& other);
+    Library(const Library &other);
 
     /**
      * @brief Copy-assigns a library, performing a deep copy of media.
      *
      * If at least one between this library and `other` wasn't empty, emits a `mediaChanged` signal.
      */
-    auto operator=(const Library& other) -> Library&;
-
-    /**
-     * @brief Swaps the current library with `other`.
-     * This operation will emit a `mediaChanged` signal on both libraries if they were not empty.
-     */
-    void swap(Library& other) noexcept;
+    auto operator=(const Library &other) -> Library &;
 
     /**
      * @brief Returns this library's signal emitter with shared ownership.
@@ -59,7 +70,7 @@ class Library final {
     [[nodiscard]] auto emitter() const -> std::shared_ptr<const LibrarySignals>;
 
     /**
-     * @return A vector of raw pointers to immutable media objects.
+     * @return An vector of raw pointers to immutable media objects, in a random order.
      *
      * The returned vector contains raw pointers to the immutable `Medium` objects owned by the
      * library. These pointers are guaranteed to remain valid until the next change to the
@@ -67,7 +78,7 @@ class Library final {
      * notified of such changes and ensure your view remains consistent, connect to the
      * `mediaChanged` signal of the Library class.
      */
-    [[nodiscard]] auto getMedia() const -> std::vector<const Medium*>;
+    [[nodiscard]] auto getMedia() const -> std::vector<const Medium *>;
 
     /**
      * @brief Returns a set containing every distinct topic in the collection of media.
@@ -84,7 +95,7 @@ class Library final {
      *
      * @return A const pointer to the medium, or nullopt if not found.
      */
-    [[nodiscard]] auto getMedium(const QUuid& id) const -> std::optional<const Medium*>;
+    [[nodiscard]] auto getMedium(const QUuid &id) const -> std::optional<const Medium *>;
 
     /**
      * @return The total number of media in the library.
@@ -122,7 +133,7 @@ class Library final {
      * @brief Removes a medium from the library by its unique ID.
      * @return True if a medium was found and removed, false otherwise.
      */
-    auto removeMedium(const QUuid& id) -> bool;
+    auto removeMedium(const QUuid &id) -> bool;
 
     /**
      * @brief Clears the entire collection
