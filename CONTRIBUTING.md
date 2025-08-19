@@ -19,6 +19,15 @@ int a = 4;
 int a{4};
 ```
 
+## Exception-Free Design philosophy
+
+SourceVault follows an original exception-free design approach. The reasons behind this decision are numerous:
+
+1. I can't really tell when a situation is exceptional and when it is not. Can you?
+2. The user is forced to check for unexpected conditions right when they could happen. This improves security and stability of the software.
+
+This philosophy also brings some drawbacks. The C++ type system doesn't like this decision too much. Thus, code can easily become verbose and noisy. For example, the Static Factory Method Pattern is widespread in the project. This is because it's the only way to ensure data-oriented classes' invariants during creation: you can't just throw an exception in the constructor.
+
 ## Parameters and Return Types
 
 Follow this simple rules:
