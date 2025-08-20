@@ -2,37 +2,37 @@
 
 namespace Core::Model {
 
-auto MediumUserData::favorite() -> bool& {
+auto MediumUserData::favorite() -> bool & {
     return favorite_;
 }
 auto MediumUserData::favorite() const -> bool {
     return favorite_;
 }
 
-auto MediumUserData::topics() -> ValidatedSet<QString>& {
+auto MediumUserData::topics() -> ValidatedSet<QString> & {
     return topics_;
 }
-auto MediumUserData::topics() const -> const ValidatedSet<QString>& {
+auto MediumUserData::topics() const -> const ValidatedSet<QString> & {
     return topics_;
 }
-auto MediumUserData::topicValidator(const QString& topicToValidate) -> bool {
+auto MediumUserData::topicValidator(const QString &topicToValidate) -> bool {
     return !topicToValidate.trimmed().isEmpty();
 }
 
-auto MediumUserData::notes() -> ValidatedField<QString>& {
+auto MediumUserData::notes() -> ValidatedField<QString> & {
     return notes_;
 }
-auto MediumUserData::notes() const -> const ValidatedField<QString>& {
+auto MediumUserData::notes() const -> const ValidatedField<QString> & {
     return notes_;
 }
-auto MediumUserData::notesValidator(const QString& notesToValidate) -> bool {
+auto MediumUserData::notesValidator(const QString &notesToValidate) -> bool {
     return !notesToValidate.trimmed().isEmpty();
 }
 
-auto MediumUserData::priority() -> ValidatedField<MediumUserData::PriorityLevel>& {
+auto MediumUserData::priority() -> ValidatedField<MediumUserData::PriorityLevel> & {
     return priority_;
 }
-auto MediumUserData::priority() const -> const ValidatedField<MediumUserData::PriorityLevel>& {
+auto MediumUserData::priority() const -> const ValidatedField<MediumUserData::PriorityLevel> & {
     return priority_;
 }
 auto MediumUserData::priorityValidator(PriorityLevel priorityToValidate) -> bool {

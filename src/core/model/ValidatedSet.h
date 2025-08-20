@@ -9,7 +9,7 @@ namespace Core::Model {
 
 template <typename T> class ValidatedSet {
 
-    using Validator = std::function<bool(const T&)>;
+    using Validator = std::function<bool(const T &)>;
 
     std::set<T> storedElements;
     Validator validator;
@@ -21,7 +21,7 @@ template <typename T> class ValidatedSet {
     /**
      * @brief Compares the two sets. Validator equality is ignored.
      */
-    auto operator==(const ValidatedSet& other) const -> bool {
+    auto operator==(const ValidatedSet &other) const -> bool {
         return storedElements == other.storedElements;
     }
 
@@ -40,7 +40,7 @@ template <typename T> class ValidatedSet {
      */
     auto set(std::set<T> newElements) -> bool {
         if (newElements.empty() ||
-            std::ranges::any_of(newElements, [&](const T& item) { return !validator(item); })) {
+            std::ranges::any_of(newElements, [&](const T &item) { return !validator(item); })) {
             unset();
             return false;
         }
@@ -59,7 +59,7 @@ template <typename T> class ValidatedSet {
         return storedElements.insert(std::move(newElement)).second;
     }
 
-    auto remove(const T& elementToRemove) -> bool {
+    auto remove(const T &elementToRemove) -> bool {
         return storedElements.erase(elementToRemove);
     }
 

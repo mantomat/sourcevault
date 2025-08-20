@@ -18,7 +18,7 @@ void TestArticle::testClone() {
 
     auto clone{articleToClone->clone()};
 
-    QVERIFY(dynamic_cast<Article*>(clone.get()) != nullptr);
+    QVERIFY(dynamic_cast<Article *>(clone.get()) != nullptr);
     QVERIFY(articleToClone != clone);
     QCOMPARE(*articleToClone, *clone);
 }
@@ -63,8 +63,8 @@ void TestArticle::testArticleUrl() {
 
     TestValidatedField::testValidatedFieldHelper<Article, QUrl>(
         articleBuilder, &Article::articleUrlValidator,
-        [](Article& article) -> ValidatedField<QUrl>& { return article.articleUrl(); },
-        [](const Article& article) -> const ValidatedField<QUrl>& { return article.articleUrl(); },
+        [](Article &article) -> ValidatedField<QUrl> & { return article.articleUrl(); },
+        [](const Article &article) -> const ValidatedField<QUrl> & { return article.articleUrl(); },
         candidateUrl, shouldBeValid);
 }
 
@@ -83,8 +83,8 @@ void TestArticle::testSourceName() {
 
     TestValidatedField::testValidatedFieldHelper<Article, QString>(
         articleBuilder, &Article::sourceNameValidator,
-        [](Article& article) -> ValidatedField<QString>& { return article.sourceName(); },
-        [](const Article& article) -> const ValidatedField<QString>& {
+        [](Article &article) -> ValidatedField<QString> & { return article.sourceName(); },
+        [](const Article &article) -> const ValidatedField<QString> & {
             return article.sourceName();
         },
         candidateSourceName, shouldBeValid);
@@ -105,8 +105,10 @@ void TestArticle::testReadTimeMinutes() {
 
     TestValidatedField::testValidatedFieldHelper<Article, unsigned int>(
         articleBuilder, &Article::readTimeMinutesValidator,
-        [](Article& article) -> ValidatedField<unsigned int>& { return article.readTimeMinutes(); },
-        [](const Article& article) -> const ValidatedField<unsigned int>& {
+        [](Article &article) -> ValidatedField<unsigned int> & {
+            return article.readTimeMinutes();
+        },
+        [](const Article &article) -> const ValidatedField<unsigned int> & {
             return article.readTimeMinutes();
         },
         candidateReadTimeMinutes, shouldBeValid);
@@ -126,8 +128,8 @@ void TestArticle::testPublicationDate() {
 
     TestValidatedField::testValidatedFieldHelper<Article, QDate>(
         articleBuilder, &Article::publicationDateValidator,
-        [](Article& article) -> ValidatedField<QDate>& { return article.publicationDate(); },
-        [](const Article& article) -> const ValidatedField<QDate>& {
+        [](Article &article) -> ValidatedField<QDate> & { return article.publicationDate(); },
+        [](const Article &article) -> const ValidatedField<QDate> & {
             return article.publicationDate();
         },
         candidatePublicationDate, shouldBeValid);

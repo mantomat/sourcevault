@@ -54,11 +54,11 @@ void TestValidatedSet::testHas_data() {
     QTest::addColumn<bool>("shouldBeSet");
 
     {
-        ValidatedSet<QString> set{[](const QString&) { return true; }};
+        ValidatedSet<QString> set{[](const QString &) { return true; }};
         QTest::addRow("New set should be unset") << set << false;
     }
     {
-        ValidatedSet<QString> set{[](const QString&) { return true; }};
+        ValidatedSet<QString> set{[](const QString &) { return true; }};
         set.add(QString{"Valid value"});
         QTest::addRow("Set should have a value") << set << true;
     }
@@ -205,7 +205,7 @@ void TestValidatedSet::testRemove() {
 void TestValidatedSet::testUnset_data() {
     QTest::addColumn<ValidatedSet<QString>>("validatedSet");
 
-    ValidatedSet<QString> set{[](const QString&) { return true; }};
+    ValidatedSet<QString> set{[](const QString &) { return true; }};
     QTest::addRow("Unsetting a new set should do nothing") << set;
 
     set.add(QString{"Valid value"});

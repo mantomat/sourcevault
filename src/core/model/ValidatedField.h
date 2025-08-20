@@ -8,7 +8,7 @@ namespace Core::Model {
 
 template <typename T> class ValidatedField final {
 
-    using Validator = std::function<bool(const T&)>;
+    using Validator = std::function<bool(const T &)>;
 
     std::optional<T> data;
     Validator validator;
@@ -20,7 +20,7 @@ template <typename T> class ValidatedField final {
     /**
      * @brief Compares the data. Validator equality is ignored.
      */
-    auto operator==(const ValidatedField& other) const -> bool {
+    auto operator==(const ValidatedField &other) const -> bool {
         return data == other.data;
     }
 

@@ -23,23 +23,24 @@ class TestValidatedField : public QObject {
      */
     template <typename MediumClass, typename FieldType>
     static void testValidatedFieldHelper(
-        const std::function<MediumClass()>& builder,
-        const std::function<bool(const FieldType&)>& validator,
-        const std::function<ValidatedField<FieldType>&(MediumClass&)>& fieldGetter,
-        const std::function<const ValidatedField<FieldType>&(const MediumClass&)>& constFieldGetter,
-        const FieldType& candidateValue, bool shouldBeValid) {
+        const std::function<MediumClass()> &builder,
+        const std::function<bool(const FieldType &)> &validator,
+        const std::function<ValidatedField<FieldType> &(MediumClass &)> &fieldGetter,
+        const std::function<const ValidatedField<FieldType> &(const MediumClass &)>
+            &constFieldGetter,
+        const FieldType &candidateValue, bool shouldBeValid) {
 
         const bool didPassValidation{validator(candidateValue)};
         QCOMPARE(didPassValidation, shouldBeValid);
 
         MediumClass mediumInstance = builder();
-        ValidatedField<FieldType>& field{fieldGetter(mediumInstance)};
+        ValidatedField<FieldType> &field{fieldGetter(mediumInstance)};
 
         const bool didSet{field.set(candidateValue)};
         QCOMPARE(didSet, shouldBeValid);
 
-        const MediumClass& constMedium{mediumInstance};
-        const auto& constField{constFieldGetter(constMedium)};
+        const MediumClass &constMedium{mediumInstance};
+        const auto &constField{constFieldGetter(constMedium)};
 
         const auto expectedValue{shouldBeValid ? std::make_optional(candidateValue) : std::nullopt};
         QCOMPARE(constField.get(), expectedValue);

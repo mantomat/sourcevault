@@ -18,7 +18,7 @@ void TestBook::testClone() {
 
     auto clone{bookToClone->clone()};
 
-    QVERIFY(dynamic_cast<Book*>(clone.get()) != nullptr);
+    QVERIFY(dynamic_cast<Book *>(clone.get()) != nullptr);
     QVERIFY(bookToClone != clone);
     QCOMPARE(*bookToClone, *clone);
 }
@@ -60,8 +60,8 @@ void TestBook::testIsbn() {
 
     TestValidatedField::testValidatedFieldHelper<Book, QString>(
         bookBuilder, &Book::isbnValidator,
-        [](Book& b) -> ValidatedField<QString>& { return b.isbn(); },
-        [](const Book& b) -> const ValidatedField<QString>& { return b.isbn(); }, candidateIsbn,
+        [](Book &b) -> ValidatedField<QString> & { return b.isbn(); },
+        [](const Book &b) -> const ValidatedField<QString> & { return b.isbn(); }, candidateIsbn,
         shouldBeValid);
 }
 
@@ -80,8 +80,8 @@ void TestBook::testEdition() {
 
     TestValidatedField::testValidatedFieldHelper<Book, QString>(
         bookBuilder, &Book::editionValidator,
-        [](Book& b) -> ValidatedField<QString>& { return b.edition(); },
-        [](const Book& b) -> const ValidatedField<QString>& { return b.edition(); },
+        [](Book &b) -> ValidatedField<QString> & { return b.edition(); },
+        [](const Book &b) -> const ValidatedField<QString> & { return b.edition(); },
         candidateEdition, shouldBeValid);
 }
 
@@ -99,8 +99,8 @@ void TestBook::testPublisher() {
     QFETCH(bool, shouldBeValid);
     TestValidatedField::testValidatedFieldHelper<Book, QString>(
         bookBuilder, &Book::publisherValidator,
-        [](Book& b) -> ValidatedField<QString>& { return b.publisher(); },
-        [](const Book& b) -> const ValidatedField<QString>& { return b.publisher(); },
+        [](Book &b) -> ValidatedField<QString> & { return b.publisher(); },
+        [](const Book &b) -> const ValidatedField<QString> & { return b.publisher(); },
         candidatePublisher, shouldBeValid);
 }
 
@@ -120,8 +120,8 @@ void TestBook::testYearPublished() {
 
     TestValidatedField::testValidatedFieldHelper<Book, int>(
         bookBuilder, &Book::yearPublishedValidator,
-        [](Book& b) -> ValidatedField<int>& { return b.yearPublished(); },
-        [](const Book& b) -> const ValidatedField<int>& { return b.yearPublished(); },
+        [](Book &b) -> ValidatedField<int> & { return b.yearPublished(); },
+        [](const Book &b) -> const ValidatedField<int> & { return b.yearPublished(); },
         candidateYearPublished, shouldBeValid);
 }
 
@@ -140,8 +140,8 @@ void TestBook::testPageNumber() {
 
     TestValidatedField::testValidatedFieldHelper<Book, unsigned int>(
         bookBuilder, &Book::pageNumberValidator,
-        [](Book& b) -> ValidatedField<unsigned int>& { return b.pageNumber(); },
-        [](const Book& b) -> const ValidatedField<unsigned int>& { return b.pageNumber(); },
+        [](Book &b) -> ValidatedField<unsigned int> & { return b.pageNumber(); },
+        [](const Book &b) -> const ValidatedField<unsigned int> & { return b.pageNumber(); },
         candidatePageNumber, shouldBeValid);
 }
 
@@ -160,8 +160,8 @@ void TestBook::testDescription() {
 
     TestValidatedField::testValidatedFieldHelper<Book, QString>(
         bookBuilder, &Book::descriptionValidator,
-        [](Book& b) -> ValidatedField<QString>& { return b.description(); },
-        [](const Book& b) -> const ValidatedField<QString>& { return b.description(); },
+        [](Book &b) -> ValidatedField<QString> & { return b.description(); },
+        [](const Book &b) -> const ValidatedField<QString> & { return b.description(); },
         candidateDescription, shouldBeValid);
 }
 
@@ -216,7 +216,7 @@ void TestBook::testThumbnailUrl() {
 
     TestValidatedField::testValidatedFieldHelper<Book, QUrl>(
         bookBuilder, &Book::thumbnailUrlValidator,
-        [](Book& b) -> ValidatedField<QUrl>& { return b.thumbnailUrl(); },
-        [](const Book& b) -> const ValidatedField<QUrl>& { return b.thumbnailUrl(); },
+        [](Book &b) -> ValidatedField<QUrl> & { return b.thumbnailUrl(); },
+        [](const Book &b) -> const ValidatedField<QUrl> & { return b.thumbnailUrl(); },
         candidateThumbnailUrl, shouldBeValid);
 }

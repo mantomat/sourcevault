@@ -15,27 +15,28 @@ class TestValidatedSet : public QObject {
   public:
     template <typename MediumClass, typename ElementsType>
     static void testValidatedFieldHelper(
-        const std::function<MediumClass()>& builder,
-        const std::function<bool(const ElementsType&)>& validator,
-        const std::function<ValidatedSet<ElementsType>&(MediumClass&)>& setGetter,
-        const std::function<const ValidatedSet<ElementsType>&(const MediumClass&)>& constSetGetter,
-        const std::set<ElementsType>& candidateSet, bool shouldBeValid) {
+        const std::function<MediumClass()> &builder,
+        const std::function<bool(const ElementsType &)> &validator,
+        const std::function<ValidatedSet<ElementsType> &(MediumClass &)> &setGetter,
+        const std::function<const ValidatedSet<ElementsType> &(const MediumClass &)>
+            &constSetGetter,
+        const std::set<ElementsType> &candidateSet, bool shouldBeValid) {
 
         const bool didAllPassValidation{
             !candidateSet.empty() &&
-            std::ranges::all_of(candidateSet, [&](const ElementsType& candidateElement) {
+            std::ranges::all_of(candidateSet, [&](const ElementsType &candidateElement) {
                 return validator(candidateElement);
             })};
         QCOMPARE(didAllPassValidation, shouldBeValid);
 
         MediumClass mediumInstance = builder();
-        ValidatedSet<ElementsType>& validatedSet{setGetter(mediumInstance)};
+        ValidatedSet<ElementsType> &validatedSet{setGetter(mediumInstance)};
 
         const bool didSet{validatedSet.set(candidateSet)};
         QCOMPARE(didSet, shouldBeValid);
 
-        const MediumClass& constMedium{mediumInstance};
-        const auto& constValidatedSet{constSetGetter(constMedium)};
+        const MediumClass &constMedium{mediumInstance};
+        const auto &constValidatedSet{constSetGetter(constMedium)};
 
         const auto expectedValue{shouldBeValid ? std::make_optional(candidateSet) : std::nullopt};
         QCOMPARE(constValidatedSet.get(), expectedValue);

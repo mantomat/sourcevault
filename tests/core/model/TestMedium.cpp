@@ -133,8 +133,8 @@ void TestMedium::testAuthors() {
 
     TestValidatedSet::testValidatedFieldHelper<ConcreteMedium, QString>(
         concreteMediumBuilder, &Medium::authorValidator,
-        [](Medium& m) -> ValidatedSet<QString>& { return m.authors(); },
-        [](const Medium& m) -> const ValidatedSet<QString>& { return m.authors(); },
+        [](Medium &m) -> ValidatedSet<QString> & { return m.authors(); },
+        [](const Medium &m) -> const ValidatedSet<QString> & { return m.authors(); },
         candidateAuthors, shouldBeValid);
 }
 
@@ -153,7 +153,7 @@ void TestMedium::testLanguage() {
 
     TestValidatedField::testValidatedFieldHelper<ConcreteMedium, QString>(
         concreteMediumBuilder, &Medium::languageValidator,
-        [](Medium& m) -> ValidatedField<QString>& { return m.language(); },
-        [](const Medium& m) -> const ValidatedField<QString>& { return m.language(); },
+        [](Medium &m) -> ValidatedField<QString> & { return m.language(); },
+        [](const Medium &m) -> const ValidatedField<QString> & { return m.language(); },
         candidateLanguage, shouldBeValid);
 }

@@ -26,21 +26,21 @@ class MediumUserData {
     ValidatedField<PriorityLevel> priority_{priorityValidator};
 
   public:
-    [[nodiscard]] auto operator==(const MediumUserData&) const -> bool = default;
+    [[nodiscard]] auto operator==(const MediumUserData &) const -> bool = default;
 
-    [[nodiscard]] auto favorite() -> bool&;
+    [[nodiscard]] auto favorite() -> bool &;
     [[nodiscard]] auto favorite() const -> bool;
 
-    [[nodiscard]] auto topics() -> ValidatedSet<QString>&;
-    [[nodiscard]] auto topics() const -> const ValidatedSet<QString>&;
-    [[nodiscard]] static auto topicValidator(const QString& topicToValidate) -> bool;
+    [[nodiscard]] auto topics() -> ValidatedSet<QString> &;
+    [[nodiscard]] auto topics() const -> const ValidatedSet<QString> &;
+    [[nodiscard]] static auto topicValidator(const QString &topicToValidate) -> bool;
 
-    [[nodiscard]] auto notes() -> ValidatedField<QString>&;
-    [[nodiscard]] auto notes() const -> const ValidatedField<QString>&;
-    [[nodiscard]] static auto notesValidator(const QString& notesToValidate) -> bool;
+    [[nodiscard]] auto notes() -> ValidatedField<QString> &;
+    [[nodiscard]] auto notes() const -> const ValidatedField<QString> &;
+    [[nodiscard]] static auto notesValidator(const QString &notesToValidate) -> bool;
 
-    [[nodiscard]] auto priority() -> ValidatedField<PriorityLevel>&;
-    [[nodiscard]] auto priority() const -> const ValidatedField<PriorityLevel>&;
+    [[nodiscard]] auto priority() -> ValidatedField<PriorityLevel> &;
+    [[nodiscard]] auto priority() const -> const ValidatedField<PriorityLevel> &;
     [[nodiscard]] static auto priorityValidator(PriorityLevel priorityToValidate) -> bool;
 };
 

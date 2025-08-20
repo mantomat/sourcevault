@@ -54,11 +54,11 @@ void TestValidatedField::testHas_data() {
     QTest::addColumn<bool>("shouldBeSet");
 
     {
-        ValidatedField<QString> field{[](const QString&) { return true; }};
+        ValidatedField<QString> field{[](const QString &) { return true; }};
         QTest::addRow("New field is unset") << field << false;
     }
     {
-        ValidatedField<QString> field{[](const QString&) { return true; }};
+        ValidatedField<QString> field{[](const QString &) { return true; }};
         field.set("Valid value");
         QTest::addRow("Field is set after setting") << field << true;
     }
@@ -119,7 +119,7 @@ void TestValidatedField::testSet() {
 void TestValidatedField::testUnset_data() {
     QTest::addColumn<ValidatedField<QString>>("validatedField");
 
-    ValidatedField<QString> field{[](const QString&) { return true; }};
+    ValidatedField<QString> field{[](const QString &) { return true; }};
     QTest::addRow("Unsetting an unset field should do nothing") << field;
 
     field.set(QString{"Valid value"});

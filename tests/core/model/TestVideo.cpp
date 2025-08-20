@@ -18,7 +18,7 @@ void TestVideo::testClone() {
 
     auto clone{videoToClone->clone()};
 
-    QVERIFY(dynamic_cast<Video*>(clone.get()) != nullptr);
+    QVERIFY(dynamic_cast<Video *>(clone.get()) != nullptr);
     QVERIFY(videoToClone != clone);
     QCOMPARE(*videoToClone, *clone);
 }
@@ -73,8 +73,8 @@ void TestVideo::testVideoUrl() {
 
     TestValidatedField::testValidatedFieldHelper<Video, QUrl>(
         videoBuilder, &Video::videoUrlValidator,
-        [](Video& v) -> ValidatedField<QUrl>& { return v.videoUrl(); },
-        [](const Video& v) -> const ValidatedField<QUrl>& { return v.videoUrl(); }, candidateUrl,
+        [](Video &v) -> ValidatedField<QUrl> & { return v.videoUrl(); },
+        [](const Video &v) -> const ValidatedField<QUrl> & { return v.videoUrl(); }, candidateUrl,
         shouldBeValid);
 }
 
@@ -93,8 +93,8 @@ void TestVideo::testDurationSeconds() {
 
     TestValidatedField::testValidatedFieldHelper<Video, unsigned int>(
         videoBuilder, &Video::durationSecondsValidator,
-        [](Video& v) -> ValidatedField<unsigned int>& { return v.durationSeconds(); },
-        [](const Video& v) -> const ValidatedField<unsigned int>& { return v.durationSeconds(); },
+        [](Video &v) -> ValidatedField<unsigned int> & { return v.durationSeconds(); },
+        [](const Video &v) -> const ValidatedField<unsigned int> & { return v.durationSeconds(); },
         candidateDurationSeconds, shouldBeValid);
 }
 
@@ -115,8 +115,8 @@ void TestVideo::testUploadDate() {
 
     TestValidatedField::testValidatedFieldHelper<Video, QDate>(
         videoBuilder, &Video::uploadDateValidator,
-        [](Video& v) -> ValidatedField<QDate>& { return v.uploadDate(); },
-        [](const Video& v) -> const ValidatedField<QDate>& { return v.uploadDate(); },
+        [](Video &v) -> ValidatedField<QDate> & { return v.uploadDate(); },
+        [](const Video &v) -> const ValidatedField<QDate> & { return v.uploadDate(); },
         candidateUploadDate, shouldBeValid);
 }
 
@@ -173,7 +173,7 @@ void TestVideo::testThumbnailUrl() {
 
     TestValidatedField::testValidatedFieldHelper<Video, QUrl>(
         videoBuilder, &Video::thumbnailUrlValidator,
-        [](Video& v) -> ValidatedField<QUrl>& { return v.thumbnailUrl(); },
-        [](const Video& v) -> const ValidatedField<QUrl>& { return v.thumbnailUrl(); },
+        [](Video &v) -> ValidatedField<QUrl> & { return v.thumbnailUrl(); },
+        [](const Video &v) -> const ValidatedField<QUrl> & { return v.thumbnailUrl(); },
         candidateThumbnailUrl, shouldBeValid);
 }
