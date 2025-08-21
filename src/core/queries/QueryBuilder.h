@@ -4,6 +4,7 @@
 #include "model/Library.h"
 #include "model/Medium.h"
 #include "queries/filters/Filter.h"
+#include "queries/search/SearchEngine.h"
 #include "queries/sortings/Sort.h"
 
 #include <typeindex>
@@ -12,6 +13,7 @@
 using Core::Model::Library;
 using Core::Model::Medium;
 using Core::Queries::Filters::Filter;
+using Core::Queries::Search::SearchEngine;
 using Core::Queries::Sortings::Sort;
 
 namespace Core::Queries {
@@ -19,6 +21,7 @@ namespace Core::Queries {
 class QueryBuilder {
     std::unordered_map<std::type_index, std::unique_ptr<const Filter>> filters;
     std::unique_ptr<const Sort> sort;
+    std::unique_ptr<const SearchEngine> searchEngine;
 
     void swap(QueryBuilder &other) noexcept;
 
@@ -48,9 +51,16 @@ class QueryBuilder {
     auto addFilter(std::unique_ptr<const Filter> newFilter) -> bool;
 
     /**
-     * @brief Sets the sort for the current builder.
+     * @brief Sets the sort for the current builder. Note that any search will be eliminated if
+     * present.
      */
     auto setSort(std::unique_ptr<const Sort> newSort) -> bool;
+
+    /**
+     * @brief Sets the search for the current builder. Note that any sort will be eliminated if
+     * present.
+     */
+    auto setSearch(std::unique_ptr<const SearchEngine> newSearchEngine) -> bool;
 
     void reset();
 

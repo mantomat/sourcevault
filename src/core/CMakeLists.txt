@@ -22,6 +22,11 @@ add_library(sourcevaultcore STATIC
         queries/QueryBuilder.cpp
         queries/QueryBuilder.h
 
+        queries/search/SearchEngine.cpp
+        queries/search/SearchEngine.h
+        queries/search/SearchScoreVisitor.cpp
+        queries/search/SearchScoreVisitor.h
+
         queries/filters/Filter.h
         queries/filters/FavoriteFilter.h
         queries/filters/FavoriteFilter.cpp

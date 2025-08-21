@@ -22,6 +22,11 @@ add_executable(testscore CoreTestsMain.cpp
         queries/TestQueryBuilder.cpp
         queries/TestQueryBuilder.h
 
+        queries/search/TestSearchScoreVisitor.cpp
+        queries/search/TestSearchScoreVisitor.h
+        queries/search/TestSearchEngine.cpp
+        queries/search/TestSearchEngine.h
+
         queries/filters/TestFavoriteFilter.cpp
         queries/filters/TestFavoriteFilter.h
         queries/filters/TestMediumTypeFilter.cpp

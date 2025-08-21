@@ -74,6 +74,8 @@ class TestQueryBuilder : public QObject {
 
     void testQuery_data() const;
     static void testQuery();
+
+    // TODO test setSearch and query with search
 };
 
 #endif

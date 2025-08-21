@@ -1,5 +1,7 @@
 #include "QueryBuilder.h"
 
+#include "queries/search/SearchEngine.h"
+
 #include <ranges>
 
 namespace Core::Queries {
@@ -42,7 +44,17 @@ auto QueryBuilder::setSort(std::unique_ptr<const Sort> newSort) -> bool {
     if (newSort == nullptr) {
         return false;
     }
+    searchEngine = nullptr;
     sort = std::move(newSort);
+    return true;
+}
+
+auto QueryBuilder::setSearch(std::unique_ptr<const SearchEngine> newSearchEngine) -> bool {
+    if (newSearchEngine == nullptr) {
+        return false;
+    }
+    sort = nullptr;
+    searchEngine = std::move(newSearchEngine);
     return true;
 }
 
@@ -56,7 +68,13 @@ auto QueryBuilder::query(const Library &library) const -> std::vector<const Medi
                    })};
     std::vector<const Medium *> filteredMedia{mediaView.begin(), mediaView.end()};
 
-    return sort != nullptr ? sort->apply(std::move(filteredMedia)) : filteredMedia;
+    if (sort != nullptr) {
+        return sort->apply(std::move(filteredMedia));
+    }
+    if (searchEngine != nullptr) {
+        return searchEngine->search(filteredMedia);
+    }
+    return filteredMedia;
 }
 
 void QueryBuilder::reset() {
