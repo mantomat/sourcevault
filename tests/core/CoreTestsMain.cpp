@@ -9,6 +9,9 @@
 #include "queries/TestQueryBuilder.h"
 #include "queries/filters/TestFavoriteFilter.h"
 #include "queries/filters/TestMediumTypeFilter.h"
+#include "queries/search/TestFieldScoreCalculator.h"
+#include "queries/search/TestSearchEngine.h"
+#include "queries/search/TestSearchScoreVisitor.h"
 #include "queries/sortings/TestDateAddedSort.h"
 #include "queries/sortings/TestSort.h"
 #include "queries/sortings/TestTitleSort.h"
@@ -35,6 +38,10 @@ auto main(const int argc, char **argv) -> int {
 
     // queries
     ret |= QTest::qExec(std::make_unique<TestQueryBuilder>().get(), argc, argv);
+    // search
+    ret |= QTest::qExec(std::make_unique<TestSearchScoreVisitor>().get(), argc, argv);
+    ret |= QTest::qExec(std::make_unique<TestFieldScoreCalculator>().get(), argc, argv);
+    ret |= QTest::qExec(std::make_unique<TestSearchEngine>().get(), argc, argv);
     // filters
     ret |= QTest::qExec(std::make_unique<TestFavoriteFilter>().get(), argc, argv);
     ret |= QTest::qExec(std::make_unique<TestMediumTypeFilter>().get(), argc, argv);

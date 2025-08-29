@@ -1,8 +1,9 @@
 #ifndef SEARCHENGINE_H
 #define SEARCHENGINE_H
 
-#include "SearchScoreVisitor.h"
+#include "FieldScoreCalculator.h"
 #include "model/Medium.h"
+#include "queries/search/SearchScoreVisitor.h"
 
 #include <QString>
 
@@ -28,13 +29,14 @@ class SearchEngine {
 
     SearchEngine(QString newSearchTerm,
                  SearchEngineOptions newSearchEngineOptions = SearchEngineOptions{},
-                 SearchWeights newWeights = SearchWeights{},
-                 SearchOptions newOptions = SearchOptions{});
+                 SearchOptions newSearchOptions = SearchOptions{},
+                 FieldWeightLevels newWeights = FieldWeightLevels{},
+                 ScoreCalculatorConfigs newScoreConfigs = ScoreCalculatorConfigs{});
 
-    SearchEngine(const SearchEngine &);
+    SearchEngine(const SearchEngine &other);
     SearchEngine(SearchEngine &&) = default;
 
-    auto operator=(const SearchEngine &) -> SearchEngine &;
+    auto operator=(const SearchEngine &other) -> SearchEngine &;
     auto operator=(SearchEngine &&) -> SearchEngine & = default;
 
     [[nodiscard]] auto search(const std::vector<const Medium *> &media) const

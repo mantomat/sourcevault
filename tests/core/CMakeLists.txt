@@ -22,6 +22,8 @@ add_executable(testscore CoreTestsMain.cpp
         queries/TestQueryBuilder.cpp
         queries/TestQueryBuilder.h
 
+        queries/search/TestFieldScoreCalculator.cpp
+        queries/search/TestFieldScoreCalculator.h
         queries/search/TestSearchScoreVisitor.cpp
         queries/search/TestSearchScoreVisitor.h
         queries/search/TestSearchEngine.cpp

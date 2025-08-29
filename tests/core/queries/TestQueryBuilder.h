@@ -70,6 +70,9 @@ class TestQueryBuilder : public QObject {
     void testSetSort_data() const;
     static void testSetSort();
 
+    void testSetSearch_data() const;
+    static void testSetSearch();
+
     void testReset() const;
 
     void testQuery_data() const;

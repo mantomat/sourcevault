@@ -34,3 +34,6 @@ if (CMAKE_CONFIGURATION_TYPES OR (NOT CMAKE_BUILD_TYPE STREQUAL "Release"))
 else ()
     message(STATUS "Skipping tests in Release build.")
 endif ()
+
+# Tools
+add_subdirectory(tools)

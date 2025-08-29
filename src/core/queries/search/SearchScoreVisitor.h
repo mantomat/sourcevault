@@ -6,6 +6,7 @@
 #include "model/Medium.h"
 #include "model/ValidatedField.h"
 #include "model/Video.h"
+#include "queries/search/FieldScoreCalculator.h"
 #include "shared/MediumVisitor.h"
 
 #include <QString>
@@ -19,43 +20,35 @@ using Core::Model::ValidatedField;
 using Core::Model::ValidatedSet;
 using Core::Shared::MediumVisitor;
 
+class TestSearchScoreVisitor;
+class FieldScoreCalculatorRepl;
+
 namespace Core::Queries::Search {
 
-struct SearchWeights {
-    static constexpr double defaultContiguity{0.6};
+struct FieldWeightLevels {
     static constexpr double defaultIdentifiers{100.0};
-    static constexpr double defaultFields{60.0};
-
-    double contiguityBias{defaultContiguity};
-
     double identifiers{defaultIdentifiers};
+    static constexpr double defaultFields{90.0};
     double fields{defaultFields};
 };
 
 struct SearchOptions {
-    QString dateFormat{"yyyyMMdd"};
+    QString dateFormat{"yyyy-MM-dd"};
 };
 
 class SearchScoreVisitor : public MediumVisitor {
 
-    QString searchTerm;
+    FieldScoreCalculator scoreCalculator;
 
-    SearchWeights weights;
+    FieldWeightLevels weights;
     SearchOptions options;
 
     double score{0.0};
 
   public:
-    SearchScoreVisitor(const SearchScoreVisitor &) = default;
-
-    explicit SearchScoreVisitor(QString newSearchTerm = QString{},
-                                SearchWeights newWeights = SearchWeights{},
-                                SearchOptions newOptions = SearchOptions{});
-
-    SearchScoreVisitor(SearchScoreVisitor &&) = default;
-    auto operator=(const SearchScoreVisitor &) -> SearchScoreVisitor & = default;
-    auto operator=(SearchScoreVisitor &&) -> SearchScoreVisitor & = default;
-    ~SearchScoreVisitor() override = default;
+    explicit SearchScoreVisitor(QString newSearchTerm, SearchOptions newOptions,
+                                FieldWeightLevels newWeights,
+                                ScoreCalculatorConfigs newScoreConfigs);
 
     [[nodiscard]] auto getScore() const -> double;
 
@@ -64,23 +57,7 @@ class SearchScoreVisitor : public MediumVisitor {
     void visit(const Video &video) override;
 
   private:
-    struct LcsResult {
-        size_t lcsLength;
-        size_t maxContiguousRun;
-    };
-
-    /**
-     * @brief Calculates the length of the Longest Common Substring and the length of the longest
-     * contiguous run inside it.
-     */
-    [[nodiscard]] static auto lcsWithContiguityBonus(const QString &x, const QString &y)
-        -> LcsResult;
-
-    /**
-     * @brief Returns a score in [0, 1] based on the Longest Common Subsequence between
-     * `searchTerm` and `field`.
-     */
-    [[nodiscard]] auto computeRawScore(const QString &field) const -> double;
+    void updateScoreIfMax(double fieldScore);
 
     /**
      * @brief Utility function to update the score with a field.
@@ -93,7 +70,7 @@ class SearchScoreVisitor : public MediumVisitor {
         if (!field.has()) {
             return;
         }
-        score = std::max(score, computeRawScore(stringGetter(field)) * weight);
+        updateScoreIfMax(scoreCalculator.getWeightedScore(stringGetter(field), weight));
     }
 
     /**
@@ -104,7 +81,7 @@ class SearchScoreVisitor : public MediumVisitor {
     /**
      * @brief Utility function to update the score with common Medium attributes.
      */
-    void scoreMediumFields(const Medium &medium);
+    void scoreCommonFields(const Medium &medium);
 };
 
 }

@@ -20,7 +20,6 @@ using Core::Shared::MediumTypeVisitor;
 using MediaGenerator = std::function<std::vector<std::unique_ptr<Medium>>()>;
 
 void TestMediumTypeVisitor::testHasMatched_data() {
-
     QTest::addColumn<MediumTypeVisitor>("visitor");
     QTest::addColumn<MediaGenerator>("mediaGenerator");
     QTest::addColumn<std::set<QUuid>>("expectedMatchIds");

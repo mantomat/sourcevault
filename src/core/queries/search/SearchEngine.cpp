@@ -8,20 +8,20 @@
 namespace Core::Queries::Search {
 
 SearchEngine::SearchEngine(QString newSearchTerm, SearchEngineOptions newSearchEngineOptions,
-                           SearchWeights newWeights, SearchOptions newOptions)
+                           SearchOptions newSearchOptions, FieldWeightLevels newWeights,
+                           ScoreCalculatorConfigs newScoreConfigs)
     : options{newSearchEngineOptions}
-    , visitor{std::make_unique<SearchScoreVisitor>(std::move(newSearchTerm), newWeights,
-                                                   std::move(newOptions))} {}
-
-SearchEngine::SearchEngine(const SearchEngine &other)
-    : options{other.options}
-    , visitor{std::make_unique<SearchScoreVisitor>(*other.visitor)} {}
+    , visitor{std::make_unique<SearchScoreVisitor>(
+          std::move(newSearchTerm), std::move(newSearchOptions), newWeights, newScoreConfigs)} {}
 
 void SearchEngine::swap(SearchEngine &other) noexcept {
     std::swap(visitor, other.visitor);
     std::swap(options, other.options);
 }
 
+SearchEngine::SearchEngine(const SearchEngine &other)
+    : options{other.options}
+    , visitor{std::make_unique<SearchScoreVisitor>(*other.visitor)} {}
 auto SearchEngine::operator=(const SearchEngine &other) -> SearchEngine & {
     if (&other != this) {
         SearchEngine temp{other};

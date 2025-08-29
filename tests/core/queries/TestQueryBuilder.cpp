@@ -155,6 +155,9 @@ void TestQueryBuilder::testSetSort() {
     }
 }
 
+void TestQueryBuilder::testSetSearch_data() const {}
+void TestQueryBuilder::testSetSearch() {}
+
 void TestQueryBuilder::testQuery_data() const {
     QTest::addColumn<Library>("library");
     QTest::addColumn<QueryBuilder>("queryBuilder");
