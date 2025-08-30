@@ -11,6 +11,7 @@ SearchEngine::SearchEngine(QString newSearchTerm, SearchEngineOptions newSearchE
                            SearchOptions newSearchOptions, FieldWeightLevels newWeights,
                            ScoreCalculatorConfigs newScoreConfigs)
     : options{newSearchEngineOptions}
+    , hasEmptySearchTerm(newSearchTerm.isEmpty())
     , visitor{std::make_unique<SearchScoreVisitor>(
           std::move(newSearchTerm), std::move(newSearchOptions), newWeights, newScoreConfigs)} {}
 
@@ -21,7 +22,9 @@ void SearchEngine::swap(SearchEngine &other) noexcept {
 
 SearchEngine::SearchEngine(const SearchEngine &other)
     : options{other.options}
+    , hasEmptySearchTerm{other.hasEmptySearchTerm}
     , visitor{std::make_unique<SearchScoreVisitor>(*other.visitor)} {}
+
 auto SearchEngine::operator=(const SearchEngine &other) -> SearchEngine & {
     if (&other != this) {
         SearchEngine temp{other};
@@ -32,6 +35,10 @@ auto SearchEngine::operator=(const SearchEngine &other) -> SearchEngine & {
 
 auto SearchEngine::search(const std::vector<const Medium *> &media) const
     -> std::vector<const Medium *> {
+    if (hasEmptySearchTerm) {
+        return media;
+    }
+
     std::vector<std::pair<double, const Medium *>> scoredMedia;
     scoredMedia.reserve(media.size());
 

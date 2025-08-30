@@ -22,6 +22,15 @@ void TestSearchEngine::testSearch_data() {
     const Book book{Book::create("book title").value()};
     const Article article{Article::create("title article").value()};
 
+    MediaGenerator articleAndBook{MediaGenerator{[book, article] {
+        std::vector<std::unique_ptr<const Medium>> vec;
+        vec.push_back(std::make_unique<Article>(article));
+        vec.push_back(std::make_unique<Book>(book));
+        return vec;
+    }}};
+    QTest::addRow("A search engine with empty search term doesn't modify the input vector")
+        << articleAndBook << SearchEngine{""} << articleAndBook;
+
     QTest::addRow("Searching through an empty vector always returns an empty vector")
         << MediaGenerator{[] { return std::vector<std::unique_ptr<const Medium>>{}; }}
         << SearchEngine{"anything"}

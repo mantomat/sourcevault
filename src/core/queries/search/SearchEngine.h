@@ -22,6 +22,8 @@ struct SearchEngineOptions {
 class SearchEngine {
 
     SearchEngineOptions options;
+    bool hasEmptySearchTerm;
+
     std::unique_ptr<SearchScoreVisitor> visitor;
 
   public:

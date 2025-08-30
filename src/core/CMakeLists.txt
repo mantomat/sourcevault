@@ -19,8 +19,12 @@ add_library(sourcevaultcore STATIC
         model/MediumUserData.cpp
         model/MediumUserData.h
 
-        queries/QueryBuilder.cpp
-        queries/QueryBuilder.h
+        queries/FilteringQuery.cpp
+        queries/FilteringQuery.h
+        queries/SearchQuery.cpp
+        queries/SearchQuery.h
+        queries/SortingQuery.cpp
+        queries/SortingQuery.h
 
         queries/search/SearchEngine.cpp
         queries/search/SearchEngine.h

@@ -19,8 +19,12 @@ add_executable(testscore CoreTestsMain.cpp
         model/TestLibrary.cpp
         model/TestLibrary.h
 
-        queries/TestQueryBuilder.cpp
-        queries/TestQueryBuilder.h
+        queries/TestFilteringQuery.cpp
+        queries/TestFilteringQuery.h
+        queries/TestSearchQuery.cpp
+        queries/TestSearchQuery.h
+        queries/TestSortingQuery.cpp
+        queries/TestSortingQuery.h
 
         queries/search/TestFieldScoreCalculator.cpp
         queries/search/TestFieldScoreCalculator.h

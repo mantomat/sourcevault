@@ -6,7 +6,9 @@
 #include "model/TestValidatedField.h"
 #include "model/TestValidatedSet.h"
 #include "model/TestVideo.h"
-#include "queries/TestQueryBuilder.h"
+#include "queries/TestFilteringQuery.h"
+#include "queries/TestSearchQuery.h"
+#include "queries/TestSortingQuery.h"
 #include "queries/filters/TestFavoriteFilter.h"
 #include "queries/filters/TestMediumTypeFilter.h"
 #include "queries/search/TestFieldScoreCalculator.h"
@@ -37,7 +39,9 @@ auto main(const int argc, char **argv) -> int {
     ret |= QTest::qExec(std::make_unique<TestMediumTypeVisitor>().get(), argc, argv);
 
     // queries
-    ret |= QTest::qExec(std::make_unique<TestQueryBuilder>().get(), argc, argv);
+    ret |= QTest::qExec(std::make_unique<TestFilteringQuery>().get(), argc, argv);
+    ret |= QTest::qExec(std::make_unique<TestSearchQuery>().get(), argc, argv);
+    ret |= QTest::qExec(std::make_unique<TestSortingQuery>().get(), argc, argv);
     // search
     ret |= QTest::qExec(std::make_unique<TestSearchScoreVisitor>().get(), argc, argv);
     ret |= QTest::qExec(std::make_unique<TestFieldScoreCalculator>().get(), argc, argv);
