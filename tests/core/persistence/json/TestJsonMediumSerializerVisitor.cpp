@@ -26,6 +26,7 @@ void TestJsonMediumSerializerVisitor::testVisitBook_data() {
     const QString title{"Thinking, Fast and Slow"};
     const Book minimalBook{Book::create(title).value()};
     const QJsonObject minimalBookJson{
+        {"type", "book"},
         {"id", minimalBook.id().toString(QUuid::StringFormat::WithoutBraces)},
         {"title", title},
         {"favorite", false},
@@ -107,6 +108,7 @@ void TestJsonMediumSerializerVisitor::testVisitArticle_data() {
     const QString title{"How We Traded Anxiety for Apathy"};
     const Article minimalArticle{Article::create(title).value()};
     const QJsonObject minimalArticleJson{
+        {"type", "article"},
         {"id", minimalArticle.id().toString(QUuid::StringFormat::WithoutBraces)},
         {"title", title},
         {"favorite", false},
@@ -174,6 +176,7 @@ void TestJsonMediumSerializerVisitor::testVisitVideo_data() {
     const QString title{"Educati e Finanziati 01: introduzione al nuovo corso di finanza di base"};
     const Video minimalVideo{Video::create(title).value()};
     const QJsonObject minimalVideoJson{
+        {"type", "video"},
         {"id", minimalVideo.id().toString(QUuid::StringFormat::WithoutBraces)},
         {"title", title},
         {"favorite", false},

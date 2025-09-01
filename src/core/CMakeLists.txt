@@ -49,6 +49,8 @@ add_library(sourcevaultcore STATIC
         persistence/MediaSerializationConfigs.h
         persistence/json/JsonMediumSerializerVisitor.cpp
         persistence/json/JsonMediumSerializerVisitor.h
+        persistence/json/JsonMediaSerializer.cpp
+        persistence/json/JsonMediaSerializer.h
 )
 target_include_directories(sourcevaultcore PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(sourcevaultcore PUBLIC Qt6::Core Qt6::Network)

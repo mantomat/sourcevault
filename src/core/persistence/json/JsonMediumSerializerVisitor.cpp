@@ -14,6 +14,7 @@ JsonMediumSerializerVisitor::JsonMediumSerializerVisitor(MediaSerializationConfi
 
 void JsonMediumSerializerVisitor::visit(const Book &book) {
     serializedMedium = QJsonObject{};
+    serializedMedium["type"] = "book";
     serializeBaseAttributes(book);
 
     serializeValidatedField<QString, QString>("isbn", book.isbn());
@@ -27,6 +28,7 @@ void JsonMediumSerializerVisitor::visit(const Book &book) {
 
 void JsonMediumSerializerVisitor::visit(const Article &article) {
     serializedMedium = QJsonObject{};
+    serializedMedium["type"] = "article";
     serializeBaseAttributes(article);
 
     serializeValidatedField<QUrl, QString>("articleUrl", article.articleUrl(),
@@ -39,6 +41,7 @@ void JsonMediumSerializerVisitor::visit(const Article &article) {
 
 void JsonMediumSerializerVisitor::visit(const Video &video) {
     serializedMedium = QJsonObject{};
+    serializedMedium["type"] = "video";
     serializeBaseAttributes(video);
 
     serializeValidatedField<QUrl, QString>("videoUrl", video.videoUrl(), urlToStringConverter);
