@@ -44,6 +44,9 @@ add_executable(testscore CoreTestsMain.cpp
         queries/sortings/TestDateAddedSort.h
         queries/sortings/TestTitleSort.cpp
         queries/sortings/TestTitleSort.h
+
+        persistence/json/TestJsonMediumSerializerVisitor.cpp
+        persistence/json/TestJsonMediumSerializerVisitor.h
 )
 target_link_libraries(testscore sourcevaultcore Qt6::Test)
 target_compile_options(testscore PRIVATE ${COMMON_COMPILE_OPTIONS})

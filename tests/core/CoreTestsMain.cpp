@@ -6,6 +6,7 @@
 #include "model/TestValidatedField.h"
 #include "model/TestValidatedSet.h"
 #include "model/TestVideo.h"
+#include "persistence/json/TestJsonMediumSerializerVisitor.h"
 #include "queries/TestFilteringQuery.h"
 #include "queries/TestSearchQuery.h"
 #include "queries/TestSortingQuery.h"
@@ -53,6 +54,9 @@ auto main(const int argc, char **argv) -> int {
     ret |= QTest::qExec(std::make_unique<TestSort>().get(), argc, argv);
     ret |= QTest::qExec(std::make_unique<TestDateAddedSort>().get(), argc, argv);
     ret |= QTest::qExec(std::make_unique<TestTitleSort>().get(), argc, argv);
+
+    // persistence
+    ret |= QTest::qExec(std::make_unique<TestJsonMediumSerializerVisitor>().get(), argc, argv);
 
     return ret;
 }
