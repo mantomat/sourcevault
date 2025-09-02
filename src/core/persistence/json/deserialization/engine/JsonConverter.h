@@ -1,7 +1,7 @@
 #ifndef JSONCONVERTER_H
 #define JSONCONVERTER_H
 
-#include "DeserializationError.h"
+#include "JsonDeserializationError.h"
 #include "model/MediumUserData.h"
 #include "persistence/MediaSerializationConfigs.h"
 
@@ -21,12 +21,12 @@ template <typename T> struct JsonConverter;
 template <> struct JsonConverter<int> {
     static auto fromJson(const QJsonObject &mediumObject, const QString &key,
                          const MediaSerializationConfigs & /*unused*/)
-        -> std::variant<DeserializationError, int> {
+        -> std::variant<JsonDeserializationError, int> {
         assert(mediumObject.contains(key));
 
         if (!mediumObject.value(key).isDouble()) {
-            return DeserializationError{
-                .code = DeserializationError::Code::WrongMediumFieldType,
+            return JsonDeserializationError{
+                .code = JsonDeserializationError::Code::WrongMediumFieldType,
                 .errorLocation = mediumObject,
                 .message =
                     QString{"Field '%1' should be an integer, but it's not a numeric type."}.arg(
@@ -37,8 +37,8 @@ template <> struct JsonConverter<int> {
         const double value{mediumObject.value(key).toDouble()};
         if (value != static_cast<double>(static_cast<long long>(value)) || value > INT_MAX ||
             value < INT_MIN) {
-            return DeserializationError{
-                .code = DeserializationError::Code::WrongMediumFieldType,
+            return JsonDeserializationError{
+                .code = JsonDeserializationError::Code::WrongMediumFieldType,
                 .errorLocation = mediumObject,
                 .message = QString{"Field '%1' should be an integer, but it's a double"}.arg(key),
             };
@@ -51,12 +51,12 @@ template <> struct JsonConverter<int> {
 template <> struct JsonConverter<unsigned int> {
     static auto fromJson(const QJsonObject &mediumObject, const QString &key,
                          const MediaSerializationConfigs & /*unused*/)
-        -> std::variant<DeserializationError, unsigned int> {
+        -> std::variant<JsonDeserializationError, unsigned int> {
         assert(mediumObject.contains(key));
 
         if (!mediumObject.value(key).isDouble()) {
-            return DeserializationError{
-                .code = DeserializationError::Code::WrongMediumFieldType,
+            return JsonDeserializationError{
+                .code = JsonDeserializationError::Code::WrongMediumFieldType,
                 .errorLocation = mediumObject,
                 .message = QString{"Field '%1' should be an unsigned integer, but it's not a "
                                    "numeric type."}
@@ -67,8 +67,8 @@ template <> struct JsonConverter<unsigned int> {
         const double value{mediumObject.value(key).toDouble()};
         if (value != static_cast<double>(static_cast<long long>(value)) || value < 0 ||
             value > UINT_MAX) {
-            return DeserializationError{
-                .code = DeserializationError::Code::WrongMediumFieldType,
+            return JsonDeserializationError{
+                .code = JsonDeserializationError::Code::WrongMediumFieldType,
                 .errorLocation = mediumObject,
                 .message =
                     QString{"Field '%1' should be an unsigned integer, but it's not"}.arg(key),
@@ -81,12 +81,12 @@ template <> struct JsonConverter<unsigned int> {
 template <> struct JsonConverter<QUrl> {
     static auto fromJson(const QJsonObject &mediumObject, const QString &key,
                          const MediaSerializationConfigs & /*unused*/)
-        -> std::variant<DeserializationError, QUrl> {
+        -> std::variant<JsonDeserializationError, QUrl> {
         assert(mediumObject.contains(key));
 
         if (!mediumObject.value(key).isString()) {
-            return DeserializationError{
-                .code = DeserializationError::Code::WrongMediumFieldType,
+            return JsonDeserializationError{
+                .code = JsonDeserializationError::Code::WrongMediumFieldType,
                 .errorLocation = mediumObject,
                 .message =
                     QString{"Field '%1' should be a URL string, but it is not even a string."}.arg(
@@ -95,8 +95,8 @@ template <> struct JsonConverter<QUrl> {
         }
         QUrl url{mediumObject.value(key).toString(), QUrl::ParsingMode::StrictMode};
         if (url.isEmpty() || !url.isValid()) {
-            return DeserializationError{
-                .code = DeserializationError::Code::WrongMediumFieldType,
+            return JsonDeserializationError{
+                .code = JsonDeserializationError::Code::WrongMediumFieldType,
                 .errorLocation = mediumObject,
                 .message =
                     QString{"Field '%1' should be a URL string, but it is an invalid URL."}.arg(
@@ -110,12 +110,12 @@ template <> struct JsonConverter<QUrl> {
 template <> struct JsonConverter<QString> {
     static auto fromJson(const QJsonObject &mediumObject, const QString &key,
                          const MediaSerializationConfigs & /*unused*/)
-        -> std::variant<DeserializationError, QString> {
+        -> std::variant<JsonDeserializationError, QString> {
         assert(mediumObject.contains(key));
 
         if (!mediumObject.value(key).isString()) {
-            return DeserializationError{
-                .code = DeserializationError::Code::WrongMediumFieldType,
+            return JsonDeserializationError{
+                .code = JsonDeserializationError::Code::WrongMediumFieldType,
                 .errorLocation = mediumObject,
                 .message = QString{"Field '%1' should be a string, but it is not."}.arg(key),
             };
@@ -127,12 +127,12 @@ template <> struct JsonConverter<QString> {
 template <> struct JsonConverter<QDate> {
     static auto fromJson(const QJsonObject &mediumObject, const QString &key,
                          const MediaSerializationConfigs &configs)
-        -> std::variant<DeserializationError, QDate> {
+        -> std::variant<JsonDeserializationError, QDate> {
         assert(mediumObject.contains(key));
 
         if (!mediumObject.value(key).isString()) {
-            return DeserializationError{
-                .code = DeserializationError::Code::WrongMediumFieldType,
+            return JsonDeserializationError{
+                .code = JsonDeserializationError::Code::WrongMediumFieldType,
                 .errorLocation = mediumObject,
                 .message =
                     QString{"Field '%1' should be a date string, but it is not even a string."}.arg(
@@ -141,8 +141,8 @@ template <> struct JsonConverter<QDate> {
         }
         auto date{QDate::fromString(mediumObject.value(key).toString(), configs.dateFormat)};
         if (date.isNull() || !date.isValid()) {
-            return DeserializationError{
-                .code = DeserializationError::Code::WrongMediumFieldType,
+            return JsonDeserializationError{
+                .code = JsonDeserializationError::Code::WrongMediumFieldType,
                 .errorLocation = mediumObject,
                 .message =
                     QString{"Field '%1' should be a date string, but it is an invalid date."}.arg(
@@ -156,12 +156,12 @@ template <> struct JsonConverter<QDate> {
 template <> struct JsonConverter<MediumUserData::PriorityLevel> {
     static auto fromJson(const QJsonObject &mediumObject, const QString &key,
                          const MediaSerializationConfigs & /*unused*/)
-        -> std::variant<DeserializationError, MediumUserData::PriorityLevel> {
+        -> std::variant<JsonDeserializationError, MediumUserData::PriorityLevel> {
         assert(mediumObject.contains(key));
 
         if (!mediumObject.value(key).isDouble()) {
-            return DeserializationError{
-                .code = DeserializationError::Code::WrongMediumFieldType,
+            return JsonDeserializationError{
+                .code = JsonDeserializationError::Code::WrongMediumFieldType,
                 .errorLocation = mediumObject,
                 .message =
                     QString{"Field '%1' should be a date string, but it is not even a string."}.arg(
@@ -172,8 +172,8 @@ template <> struct JsonConverter<MediumUserData::PriorityLevel> {
         if (value != static_cast<double>(static_cast<long long>(value)) ||
             value < static_cast<double>(MediumUserData::PriorityLevel::min) ||
             value > static_cast<double>(MediumUserData::PriorityLevel::max)) {
-            return DeserializationError{
-                .code = DeserializationError::Code::WrongMediumFieldType,
+            return JsonDeserializationError{
+                .code = JsonDeserializationError::Code::WrongMediumFieldType,
                 .errorLocation = mediumObject,
                 .message =
                     QString{"Field '%1' should be an integer from '%2' to '%3', but it's not"}

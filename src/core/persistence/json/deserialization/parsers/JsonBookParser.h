@@ -1,9 +1,9 @@
 #ifndef JSONBOOKPARSER_H
 #define JSONBOOKPARSER_H
 
-#include "JsonDeserializationUtils.h"
 #include "JsonMediumParser.h"
 #include "persistence/MediaSerializationConfigs.h"
+#include "persistence/json/deserialization/engine/JsonDeserializationUtils.h"
 
 namespace Core::Persistence::Json {
 
@@ -21,7 +21,7 @@ class JsonBookParser : public JsonMediumParser {
     JsonBookParser(MediaSerializationConfigs newConfigs = MediaSerializationConfigs{});
 
     [[nodiscard]] auto parse(const QJsonObject &bookObject, const QString &version) const
-        -> std::variant<DeserializationError, std::unique_ptr<const Medium>> override;
+        -> std::variant<JsonDeserializationError, std::unique_ptr<const Medium>> override;
 };
 
 }

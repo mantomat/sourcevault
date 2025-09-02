@@ -9,7 +9,7 @@
 
 namespace Core::Persistence::Json {
 
-struct DeserializationError {
+struct JsonDeserializationError {
     enum class Code : uint8_t {
         InvalidJson,
         EmptyJson,

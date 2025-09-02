@@ -10,7 +10,7 @@ JsonVideoParser::JsonVideoParser(MediaSerializationConfigs newConfigs)
     : configs{std::move(newConfigs)} {}
 
 auto JsonVideoParser::parse(const QJsonObject &videoObject, const QString &version) const
-    -> std::variant<DeserializationError, std::unique_ptr<const Medium>> {
+    -> std::variant<JsonDeserializationError, std::unique_ptr<const Medium>> {
     // We only manage this version for now.
     assert(version == "1.0");
 
@@ -18,14 +18,7 @@ auto JsonVideoParser::parse(const QJsonObject &videoObject, const QString &versi
     const QUuid id{videoObject.value("id").toString()};
     std::unique_ptr<Video> video{Video::make(std::move(title), id, QDate::currentDate()).value()};
 
-    auto commonFieldsResult{deserializeCommonFields<Video>(std::move(video), videoObject, version)};
-    if (const auto *error{std::get_if<DeserializationError>(&commonFieldsResult)};
-        error != nullptr) {
-        return *error;
-    }
-
-    std::variant<DeserializationError, std::unique_ptr<Video>> result =
-        std::move(std::get<std::unique_ptr<Video>>(commonFieldsResult));
+    auto result{deserializeCommonFields<Video>(std::move(video), videoObject, version)};
 
     result = andThen<Video>(std::move(result), optionalValidatedFieldParser<QUrl, Video>(
                                                    videoObject, "videoUrl", [](Video &v) -> auto & {
@@ -47,7 +40,7 @@ auto JsonVideoParser::parse(const QJsonObject &videoObject, const QString &versi
     if (auto *success = std::get_if<std::unique_ptr<Video>>(&result)) {
         return std::move(*success);
     }
-    return std::get<DeserializationError>(result);
+    return std::get<JsonDeserializationError>(result);
 }
 
 }

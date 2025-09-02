@@ -1,13 +1,13 @@
 #ifndef JSONDESERIALIZATIONUTILS_H
 #define JSONDESERIALIZATIONUTILS_H
 
-#include "DeserializationError.h"
+#include "JsonConverter.h"
+#include "JsonDeserializationError.h"
 #include "model/Medium.h"
 #include "model/MediumUserData.h"
 #include "model/ValidatedField.h"
 #include "model/ValidatedSet.h"
 #include "persistence/MediaSerializationConfigs.h"
-#include "persistence/json/JsonConverter.h"
 #include "shared/ConcreteMediumConcept.h"
 
 #include <QJsonArray>
@@ -31,16 +31,16 @@ namespace Core::Persistence::Json {
  */
 template <ConcreteMedium MediumType>
 [[nodiscard]] auto
-andThen(std::variant<DeserializationError, std::unique_ptr<MediumType>> previousResult,
-        std::function<std::optional<DeserializationError>(MediumType &)> nextStep)
-    -> std::variant<DeserializationError, std::unique_ptr<MediumType>> {
+andThen(std::variant<JsonDeserializationError, std::unique_ptr<MediumType>> previousResult,
+        std::function<std::optional<JsonDeserializationError>(MediumType &)> nextStep)
+    -> std::variant<JsonDeserializationError, std::unique_ptr<MediumType>> {
 
-    if (auto *error = std::get_if<DeserializationError>(&previousResult)) {
+    if (auto *error = std::get_if<JsonDeserializationError>(&previousResult)) {
         return *error;
     }
     auto mediumPtr = std::get<std::unique_ptr<MediumType>>(std::move(previousResult));
 
-    if (std::optional<DeserializationError> nextError = nextStep(*mediumPtr);
+    if (std::optional<JsonDeserializationError> nextError = nextStep(*mediumPtr);
         nextError.has_value()) {
         return nextError.value();
     }
@@ -57,32 +57,32 @@ template <typename FieldType, ConcreteMedium MediumType>
 optionalValidatedFieldParser(const QJsonObject &obj, const QString &key,
                              std::function<ValidatedField<FieldType> &(MediumType &)> getField,
                              const MediaSerializationConfigs &configs = MediaSerializationConfigs{})
-    -> std::function<std::optional<DeserializationError>(MediumType &)> {
+    -> std::function<std::optional<JsonDeserializationError>(MediumType &)> {
 
-    return
-        [obj, key, getField, configs](MediumType &medium) -> std::optional<DeserializationError> {
-            if (!obj.contains(key)) {
-                return std::nullopt;
-            }
-
-            const auto jsonValue = obj.value(key);
-
-            auto conversionResult = JsonConverter<FieldType>::fromJson(obj, key, configs);
-            if (const auto *error = std::get_if<DeserializationError>(&conversionResult)) {
-                return *error;
-            }
-
-            const auto &value = std::get<FieldType>(conversionResult);
-            const bool wasSet{getField(medium).set(value)};
-            if (!wasSet) {
-                return DeserializationError{
-                    .code = DeserializationError::Code::SemanticValidationFailed,
-                    .errorLocation = obj,
-                    .message = QString{"Failed to validate field %1 semantically."}.arg(key),
-                };
-            }
+    return [obj, key, getField,
+            configs](MediumType &medium) -> std::optional<JsonDeserializationError> {
+        if (!obj.contains(key)) {
             return std::nullopt;
-        };
+        }
+
+        const auto jsonValue = obj.value(key);
+
+        auto conversionResult = JsonConverter<FieldType>::fromJson(obj, key, configs);
+        if (const auto *error = std::get_if<JsonDeserializationError>(&conversionResult)) {
+            return *error;
+        }
+
+        const auto &value = std::get<FieldType>(conversionResult);
+        const bool wasSet{getField(medium).set(value)};
+        if (!wasSet) {
+            return JsonDeserializationError{
+                .code = JsonDeserializationError::Code::SemanticValidationFailed,
+                .errorLocation = obj,
+                .message = QString{"Failed to validate field %1 semantically."}.arg(key),
+            };
+        }
+        return std::nullopt;
+    };
 }
 
 /**
@@ -95,9 +95,9 @@ auto optionalValidatedSetParser(
     const QJsonObject &obj, const QString &key,
     std::function<ValidatedSet<QString> &(MediumType &)> getField,
     const MediaSerializationConfigs & /*unused*/ = MediaSerializationConfigs{})
-    -> std::function<std::optional<DeserializationError>(MediumType &)> {
+    -> std::function<std::optional<JsonDeserializationError>(MediumType &)> {
 
-    return [=](MediumType &medium) -> std::optional<DeserializationError> {
+    return [=](MediumType &medium) -> std::optional<JsonDeserializationError> {
         if (!obj.contains(key)) {
             return std::nullopt;
         }
@@ -105,8 +105,8 @@ auto optionalValidatedSetParser(
         const auto jsonValue = obj.value(key);
 
         if (!jsonValue.isArray()) {
-            return DeserializationError{
-                .code = DeserializationError::Code::WrongMediumFieldType,
+            return JsonDeserializationError{
+                .code = JsonDeserializationError::Code::WrongMediumFieldType,
                 .errorLocation = obj,
                 .message = QString("Field '%1' should be an array of strings.").arg(key)};
         }
@@ -114,8 +114,8 @@ auto optionalValidatedSetParser(
         std::set<QString> values;
         for (const auto &item : jsonValue.toArray()) {
             if (!item.isString()) {
-                return DeserializationError{
-                    .code = DeserializationError::Code::WrongMediumFieldType,
+                return JsonDeserializationError{
+                    .code = JsonDeserializationError::Code::WrongMediumFieldType,
                     .errorLocation = obj,
                     .message =
                         QString("An item in the array for field '%1' is not a string.").arg(key)};
@@ -124,8 +124,8 @@ auto optionalValidatedSetParser(
         }
 
         if (!getField(medium).set(values)) {
-            return DeserializationError{
-                .code = DeserializationError::Code::SemanticValidationFailed,
+            return JsonDeserializationError{
+                .code = JsonDeserializationError::Code::SemanticValidationFailed,
                 .errorLocation = obj,
                 .message = QString("Values for field '%1' failed semantic validation.").arg(key)};
         }
@@ -137,13 +137,13 @@ auto optionalValidatedSetParser(
 template <ConcreteMedium MediumType>
 [[nodiscard]] auto deserializeCommonFields(std::unique_ptr<MediumType> medium,
                                            const QJsonObject &mediumObject, const QString &version)
-    -> std::variant<DeserializationError, std::unique_ptr<MediumType>> {
+    -> std::variant<JsonDeserializationError, std::unique_ptr<MediumType>> {
     // We only manage this version for now.
     assert(version == "1.0");
 
     medium->userData().favorite() = mediumObject.value("favorite").toBool();
 
-    std::variant<DeserializationError, std::unique_ptr<MediumType>> result = std::move(medium);
+    std::variant<JsonDeserializationError, std::unique_ptr<MediumType>> result = std::move(medium);
 
     result = andThen(std::move(result), optionalValidatedSetParser<MediumType>(
                                             mediumObject, "authors",

@@ -1,8 +1,5 @@
 #include "JsonMediaSerializer.h"
 
-#include "persistence/MediaSerializationConfigs.h"
-#include "persistence/json/JsonMediumSerializerVisitor.h"
-
 #include <QJsonArray>
 #include <QJsonDocument>
 

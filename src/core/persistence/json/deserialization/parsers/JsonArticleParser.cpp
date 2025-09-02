@@ -11,7 +11,7 @@ JsonArticleParser::JsonArticleParser(MediaSerializationConfigs newConfigs)
     : configs{std::move(newConfigs)} {}
 
 auto JsonArticleParser::parse(const QJsonObject &articleObject, const QString &version) const
-    -> std::variant<DeserializationError, std::unique_ptr<const Medium>> {
+    -> std::variant<JsonDeserializationError, std::unique_ptr<const Medium>> {
     // We only manage this version for now.
     assert(version == "1.0");
 
@@ -20,15 +20,7 @@ auto JsonArticleParser::parse(const QJsonObject &articleObject, const QString &v
     std::unique_ptr<Article> article{
         Article::make(std::move(title), id, QDate::currentDate()).value()};
 
-    auto commonFieldsResult{
-        deserializeCommonFields<Article>(std::move(article), articleObject, version)};
-    if (const auto *error{std::get_if<DeserializationError>(&commonFieldsResult)};
-        error != nullptr) {
-        return *error;
-    }
-
-    std::variant<DeserializationError, std::unique_ptr<Article>> result =
-        std::move(std::get<std::unique_ptr<Article>>(commonFieldsResult));
+    auto result{deserializeCommonFields<Article>(std::move(article), articleObject, version)};
 
     result = andThen<Article>(
         std::move(result),
@@ -50,6 +42,6 @@ auto JsonArticleParser::parse(const QJsonObject &articleObject, const QString &v
     if (auto *success = std::get_if<std::unique_ptr<Article>>(&result)) {
         return std::move(*success);
     }
-    return std::get<DeserializationError>(result);
+    return std::get<JsonDeserializationError>(result);
 }
 }

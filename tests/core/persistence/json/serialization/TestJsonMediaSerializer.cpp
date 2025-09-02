@@ -4,7 +4,7 @@
 #include "model/Book.h"
 #include "model/Medium.h"
 #include "model/Video.h"
-#include "persistence/json/JsonMediaSerializer.h"
+#include "persistence/json/serialization/JsonMediaSerializer.h"
 
 #include <QJsonArray>
 #include <QJsonDocument>

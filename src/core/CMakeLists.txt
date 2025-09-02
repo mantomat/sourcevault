@@ -47,22 +47,22 @@ add_library(sourcevaultcore STATIC
         queries/sortings/DateAddedSort.h
 
         persistence/MediaSerializationConfigs.h
-        persistence/json/JsonMediumSerializerVisitor.cpp
-        persistence/json/JsonMediumSerializerVisitor.h
-        persistence/json/JsonMediaSerializer.cpp
-        persistence/json/JsonMediaSerializer.h
-        persistence/json/JsonMediaDeserializer.cpp
-        persistence/json/JsonMediaDeserializer.h
-        persistence/json/DeserializationError.h
-        persistence/json/JsonArticleParser.cpp
-        persistence/json/JsonArticleParser.h
-        persistence/json/JsonBookParser.cpp
-        persistence/json/JsonBookParser.h
-        persistence/json/JsonConverter.h
-        persistence/json/JsonDeserializationUtils.h
-        persistence/json/JsonMediumParser.h
-        persistence/json/JsonVideoParser.cpp
-        persistence/json/JsonVideoParser.h
+        persistence/json/deserialization/JsonMediaDeserializer.cpp
+        persistence/json/deserialization/JsonMediaDeserializer.h
+        persistence/json/deserialization/engine/JsonConverter.h
+        persistence/json/deserialization/engine/JsonDeserializationError.h
+        persistence/json/deserialization/engine/JsonDeserializationUtils.h
+        persistence/json/deserialization/parsers/JsonArticleParser.cpp
+        persistence/json/deserialization/parsers/JsonArticleParser.h
+        persistence/json/deserialization/parsers/JsonBookParser.cpp
+        persistence/json/deserialization/parsers/JsonBookParser.h
+        persistence/json/deserialization/parsers/JsonMediumParser.h
+        persistence/json/deserialization/parsers/JsonVideoParser.cpp
+        persistence/json/deserialization/parsers/JsonVideoParser.h
+        persistence/json/serialization/JsonMediumSerializerVisitor.cpp
+        persistence/json/serialization/JsonMediumSerializerVisitor.h
+        persistence/json/serialization/JsonMediaSerializer.cpp
+        persistence/json/serialization/JsonMediaSerializer.h
 )
 
 target_include_directories(sourcevaultcore PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

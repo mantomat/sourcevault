@@ -1,7 +1,7 @@
 #ifndef JSONVIDEOPARSER_H
 #define JSONVIDEOPARSER_H
 
-#include "persistence/json/JsonMediumParser.h"
+#include "JsonMediumParser.h"
 
 namespace Core::Persistence::Json {
 
@@ -19,7 +19,7 @@ class JsonVideoParser : public JsonMediumParser {
     explicit JsonVideoParser(MediaSerializationConfigs newConfigs);
 
     [[nodiscard]] auto parse(const QJsonObject &videoObject, const QString &version) const
-        -> std::variant<DeserializationError, std::unique_ptr<const Medium>> override;
+        -> std::variant<JsonDeserializationError, std::unique_ptr<const Medium>> override;
 };
 
 }

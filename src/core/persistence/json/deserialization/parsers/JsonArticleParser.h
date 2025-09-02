@@ -1,7 +1,7 @@
 #ifndef JSONARTICLEPARSER_H
 #define JSONARTICLEPARSER_H
 
-#include "persistence/json/JsonMediumParser.h"
+#include "JsonMediumParser.h"
 
 namespace Core::Persistence::Json {
 
@@ -19,7 +19,7 @@ class JsonArticleParser : public JsonMediumParser {
     explicit JsonArticleParser(MediaSerializationConfigs configs);
 
     [[nodiscard]] auto parse(const QJsonObject &articleObject, const QString &version) const
-        -> std::variant<DeserializationError, std::unique_ptr<const Medium>> override;
+        -> std::variant<JsonDeserializationError, std::unique_ptr<const Medium>> override;
 };
 
 }

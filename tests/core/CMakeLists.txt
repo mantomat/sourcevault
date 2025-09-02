@@ -45,10 +45,10 @@ add_executable(testscore CoreTestsMain.cpp
         queries/sortings/TestTitleSort.cpp
         queries/sortings/TestTitleSort.h
 
-        persistence/json/TestJsonMediumSerializerVisitor.cpp
-        persistence/json/TestJsonMediumSerializerVisitor.h
-        persistence/json/TestJsonMediaSerializer.cpp
-        persistence/json/TestJsonMediaSerializer.h
+        persistence/json/serialization/TestJsonMediumSerializerVisitor.cpp
+        persistence/json/serialization/TestJsonMediumSerializerVisitor.h
+        persistence/json/serialization/TestJsonMediaSerializer.cpp
+        persistence/json/serialization/TestJsonMediaSerializer.h
 )
 target_link_libraries(testscore sourcevaultcore Qt6::Test)
 target_compile_options(testscore PRIVATE ${COMMON_COMPILE_OPTIONS})

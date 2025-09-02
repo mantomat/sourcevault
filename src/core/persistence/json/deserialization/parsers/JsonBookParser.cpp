@@ -10,7 +10,7 @@ JsonBookParser::JsonBookParser(MediaSerializationConfigs newConfigs)
     : configs{std::move(newConfigs)} {}
 
 auto JsonBookParser::parse(const QJsonObject &bookObject, const QString &version) const
-    -> std::variant<DeserializationError, std::unique_ptr<const Medium>> {
+    -> std::variant<JsonDeserializationError, std::unique_ptr<const Medium>> {
     // We only manage this version for now.
     assert(version == "1.0");
 
@@ -18,14 +18,7 @@ auto JsonBookParser::parse(const QJsonObject &bookObject, const QString &version
     const QUuid id{bookObject.value("id").toString()};
     std::unique_ptr<Book> book{Book::make(std::move(title), id, QDate::currentDate()).value()};
 
-    auto commonFieldsResult{deserializeCommonFields<Book>(std::move(book), bookObject, version)};
-    if (const auto *error{std::get_if<DeserializationError>(&commonFieldsResult)};
-        error != nullptr) {
-        return *error;
-    }
-
-    std::variant<DeserializationError, std::unique_ptr<Book>> result =
-        std::move(std::get<std::unique_ptr<Book>>(commonFieldsResult));
+    auto result{deserializeCommonFields<Book>(std::move(book), bookObject, version)};
 
     result = andThen<Book>(std::move(result),
                            optionalValidatedFieldParser<QString, Book>(
@@ -56,7 +49,7 @@ auto JsonBookParser::parse(const QJsonObject &bookObject, const QString &version
     if (auto *success = std::get_if<std::unique_ptr<Book>>(&result)) {
         return std::move(*success);
     }
-    return std::get<DeserializationError>(result);
+    return std::get<JsonDeserializationError>(result);
 }
 
 }

@@ -1,7 +1,7 @@
 #ifndef JSONMEDIUMPARSER_H
 #define JSONMEDIUMPARSER_H
 
-#include "persistence/json/JsonDeserializationUtils.h"
+#include "persistence/json/deserialization/engine/JsonDeserializationUtils.h"
 
 #include <QJsonObject>
 
@@ -17,7 +17,7 @@ class JsonMediumParser {
     auto operator=(JsonMediumParser &&) -> JsonMediumParser & = default;
 
     [[nodiscard]] virtual auto parse(const QJsonObject &obj, const QString &version) const
-        -> std::variant<DeserializationError, std::unique_ptr<const Medium>> = 0;
+        -> std::variant<JsonDeserializationError, std::unique_ptr<const Medium>> = 0;
 };
 
 }

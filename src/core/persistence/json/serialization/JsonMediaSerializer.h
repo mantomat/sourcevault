@@ -1,9 +1,9 @@
 #ifndef JSONMEDIASERIALIZER_H
 #define JSONMEDIASERIALIZER_H
 
+#include "JsonMediumSerializerVisitor.h"
 #include "model/Medium.h"
 #include "persistence/MediaSerializationConfigs.h"
-#include "persistence/json/JsonMediumSerializerVisitor.h"
 
 using Core::Model::Medium;
 
