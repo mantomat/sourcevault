@@ -36,6 +36,9 @@ class Video : public Medium {
     [[nodiscard]] static auto create(QString title, QUuid id = QUuid::createUuid(),
                                      QDate dateAdded = QDate::currentDate())
         -> std::optional<Video>;
+    [[nodiscard]] static auto make(QString title, QUuid id = QUuid::createUuid(),
+                                   QDate dateAdded = QDate::currentDate())
+        -> std::optional<std::unique_ptr<Video>>;
 
     [[nodiscard]] auto videoUrl() -> ValidatedField<QUrl> &;
     [[nodiscard]] auto videoUrl() const -> const ValidatedField<QUrl> &;

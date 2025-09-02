@@ -19,6 +19,15 @@ auto Book::create(QString title, const QUuid id, const QDate dateAdded) -> std::
     return std::make_optional(Book{std::move(title), id, dateAdded});
 }
 
+auto Book::make(QString title, const QUuid id, const QDate dateAdded)
+    -> std::optional<std::unique_ptr<Book>> {
+    auto bookOpt{Book::create(std::move(title), id, dateAdded)};
+    if (!bookOpt.has_value()) {
+        return std::nullopt;
+    }
+    return std::make_unique<Book>(std::move(bookOpt.value()));
+}
+
 auto Book::isbn() -> ValidatedField<QString> & {
     return isbn_;
 }

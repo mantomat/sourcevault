@@ -36,6 +36,9 @@ class Article : public Medium {
     [[nodiscard]] static auto create(QString title, QUuid id = QUuid::createUuid(),
                                      QDate dateAdded = QDate::currentDate())
         -> std::optional<Article>;
+    [[nodiscard]] static auto make(QString title, QUuid id = QUuid::createUuid(),
+                                   QDate dateAdded = QDate::currentDate())
+        -> std::optional<std::unique_ptr<Article>>;
 
     [[nodiscard]] auto articleUrl() -> ValidatedField<QUrl> &;
     [[nodiscard]] auto articleUrl() const -> const ValidatedField<QUrl> &;

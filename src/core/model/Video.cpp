@@ -18,6 +18,15 @@ auto Video::create(QString title, const QUuid id, const QDate dateAdded) -> std:
     return std::make_optional(Video{std::move(title), id, dateAdded});
 }
 
+auto Video::make(QString title, const QUuid id, const QDate dateAdded)
+    -> std::optional<std::unique_ptr<Video>> {
+    auto videoOpt{Video::create(std::move(title), id, dateAdded)};
+    if (!videoOpt.has_value()) {
+        return std::nullopt;
+    }
+    return std::make_unique<Video>(std::move(videoOpt.value()));
+}
+
 auto Video::videoUrl() -> ValidatedField<QUrl> & {
     return videoUrl_;
 }

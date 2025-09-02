@@ -17,6 +17,15 @@ auto Article::create(QString title, const QUuid id, const QDate dateAdded)
     return std::make_optional(Article{std::move(title), id, dateAdded});
 }
 
+auto Article::make(QString title, const QUuid id, const QDate dateAdded)
+    -> std::optional<std::unique_ptr<Article>> {
+    auto articleOpt{Article::create(std::move(title), id, dateAdded)};
+    if (!articleOpt.has_value()) {
+        return std::nullopt;
+    }
+    return std::make_unique<Article>(std::move(articleOpt.value()));
+}
+
 auto Article::articleUrl() -> ValidatedField<QUrl> & {
     return articleUrl_;
 }

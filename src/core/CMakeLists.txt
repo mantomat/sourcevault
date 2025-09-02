@@ -51,6 +51,19 @@ add_library(sourcevaultcore STATIC
         persistence/json/JsonMediumSerializerVisitor.h
         persistence/json/JsonMediaSerializer.cpp
         persistence/json/JsonMediaSerializer.h
+        persistence/json/JsonMediaDeserializer.cpp
+        persistence/json/JsonMediaDeserializer.h
+        persistence/json/DeserializationError.h
+        persistence/json/JsonArticleParser.cpp
+        persistence/json/JsonArticleParser.h
+        persistence/json/JsonBookParser.cpp
+        persistence/json/JsonBookParser.h
+        persistence/json/JsonConverter.h
+        persistence/json/JsonDeserializationUtils.h
+        persistence/json/JsonMediumParser.h
+        persistence/json/JsonVideoParser.cpp
+        persistence/json/JsonVideoParser.h
 )
+
 target_include_directories(sourcevaultcore PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(sourcevaultcore PUBLIC Qt6::Core Qt6::Network)

@@ -1,0 +1,181 @@
+#include "JsonMediaDeserializer.h"
+
+#include "JsonDeserializationUtils.h"
+#include "model/Medium.h"
+#include "persistence/json/JsonArticleParser.h"
+#include "persistence/json/JsonBookParser.h"
+#include "persistence/json/JsonVideoParser.h"
+
+#include <algorithm>
+
+using Core::Model::Medium;
+
+namespace Core::Persistence::Json {
+
+JsonMediaDeserializer::JsonMediaDeserializer(MediaSerializationConfigs newConfigs)
+    : parsers{[&newConfigs] {
+        std::unordered_map<QString, std::unique_ptr<JsonMediumParser>> newParsers;
+        newParsers["article"] = std::make_unique<JsonArticleParser>(newConfigs);
+        newParsers["book"] = std::make_unique<JsonBookParser>(newConfigs);
+        newParsers["video"] = std::make_unique<JsonVideoParser>(std::move(newConfigs));
+        return newParsers;
+    }()} {}
+
+auto JsonMediaDeserializer::deserialize(const QJsonDocument &document) const
+    -> std::variant<DeserializationError, Library> {
+    const auto preliminaryErrorOpt{preliminaryDocumentValidation(document)};
+    if (preliminaryErrorOpt.has_value()) {
+        return preliminaryErrorOpt.value();
+    }
+
+    // Invariant: The document is sane, there is the `media` array and a valid version.
+    return deserializeMedia(document.object().value("media").toArray(),
+                            document.object().value("version").toString());
+}
+
+auto JsonMediaDeserializer::preliminaryDocumentValidation(const QJsonDocument &document)
+    -> std::optional<DeserializationError> {
+
+    if (document.isNull()) {
+        return DeserializationError{.code = DeserializationError::Code::InvalidJson,
+                                    .errorLocation = document,
+                                    .message = "Invalid or null Json document."};
+    }
+
+    if (document.isEmpty()) {
+        return DeserializationError{.code = DeserializationError::Code::EmptyJson,
+                                    .errorLocation = document,
+                                    .message = "Json document is empty."};
+    }
+
+    if (!document.isObject()) {
+        return DeserializationError{.code = DeserializationError::Code::InvalidRootType,
+                                    .errorLocation = document,
+                                    .message = "Root is not an object. It must be an object."};
+    }
+
+    if (!document.object().contains("version")) {
+        return DeserializationError{.code = DeserializationError::Code::MissingVersion,
+                                    .errorLocation = document.object(),
+                                    .message = "Format version is not specified."};
+    }
+
+    if (const auto version{document.object().value("version")};
+        !version.isString() || std::ranges::none_of(supportedVersions, [&version](const char *ver) {
+            return QString{ver} != version.toString();
+        })) {
+        return DeserializationError{.code = DeserializationError::Code::UnknownVersion,
+                                    .errorLocation = document.object(),
+                                    .message =
+                                        QString{"`version` is not a string or is not supported."}};
+    }
+
+    if (!document.object().contains("media") || !document.object().value("media").isArray()) {
+        return DeserializationError{.code = DeserializationError::Code::MissingMediaArray,
+                                    .errorLocation = document.object(),
+                                    .message = QString{"`media` is not there or is not an array."}};
+    }
+
+    return std::nullopt;
+}
+
+auto JsonMediaDeserializer::deserializeMedia(const QJsonArray &mediaArray,
+                                             const QString &version) const
+    -> std::variant<DeserializationError, Library> {
+
+    // We only manage this version for now.
+    assert(version == "1.0");
+
+    Library lib;
+    for (const auto &entry : mediaArray) {
+        if (!entry.isObject()) {
+            return DeserializationError{
+                .code = DeserializationError::Code::NonObjectMediaEntry,
+                .errorLocation = mediaArray,
+                .message = QString{"An entry of the `media` array is not an object."}};
+        }
+
+        auto deserializationResult{deserializeMedium(entry.toObject(), version)};
+        if (const auto *error{std::get_if<DeserializationError>(&deserializationResult)};
+            error != nullptr) {
+            return *error;
+        }
+        lib.addMedium(std::move(std::get<std::unique_ptr<const Medium>>(deserializationResult)));
+    }
+
+    return lib;
+}
+
+auto JsonMediaDeserializer::deserializeMedium(const QJsonObject &mediumObject,
+                                              const QString &version) const
+    -> std::variant<DeserializationError, std::unique_ptr<const Medium>> {
+    // We only manage this version for now.
+    assert(version == "1.0");
+
+    const auto validationResults{preliminaryMediumValidation(mediumObject, version)};
+    if (validationResults.has_value()) {
+        return validationResults.value();
+    }
+
+    const QString type{mediumObject.value("type").toString()};
+    if (!parsers.contains(type)) {
+        return DeserializationError{.code = DeserializationError::Code::UnknownMediumType,
+                                    .errorLocation = mediumObject,
+                                    .message =
+                                        QString{"`Medium` object has an unknown type entry."}};
+    }
+    return parsers.at(type)->parse(mediumObject, version);
+}
+
+auto JsonMediaDeserializer::preliminaryMediumValidation(const QJsonObject &mediumObject,
+                                                        const QString &version)
+    -> std::optional<DeserializationError> {
+    // We only manage this version for now.
+    assert(version == "1.0");
+
+    if (!mediumObject.contains("type")) {
+        return DeserializationError{.code = DeserializationError::Code::MissingMediumType,
+                                    .errorLocation = mediumObject,
+                                    .message =
+                                        QString{"`Medium` object doesn't have a `type` entry"}};
+    }
+
+    if (!mediumObject.value("type").isString()) {
+        return DeserializationError{
+            .code = DeserializationError::Code::UnknownMediumType,
+            .errorLocation = mediumObject,
+            .message = QString{
+                "`Medium` object has a `type` entry of the wrong type. It must be a string."}};
+    }
+
+    if (!mediumObject.contains("id") || !mediumObject.value("id").isString()) {
+        return DeserializationError{.code = DeserializationError::Code::MissingRequiredField,
+                                    .errorLocation = mediumObject,
+                                    .message = QString{"`id` (string) is required."}};
+    }
+
+    if (const QUuid id{mediumObject.value("id").toString()};
+        id.isNull() || !Medium::idValidator(id)) {
+        return DeserializationError{.code = DeserializationError::Code::SemanticValidationFailed,
+                                    .errorLocation = mediumObject,
+                                    .message = QString{"Invalid value for `id` Medium attribute."}};
+    }
+
+    if (!mediumObject.contains("title") || !mediumObject.value("title").isString()) {
+        return DeserializationError{.code = DeserializationError::Code::MissingRequiredField,
+                                    .errorLocation = mediumObject,
+                                    .message = QString{"`title` (string) is required."}};
+    }
+
+    if (const QString title{mediumObject.value("title").toString()};
+        !Medium::titleValidator(title)) {
+        return DeserializationError{.code = DeserializationError::Code::SemanticValidationFailed,
+                                    .errorLocation = mediumObject,
+                                    .message =
+                                        QString{"Invalid value for `title` Medium attribute."}};
+    }
+
+    return std::nullopt;
+}
+
+}

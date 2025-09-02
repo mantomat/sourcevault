@@ -38,6 +38,9 @@ class Book : public Medium {
 
     [[nodiscard]] static auto create(QString title, QUuid id = QUuid::createUuid(),
                                      QDate dateAdded = QDate::currentDate()) -> std::optional<Book>;
+    [[nodiscard]] static auto make(QString title, QUuid id = QUuid::createUuid(),
+                                   QDate dateAdded = QDate::currentDate())
+        -> std::optional<std::unique_ptr<Book>>;
 
     [[nodiscard]] auto isbn() -> ValidatedField<QString> &;
     [[nodiscard]] auto isbn() const -> const ValidatedField<QString> &;
