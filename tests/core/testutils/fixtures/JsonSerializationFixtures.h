@@ -63,7 +63,7 @@ struct VideoJsonFixture {
         newVideo.userData().favorite() = false;
         newVideo.authors().set({"Paolo Coletti"});
         newVideo.language().set("Italian");
-        newVideo.userData().topics().set({"Finance", "Education"});
+        newVideo.userData().topics().set({"Education", "Finance"});
         newVideo.userData().notes().set("Example notes...");
         newVideo.userData().priority().set(MediumUserData::PriorityLevel::max);
         newVideo.videoUrl().set(QUrl{
@@ -84,7 +84,7 @@ struct VideoJsonFixture {
         {"favorite", video.userData().favorite()},
         {"authors", QJsonArray{"Paolo Coletti"}},
         {"language", video.language().get().value()},
-        {"topics", QJsonArray{"Finance", "Education"}},
+        {"topics", QJsonArray{"Education", "Finance"}},
         {"notes", video.userData().notes().get().value()},
         {"priority", static_cast<int>(video.userData().priority().get().value())},
         {"videoUrl", video.videoUrl().get().value().toString()},
@@ -101,7 +101,7 @@ struct BookJsonFixture {
         newBook.userData().favorite() = true;
         newBook.authors().set({"Daniel Kahneman"});
         newBook.language().set("English");
-        newBook.userData().topics().set({"Psychology", "Economics"});
+        newBook.userData().topics().set({"Economics", "Psychology"});
         newBook.userData().notes().set("Example notes...");
         newBook.userData().priority().set(MediumUserData::PriorityLevel::high);
         newBook.isbn().set("978-0141033570");
@@ -122,7 +122,7 @@ struct BookJsonFixture {
         {"favorite", book.userData().favorite()},
         {"authors", QJsonArray{"Daniel Kahneman"}},
         {"language", book.language().get().value()},
-        {"topics", QJsonArray{"Psychology", "Economics"}},
+        {"topics", QJsonArray{"Economics", "Psychology"}},
         {"notes", book.userData().notes().get().value()},
         {"priority", static_cast<int>(book.userData().priority().get().value())},
         {"isbn", book.isbn().get().value()},
