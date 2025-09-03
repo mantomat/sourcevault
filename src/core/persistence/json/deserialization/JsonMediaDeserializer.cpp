@@ -42,12 +42,6 @@ auto JsonMediaDeserializer::preliminaryDocumentValidation(const QJsonDocument &d
                                         .message = "Invalid or null Json document."};
     }
 
-    if (document.isEmpty()) {
-        return JsonDeserializationError{.code = JsonDeserializationError::Code::EmptyJson,
-                                        .errorLocation = document,
-                                        .message = "Json document is empty."};
-    }
-
     if (!document.isObject()) {
         return JsonDeserializationError{.code = JsonDeserializationError::Code::InvalidRootType,
                                         .errorLocation = document,
@@ -62,7 +56,7 @@ auto JsonMediaDeserializer::preliminaryDocumentValidation(const QJsonDocument &d
 
     if (const auto version{document.object().value("version")};
         !version.isString() || std::ranges::none_of(supportedVersions, [&version](const char *ver) {
-            return QString{ver} != version.toString();
+            return QString{ver} == version.toString();
         })) {
         return JsonDeserializationError{
             .code = JsonDeserializationError::Code::UnknownVersion,
@@ -75,6 +69,14 @@ auto JsonMediaDeserializer::preliminaryDocumentValidation(const QJsonDocument &d
                                         .errorLocation = document.object(),
                                         .message =
                                             QString{"`media` is not there or is not an array."}};
+    }
+
+    if (document.object().size() != 2) {
+        return JsonDeserializationError{
+            .code = JsonDeserializationError::Code::TooManyFields,
+            .errorLocation = document.object(),
+            .message = QString{
+                "The root object has too many fields. Only `version` and `media` are allowed"}};
     }
 
     return std::nullopt;
@@ -177,6 +179,13 @@ auto JsonMediaDeserializer::preliminaryMediumValidation(const QJsonObject &mediu
             .code = JsonDeserializationError::Code::SemanticValidationFailed,
             .errorLocation = mediumObject,
             .message = QString{"Invalid value for `title` Medium attribute."}};
+    }
+
+    if (!mediumObject.contains("favorite") || !mediumObject.value("favorite").isBool()) {
+        return JsonDeserializationError{.code =
+                                            JsonDeserializationError::Code::MissingRequiredField,
+                                        .errorLocation = mediumObject,
+                                        .message = QString{"`favorite` (bool) is required."}};
     }
 
     return std::nullopt;

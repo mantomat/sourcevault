@@ -17,6 +17,8 @@ class MockConcreteMedium final : public Medium {
     MockConcreteMedium(MockConcreteMedium &&m) = default;
     MockConcreteMedium(const MockConcreteMedium &m) = default;
 
+    [[nodiscard]] auto operator==(const MockConcreteMedium &) const -> bool = default;
+
     [[nodiscard]] static auto make(QString title, QUuid id = QUuid::createUuid(),
                                    QDate dateAdded = QDate::currentDate()) {
         return std::make_optional(

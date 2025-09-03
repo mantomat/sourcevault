@@ -2,7 +2,7 @@
 
 #include "TestValidatedField.h"
 #include "TestValidatedSet.h"
-#include "mocks/MockConcreteMedium.h"
+#include "testutils/mocks/MockConcreteMedium.h"
 
 #include <QTest>
 

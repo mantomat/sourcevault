@@ -28,6 +28,10 @@ auto Library::operator=(const Library &other) -> Library & {
     return *this;
 }
 
+auto Library::operator==(const Library &other) const -> bool {
+    return media == other.media;
+}
+
 auto Library::emitter() const -> const LibrarySignals * {
     return sigsEmitter.get();
 }

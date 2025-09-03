@@ -5,62 +5,21 @@
 #include "persistence/json/deserialization/engine/JsonDeserializationError.h"
 #include "persistence/json/deserialization/parsers/JsonArticleParser.h"
 #include "persistence/json/serialization/JsonMediumSerializerVisitor.h"
+#include "testutils/fixtures/JsonSerializationFixtures.h"
 
 #include <QTest>
-#include <qjsonvalue.h>
 
 using Core::Model::Article;
 using Core::Persistence::MediaSerializationConfigs;
 using Core::Persistence::Json::JsonArticleParser;
 using Core::Persistence::Json::JsonDeserializationError;
 
-// utils
 namespace {
-
-struct ArticleTestFixture {
-    Article article{[] {
-        Article newArticle =
-            Article::create("Test Title", QUuid::createUuid(), QDate(2025, 1, 1)).value();
-        newArticle.userData().favorite() = true;
-        newArticle.authors().set({"Joan Westenberg"});
-        newArticle.language().set("English");
-        newArticle.userData().topics().set({"Emotions", "Personal Growth"});
-        newArticle.userData().notes().set("Example notes...");
-        newArticle.userData().priority().set(MediumUserData::PriorityLevel::mid);
-        newArticle.articleUrl().set(QUrl{
-            "https://www.joanwestenberg.com/p/how-we-traded-anxiety-for-apathy-d9fec4ba127f6971"});
-        newArticle.sourceName().set("Westenber Blog");
-        newArticle.readTimeMinutes().set(5);
-        newArticle.publicationDate().set(QDate{2025, 8, 11});
-        return newArticle;
-    }()};
-
-    QJsonObject json{[this] {
-        QJsonObject newJson = {
-            {"type", "article"},
-            {"id", article.id().toString(QUuid::WithoutBraces)},
-            {"title", article.title()},
-            {"favorite", article.userData().favorite()},
-            {"authors", QJsonArray{"Joan Westenberg"}},
-            {"language", article.language().get().value()},
-            {"topics", QJsonArray{"Emotions", "Personal Growth"}},
-            {"notes", article.userData().notes().get().value()},
-            {"priority", static_cast<int>(article.userData().priority().get().value())},
-            {"articleUrl", article.articleUrl().get().value().toString()},
-            {"sourceName", article.sourceName().get().value()},
-            {"readTimeMinutes", static_cast<int>(article.readTimeMinutes().get().value())},
-            {"publicationDate",
-             article.publicationDate().get()->toString(MediaSerializationConfigs{}.dateFormat)},
-        };
-        return newJson;
-    }()};
-};
-
 template <typename FieldType>
 void testOptionalValidatedField(
     const QString &fieldName, const std::function<FieldType &(Article &)> &fieldGetter,
     const std::optional<QJsonValue> &semanticallyInvalidValue = std::nullopt) {
-    ArticleTestFixture fixture{};
+    ArticleJsonFixture fixture{};
 
     Article aWithNoField{fixture.article};
     fieldGetter(aWithNoField).unset();
@@ -97,7 +56,6 @@ void testOptionalValidatedField(
                .message = "not tested"})
         << std::optional<Article>{std::nullopt};
 }
-
 }
 
 void TestJsonArticleParser::testParse_data() {
@@ -106,7 +64,7 @@ void TestJsonArticleParser::testParse_data() {
     QTest::addColumn<std::optional<JsonDeserializationError>>("expectedError");
     QTest::addColumn<std::optional<Article>>("expectedArticle");
 
-    ArticleTestFixture fixture{};
+    ArticleJsonFixture fixture{};
 
     QTest::addRow("Full valid article")
         << fixture.json << std::optional<JsonDeserializationError>{std::nullopt}
@@ -137,7 +95,7 @@ void TestJsonArticleParser::testParse() {
     if (expectedError.has_value()) {
         QVERIFY2(std::holds_alternative<JsonDeserializationError>(parseResult),
                  "The parser should have returned an error, but it succeeded.");
-        const auto actualError = std::get<JsonDeserializationError>(parseResult);
+        const auto &actualError = std::get<JsonDeserializationError>(parseResult);
         QCOMPARE(actualError.code, expectedError.value().code);
         QCOMPARE(actualError.errorLocation, expectedError.value().errorLocation);
         return;
@@ -149,18 +107,20 @@ void TestJsonArticleParser::testParse() {
     const auto *parsedArticle = dynamic_cast<const Article *>(parsedMedium.get());
     QVERIFY2(parsedArticle != nullptr, "The parsed medium is not an Article.");
 
-    const auto &expected = expectedArticle.value();
+    testEqualityNoDate(*parsedArticle, expectedArticle.value());
+}
 
-    QCOMPARE(parsedArticle->id(), expected.id());
-    QCOMPARE(parsedArticle->title(), expected.title());
-    QCOMPARE(parsedArticle->userData().favorite(), expected.userData().favorite());
-    QCOMPARE(parsedArticle->authors().get(), expected.authors().get());
-    QCOMPARE(parsedArticle->language().get(), expected.language().get());
-    QCOMPARE(parsedArticle->userData().topics().get(), expected.userData().topics().get());
-    QCOMPARE(parsedArticle->userData().notes().get(), expected.userData().notes().get());
-    QCOMPARE(parsedArticle->userData().priority().get(), expected.userData().priority().get());
-    QCOMPARE(parsedArticle->articleUrl().get(), expected.articleUrl().get());
-    QCOMPARE(parsedArticle->sourceName().get(), expected.sourceName().get());
-    QCOMPARE(parsedArticle->readTimeMinutes().get(), expected.readTimeMinutes().get());
-    QCOMPARE(parsedArticle->publicationDate().get(), expected.publicationDate().get());
+void TestJsonArticleParser::testEqualityNoDate(const Article &lhs, const Article &rhs) {
+    QCOMPARE(lhs.id(), rhs.id());
+    QCOMPARE(lhs.title(), rhs.title());
+    QCOMPARE(lhs.userData().favorite(), rhs.userData().favorite());
+    QCOMPARE(lhs.authors(), rhs.authors());
+    QCOMPARE(lhs.language(), rhs.language());
+    QCOMPARE(lhs.userData().topics(), rhs.userData().topics());
+    QCOMPARE(lhs.userData().notes(), rhs.userData().notes());
+    QCOMPARE(lhs.userData().priority(), rhs.userData().priority());
+    QCOMPARE(lhs.articleUrl(), rhs.articleUrl());
+    QCOMPARE(lhs.sourceName(), rhs.sourceName());
+    QCOMPARE(lhs.readTimeMinutes(), rhs.readTimeMinutes());
+    QCOMPARE(lhs.publicationDate(), rhs.publicationDate());
 }

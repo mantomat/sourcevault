@@ -5,6 +5,7 @@
 #include "persistence/MediaSerializationConfigs.h"
 #include "persistence/json/deserialization/engine/JsonDeserializationError.h"
 #include "persistence/json/deserialization/parsers/JsonVideoParser.h"
+#include "testutils/fixtures/JsonSerializationFixtures.h"
 
 #include <QJsonArray>
 #include <QJsonObject>
@@ -16,53 +17,11 @@ using Core::Persistence::Json::JsonDeserializationError;
 using Core::Persistence::Json::JsonVideoParser;
 
 namespace {
-
-struct VideoTestFixture {
-    Video video{[] {
-        Video newVideo{Video::create("Test Title", QUuid::createUuid(), QDate(2025, 1, 1)).value()};
-        newVideo.userData().favorite() = false;
-        newVideo.authors().set({"Paolo Coletti"});
-        newVideo.language().set("Italian");
-        newVideo.userData().topics().set({"Finance", "Education"});
-        newVideo.userData().notes().set("Example notes...");
-        newVideo.userData().priority().set(MediumUserData::PriorityLevel::max);
-        newVideo.videoUrl().set(QUrl{
-            "https://www.youtube.com/watch?v=cSlr2I1GGiw&list=PLfuzpc-H8qcdyEb5rpgYhN2P7cJGR1i9h"});
-        newVideo.durationSeconds().set(516);
-        newVideo.uploadDate().set(QDate{2023, 8, 13});
-        newVideo.thumbnailUrl().set(
-            QUrl{"https://i.ytimg.com/vi/cSlr2I1GGiw/"
-                 "hqdefault.jpg?sqp=-oaymwEcCPYBEIoBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs="
-                 "AOn4CLAyPvvwnV5Kt15d_r8EvE72ZEJHfg"});
-        return newVideo;
-    }()};
-
-    QJsonObject json{[this] {
-        QJsonObject newJson{
-            {"type", "video"},
-            {"id", video.id().toString(QUuid::WithoutBraces)},
-            {"title", video.title()},
-            {"favorite", video.userData().favorite()},
-            {"authors", QJsonArray{"Paolo Coletti"}},
-            {"language", video.language().get().value()},
-            {"topics", QJsonArray{"Finance", "Education"}},
-            {"notes", video.userData().notes().get().value()},
-            {"priority", static_cast<int>(video.userData().priority().get().value())},
-            {"videoUrl", video.videoUrl().get().value().toString()},
-            {"durationSeconds", static_cast<int>(video.durationSeconds().get().value())},
-            {"uploadDate", video.uploadDate().get().value().toString(
-                               Core::Persistence::MediaSerializationConfigs{}.dateFormat)},
-            {"thumbnailUrl", video.thumbnailUrl().get().value().toString()},
-        };
-        return newJson;
-    }()};
-};
-
 template <typename FieldType>
 void testOptionalValidatedField(
     const QString &fieldName, const std::function<FieldType &(Video &)> &fieldGetter,
     const std::optional<QJsonValue> &semanticallyInvalidValue = std::nullopt) {
-    VideoTestFixture fixture{};
+    VideoJsonFixture fixture{};
 
     Video vWithNoField{fixture.video};
     fieldGetter(vWithNoField).unset();
@@ -107,7 +66,7 @@ void TestJsonVideoParser::testParse_data() {
     QTest::addColumn<std::optional<JsonDeserializationError>>("expectedError");
     QTest::addColumn<std::optional<Video>>("expectedVideo");
 
-    VideoTestFixture fixture{};
+    VideoJsonFixture fixture{};
 
     QTest::addRow("Full valid video")
         << fixture.json << std::optional<JsonDeserializationError>{std::nullopt}
@@ -124,8 +83,8 @@ void TestJsonVideoParser::testParse_data() {
         "uploadDate", [](Video &v) -> auto & { return v.uploadDate(); },
         QDate{1970, 1, 1}.toString(Core::Persistence::MediaSerializationConfigs{}.dateFormat));
 
-    testOptionalValidatedField<ValidatedField<QDate>>(
-        "thumbnailUrl", [](Video &v) -> auto & { return v.uploadDate(); },
+    testOptionalValidatedField<ValidatedField<QUrl>>(
+        "thumbnailUrl", [](Video &v) -> auto & { return v.thumbnailUrl(); },
         QUrl{"https://i.ytimg.com/vi/cSlr2I1GGiw/hqdefault.psd"}.toString());
 }
 void TestJsonVideoParser::testParse() {
@@ -141,7 +100,7 @@ void TestJsonVideoParser::testParse() {
     if (expectedError.has_value()) {
         QVERIFY2(std::holds_alternative<JsonDeserializationError>(parseResult),
                  "The parser should have returned an error, but it succeeded.");
-        const auto actualError = std::get<JsonDeserializationError>(parseResult);
+        const auto &actualError = std::get<JsonDeserializationError>(parseResult);
         QCOMPARE(actualError.code, expectedError.value().code);
         QCOMPARE(actualError.errorLocation, expectedError.value().errorLocation);
         return;
@@ -153,18 +112,20 @@ void TestJsonVideoParser::testParse() {
     const auto *parsedVideo = dynamic_cast<const Video *>(parsedMedium.get());
     QVERIFY2(parsedVideo != nullptr, "The parsed medium is not of the right type.");
 
-    const auto &expected = expectedVideo.value();
+    testEqualityNoDate(*parsedVideo, expectedVideo.value());
+}
 
-    QCOMPARE(parsedVideo->id(), expected.id());
-    QCOMPARE(parsedVideo->title(), expected.title());
-    QCOMPARE(parsedVideo->userData().favorite(), expected.userData().favorite());
-    QCOMPARE(parsedVideo->authors().get(), expected.authors().get());
-    QCOMPARE(parsedVideo->language().get(), expected.language().get());
-    QCOMPARE(parsedVideo->userData().topics().get(), expected.userData().topics().get());
-    QCOMPARE(parsedVideo->userData().notes().get(), expected.userData().notes().get());
-    QCOMPARE(parsedVideo->userData().priority().get(), expected.userData().priority().get());
-    QCOMPARE(parsedVideo->videoUrl().get(), expected.videoUrl().get());
-    QCOMPARE(parsedVideo->durationSeconds().get(), expected.durationSeconds().get());
-    QCOMPARE(parsedVideo->uploadDate().get(), expected.uploadDate().get());
-    QCOMPARE(parsedVideo->thumbnailUrl().get(), expected.thumbnailUrl().get());
+void TestJsonVideoParser::testEqualityNoDate(const Video &lhs, const Video &rhs) {
+    QCOMPARE(lhs.id(), rhs.id());
+    QCOMPARE(lhs.title(), rhs.title());
+    QCOMPARE(lhs.userData().favorite(), rhs.userData().favorite());
+    QCOMPARE(lhs.authors(), rhs.authors());
+    QCOMPARE(lhs.language(), rhs.language());
+    QCOMPARE(lhs.userData().topics(), rhs.userData().topics());
+    QCOMPARE(lhs.userData().notes(), rhs.userData().notes());
+    QCOMPARE(lhs.userData().priority(), rhs.userData().priority());
+    QCOMPARE(lhs.videoUrl(), rhs.videoUrl());
+    QCOMPARE(lhs.durationSeconds(), rhs.durationSeconds());
+    QCOMPARE(lhs.uploadDate(), rhs.uploadDate());
+    QCOMPARE(lhs.thumbnailUrl(), rhs.thumbnailUrl());
 }

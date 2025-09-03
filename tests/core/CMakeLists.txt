@@ -1,4 +1,7 @@
 add_executable(testscore CoreTestsMain.cpp
+        testutils/mocks/MockConcreteMedium.h
+        testutils/fixtures/JsonSerializationFixtures.h
+
         shared/TestMediumTypeVisitor.cpp
         shared/TestMediumTypeVisitor.h
 

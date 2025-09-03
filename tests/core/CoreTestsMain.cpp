@@ -6,9 +6,11 @@
 #include "model/TestValidatedField.h"
 #include "model/TestValidatedSet.h"
 #include "model/TestVideo.h"
+#include "persistence/json/deserialization/TestJsonMediaDeserializer.h"
 #include "persistence/json/deserialization/engine/TestDeserializeCommonFields.h"
 #include "persistence/json/deserialization/parsers/TestJsonArticleParser.h"
 #include "persistence/json/deserialization/parsers/TestJsonBookParser.h"
+#include "persistence/json/deserialization/parsers/TestJsonVideoParser.h"
 #include "persistence/json/serialization/TestJsonMediaSerializer.h"
 #include "persistence/json/serialization/TestJsonMediumSerializerVisitor.h"
 #include "queries/TestFilteringQuery.h"
@@ -64,9 +66,11 @@ auto main(const int argc, char **argv) -> int {
     ret |= QTest::qExec(std::make_unique<TestJsonMediumSerializerVisitor>().get(), argc, argv);
     ret |= QTest::qExec(std::make_unique<TestJsonMediaSerializer>().get(), argc, argv);
     // deserialization
+    ret |= QTest::qExec(std::make_unique<TestJsonMediaDeserializer>().get(), argc, argv);
     ret |= QTest::qExec(std::make_unique<TestDeserializeCommonFields>().get(), argc, argv);
     ret |= QTest::qExec(std::make_unique<TestJsonArticleParser>().get(), argc, argv);
     ret |= QTest::qExec(std::make_unique<TestJsonBookParser>().get(), argc, argv);
+    ret |= QTest::qExec(std::make_unique<TestJsonVideoParser>().get(), argc, argv);
 
     return ret;
 }

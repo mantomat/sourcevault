@@ -1,9 +1,10 @@
 #include "TestDeserializeCommonFields.h"
 
-#include "mocks/MockConcreteMedium.h"
 #include "model/MediumUserData.h"
 #include "persistence/json/deserialization/engine/JsonDeserializationError.h"
 #include "persistence/json/deserialization/engine/JsonDeserializationUtils.h"
+#include "testutils/fixtures/JsonSerializationFixtures.h"
+#include "testutils/mocks/MockConcreteMedium.h"
 
 #include <QJsonArray>
 #include <QJsonObject>
@@ -14,41 +15,13 @@ using Core::Model::MediumUserData;
 using Core::Persistence::Json::deserializeCommonFields;
 using Core::Persistence::Json::JsonDeserializationError;
 
-struct MediumTextFixture {
-    MockConcreteMedium medium{[] {
-        MockConcreteMedium newMedium;
-        newMedium.userData().favorite() = true;
-        newMedium.authors().set({"Joan Westenberg"});
-        newMedium.language().set("English");
-        newMedium.userData().topics().set({"Emotions", "Personal Growth"});
-        newMedium.userData().notes().set("Example notes...");
-        newMedium.userData().priority().set(MediumUserData::PriorityLevel::mid);
-        return newMedium;
-    }()};
-
-    QJsonObject json{[this] {
-        QJsonObject newJson = {
-            {"type", "unused"},
-            {"id", medium.id().toString(QUuid::WithoutBraces)},
-            {"title", medium.title()},
-            {"favorite", medium.userData().favorite()},
-            {"authors", QJsonArray{"Joan Westenberg"}},
-            {"language", medium.language().get().value()},
-            {"topics", QJsonArray{"Emotions", "Personal Growth"}},
-            {"notes", medium.userData().notes().get().value()},
-            {"priority", static_cast<int>(medium.userData().priority().get().value())},
-        };
-        return newJson;
-    }()};
-};
-
 namespace {
 
 template <typename FieldType>
 void testOptionalValidatedField(
     const QString &fieldName, const std::function<FieldType &(MockConcreteMedium &)> &fieldGetter,
     const std::optional<QJsonValue> &semanticallyInvalidValue = std::nullopt) {
-    MediumTextFixture fixture{};
+    MediumJsonFixture fixture{};
 
     MockConcreteMedium mWithNoField{fixture.medium};
     fieldGetter(mWithNoField).unset();
@@ -94,7 +67,7 @@ void testOptionalValidatedSet(const QString &fieldName,
     testOptionalValidatedField(fieldName, fieldGetter,
                                std::make_optional(semanticallyInvalidValue));
 
-    MediumTextFixture fixture{};
+    MediumJsonFixture fixture{};
     QJsonObject o{fixture.json};
     o[fieldName] = QJsonArray{"a", "b", 12};
     auto testCaseName{
@@ -116,7 +89,7 @@ void TestDeserializeCommonFields::testDeserializeCommonFields_data() {
     QTest::addColumn<std::optional<JsonDeserializationError>>("expectedError");
     QTest::addColumn<std::optional<MockConcreteMedium>>("expectedMedium");
 
-    MediumTextFixture fixture{};
+    MediumJsonFixture fixture{};
 
     QTest::addRow("Full valid medium")
         << fixture.json << std::optional<JsonDeserializationError>{std::nullopt}
@@ -151,7 +124,7 @@ void TestDeserializeCommonFields::testDeserializeCommonFields() {
     if (expectedError.has_value()) {
         QVERIFY2(std::holds_alternative<JsonDeserializationError>(parseResult),
                  "The parser should have returned an error, but it succeeded.");
-        const auto actualError = std::get<JsonDeserializationError>(parseResult);
+        const auto &actualError = std::get<JsonDeserializationError>(parseResult);
         QCOMPARE(actualError.code, expectedError.value().code);
         QCOMPARE(actualError.errorLocation, expectedError.value().errorLocation);
         return;

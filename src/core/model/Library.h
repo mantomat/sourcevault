@@ -64,6 +64,8 @@ class Library final {
      */
     auto operator=(const Library &other) -> Library &;
 
+    auto operator==(const Library &other) const -> bool;
+
     /**
      * @brief Returns a non-owning pointer to the library emitter.
      *

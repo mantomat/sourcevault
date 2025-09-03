@@ -4,6 +4,7 @@
 #include "model/MediumUserData.h"
 #include "persistence/json/deserialization/engine/JsonDeserializationError.h"
 #include "persistence/json/deserialization/parsers/JsonBookParser.h"
+#include "testutils/fixtures/JsonSerializationFixtures.h"
 
 #include <QJsonArray>
 #include <QJsonObject>
@@ -18,54 +19,11 @@ using Core::Persistence::Json::JsonDeserializationError;
 
 namespace {
 
-struct BookTestFixture {
-    Book book{[] {
-        Book newBook{Book::create("Test Title", QUuid::createUuid(), QDate(2025, 1, 1)).value()};
-        newBook.userData().favorite() = true;
-        newBook.authors().set({"Daniel Kahneman"});
-        newBook.language().set("English");
-        newBook.userData().topics().set({"Psychology", "Economics"});
-        newBook.userData().notes().set("Example notes...");
-        newBook.userData().priority().set(MediumUserData::PriorityLevel::high);
-        newBook.isbn().set("978-0141033570");
-        newBook.edition().set("First edition");
-        newBook.publisher().set("Penguin Psychology");
-        newBook.yearPublished().set(2012);
-        newBook.pageNumber().set(610);
-        newBook.description().set("One of the most influential books of the 21st century: ...");
-        newBook.thumbnailUrl().set(
-            QUrl{"https://m.media-amazon.com/images/I/71f6DceqZAL._SL1500_.jpg"});
-        return newBook;
-    }()};
-
-    QJsonObject json{[this] {
-        QJsonObject newJson{
-            {"type", "book"},
-            {"id", book.id().toString(QUuid::WithoutBraces)},
-            {"title", book.title()},
-            {"favorite", book.userData().favorite()},
-            {"authors", QJsonArray{"Daniel Kahneman"}},
-            {"language", book.language().get().value()},
-            {"topics", QJsonArray{"Psychology", "Economics"}},
-            {"notes", book.userData().notes().get().value()},
-            {"priority", static_cast<int>(book.userData().priority().get().value())},
-            {"isbn", book.isbn().get().value()},
-            {"edition", book.edition().get().value()},
-            {"publisher", book.publisher().get().value()},
-            {"yearPublished", book.yearPublished().get().value()},
-            {"pageNumber", static_cast<int>(book.pageNumber().get().value())},
-            {"description", book.description().get().value()},
-            {"thumbnailUrl", book.thumbnailUrl().get().value().toString()},
-        };
-        return newJson;
-    }()};
-};
-
 template <typename FieldType>
 void testOptionalValidatedField(
     const QString &fieldName, const std::function<FieldType &(Book &)> &fieldGetter,
     const std::optional<QJsonValue> &semanticallyInvalidValue = std::nullopt) {
-    BookTestFixture fixture{};
+    BookJsonFixture fixture{};
 
     Book bWithNoField{fixture.book};
     fieldGetter(bWithNoField).unset();
@@ -111,7 +69,7 @@ void TestJsonBookParser::testParse_data() {
     QTest::addColumn<std::optional<JsonDeserializationError>>("expectedError");
     QTest::addColumn<std::optional<Book>>("expectedBook");
 
-    BookTestFixture fixture{};
+    BookJsonFixture fixture{};
 
     QTest::addRow("Full valid book")
         << fixture.json << std::optional<JsonDeserializationError>{std::nullopt}
@@ -152,7 +110,7 @@ void TestJsonBookParser::testParse() {
     if (expectedError.has_value()) {
         QVERIFY2(std::holds_alternative<JsonDeserializationError>(parseResult),
                  "The parser should have returned an error, but it succeeded.");
-        const auto actualError = std::get<JsonDeserializationError>(parseResult);
+        const auto &actualError = std::get<JsonDeserializationError>(parseResult);
         QCOMPARE(actualError.code, expectedError.value().code);
         QCOMPARE(actualError.errorLocation, expectedError.value().errorLocation);
         return;
@@ -164,21 +122,23 @@ void TestJsonBookParser::testParse() {
     const auto *parsedBook = dynamic_cast<const Book *>(parsedMedium.get());
     QVERIFY2(parsedBook != nullptr, "The parsed medium is not of the right type.");
 
-    const auto &expected = expectedBook.value();
+    testEqualityNoDate(*parsedBook, expectedBook.value());
+}
 
-    QCOMPARE(parsedBook->id(), expected.id());
-    QCOMPARE(parsedBook->title(), expected.title());
-    QCOMPARE(parsedBook->userData().favorite(), expected.userData().favorite());
-    QCOMPARE(parsedBook->authors().get(), expected.authors().get());
-    QCOMPARE(parsedBook->language().get(), expected.language().get());
-    QCOMPARE(parsedBook->userData().topics().get(), expected.userData().topics().get());
-    QCOMPARE(parsedBook->userData().notes().get(), expected.userData().notes().get());
-    QCOMPARE(parsedBook->userData().priority().get(), expected.userData().priority().get());
-    QCOMPARE(parsedBook->isbn().get(), expected.isbn().get());
-    QCOMPARE(parsedBook->edition().get(), expected.edition().get());
-    QCOMPARE(parsedBook->publisher().get(), expected.publisher().get());
-    QCOMPARE(parsedBook->yearPublished().get(), expected.yearPublished().get());
-    QCOMPARE(parsedBook->pageNumber().get(), expected.pageNumber().get());
-    QCOMPARE(parsedBook->description().get(), expected.description().get());
-    QCOMPARE(parsedBook->thumbnailUrl().get(), expected.thumbnailUrl().get());
+void TestJsonBookParser::testEqualityNoDate(const Book &lhs, const Book &rhs) {
+    QCOMPARE(lhs.id(), rhs.id());
+    QCOMPARE(lhs.title(), rhs.title());
+    QCOMPARE(lhs.userData().favorite(), rhs.userData().favorite());
+    QCOMPARE(lhs.authors(), rhs.authors());
+    QCOMPARE(lhs.language(), rhs.language());
+    QCOMPARE(lhs.userData().topics(), rhs.userData().topics());
+    QCOMPARE(lhs.userData().notes(), rhs.userData().notes());
+    QCOMPARE(lhs.userData().priority(), rhs.userData().priority());
+    QCOMPARE(lhs.isbn(), rhs.isbn());
+    QCOMPARE(lhs.edition(), rhs.edition());
+    QCOMPARE(lhs.publisher(), rhs.publisher());
+    QCOMPARE(lhs.yearPublished(), rhs.yearPublished());
+    QCOMPARE(lhs.pageNumber(), rhs.pageNumber());
+    QCOMPARE(lhs.description(), rhs.description());
+    QCOMPARE(lhs.thumbnailUrl(), rhs.thumbnailUrl());
 }

@@ -12,11 +12,11 @@ namespace Core::Persistence::Json {
 struct JsonDeserializationError {
     enum class Code : uint8_t {
         InvalidJson,
-        EmptyJson,
         InvalidRootType,
         MissingVersion,
         UnknownVersion,
         MissingMediaArray,
+        TooManyFields,
         NonObjectMediaEntry,
         MissingMediumType,
         UnknownMediumType,
