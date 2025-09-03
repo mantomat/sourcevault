@@ -14,11 +14,7 @@ auto JsonBookParser::parse(const QJsonObject &bookObject, const QString &version
     // We only manage this version for now.
     assert(version == "1.0");
 
-    QString title{bookObject.value("title").toString()};
-    const QUuid id{bookObject.value("id").toString()};
-    std::unique_ptr<Book> book{Book::make(std::move(title), id, QDate::currentDate()).value()};
-
-    auto result{deserializeCommonFields<Book>(std::move(book), bookObject, version)};
+    auto result{deserializeCommonFields<Book>(bookObject, version)};
 
     result = andThen<Book>(std::move(result),
                            optionalValidatedFieldParser<QString, Book>(

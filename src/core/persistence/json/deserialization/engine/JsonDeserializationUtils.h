@@ -135,11 +135,14 @@ auto optionalValidatedSetParser(
 }
 
 template <ConcreteMedium MediumType>
-[[nodiscard]] auto deserializeCommonFields(std::unique_ptr<MediumType> medium,
-                                           const QJsonObject &mediumObject, const QString &version)
+[[nodiscard]] auto deserializeCommonFields(const QJsonObject &mediumObject, const QString &version)
     -> std::variant<JsonDeserializationError, std::unique_ptr<MediumType>> {
     // We only manage this version for now.
     assert(version == "1.0");
+
+    QString title{mediumObject.value("title").toString()};
+    const QUuid id{mediumObject.value("id").toString()};
+    std::unique_ptr<MediumType> medium{MediumType::make(std::move(title), id).value()};
 
     medium->userData().favorite() = mediumObject.value("favorite").toBool();
 

@@ -15,25 +15,23 @@ auto JsonArticleParser::parse(const QJsonObject &articleObject, const QString &v
     // We only manage this version for now.
     assert(version == "1.0");
 
-    QString title{articleObject.value("title").toString()};
-    const QUuid id{articleObject.value("id").toString()};
-    std::unique_ptr<Article> article{
-        Article::make(std::move(title), id, QDate::currentDate()).value()};
-
-    auto result{deserializeCommonFields<Article>(std::move(article), articleObject, version)};
+    auto result{deserializeCommonFields<Article>(articleObject, version)};
 
     result = andThen<Article>(
         std::move(result),
         optionalValidatedFieldParser<QUrl, Article>(
-            articleObject, "isbn", [](Article &a) -> auto & { return a.articleUrl(); }));
+            articleObject, "articleUrl", [](Article &a) -> auto & { return a.articleUrl(); }));
+
     result = andThen<Article>(
         std::move(result),
         optionalValidatedFieldParser<QString, Article>(
             articleObject, "sourceName", [](Article &a) -> auto & { return a.sourceName(); }));
+
     result = andThen<Article>(std::move(result),
                               optionalValidatedFieldParser<unsigned int, Article>(
                                   articleObject, "readTimeMinutes",
                                   [](Article &a) -> auto & { return a.readTimeMinutes(); }));
+
     result = andThen<Article>(std::move(result),
                               optionalValidatedFieldParser<QDate, Article>(
                                   articleObject, "publicationDate",

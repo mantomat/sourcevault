@@ -45,6 +45,16 @@ add_executable(testscore CoreTestsMain.cpp
         queries/sortings/TestTitleSort.cpp
         queries/sortings/TestTitleSort.h
 
+        persistence/json/deserialization/engine/TestDeserializeCommonFields.cpp
+        persistence/json/deserialization/engine/TestDeserializeCommonFields.h
+        persistence/json/deserialization/parsers/TestJsonArticleParser.cpp
+        persistence/json/deserialization/parsers/TestJsonArticleParser.h
+        persistence/json/deserialization/parsers/TestJsonBookParser.cpp
+        persistence/json/deserialization/parsers/TestJsonBookParser.h
+        persistence/json/deserialization/parsers/TestJsonVideoParser.cpp
+        persistence/json/deserialization/parsers/TestJsonVideoParser.h
+        persistence/json/deserialization/TestJsonMediaDeserializer.cpp
+        persistence/json/deserialization/TestJsonMediaDeserializer.h
         persistence/json/serialization/TestJsonMediumSerializerVisitor.cpp
         persistence/json/serialization/TestJsonMediumSerializerVisitor.h
         persistence/json/serialization/TestJsonMediaSerializer.cpp
@@ -52,5 +62,5 @@ add_executable(testscore CoreTestsMain.cpp
 )
 target_link_libraries(testscore sourcevaultcore Qt6::Test)
 target_compile_options(testscore PRIVATE ${COMMON_COMPILE_OPTIONS})
-target_compile_options(sourcevaultcore PRIVATE ${COMMON_COMPILE_OPTIONS})
+target_include_directories(testscore PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 add_test(NAME TestsCore COMMAND testscore)

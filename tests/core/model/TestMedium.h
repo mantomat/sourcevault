@@ -1,33 +1,7 @@
 #ifndef TESTMEDIUM_H
 #define TESTMEDIUM_H
 
-#include "model/Book.h"
-#include "model/Medium.h"
-
 #include <QObject>
-
-using Core::Model::Medium;
-
-class ConcreteMedium final : public Medium {
-  public:
-    ~ConcreteMedium() override = default;
-    explicit ConcreteMedium(QString title = "default title", QUuid id = QUuid::createUuid(),
-                            QDate dateAdded = QDate::currentDate())
-        : Medium{std::move(title), id, dateAdded} {};
-
-    ConcreteMedium(ConcreteMedium &&m) = default;
-    ConcreteMedium(const ConcreteMedium &m) = default;
-
-    [[nodiscard]] std::unique_ptr<Medium> clone() const override {
-        return std::make_unique<ConcreteMedium>(*this);
-    }
-
-    void accept(MediumVisitor &) const override {
-        // never the case
-    }
-
-    friend class TestMedium;
-};
 
 class TestMedium final : public QObject {
     Q_OBJECT

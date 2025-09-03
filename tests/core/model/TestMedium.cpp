@@ -2,12 +2,13 @@
 
 #include "TestValidatedField.h"
 #include "TestValidatedSet.h"
+#include "mocks/MockConcreteMedium.h"
 
 #include <QTest>
 
 using Core::Model::Medium;
 
-const auto concreteMediumBuilder{[] { return ConcreteMedium{}; }};
+const auto concreteMediumBuilder{[] { return MockConcreteMedium{}; }};
 
 void TestMedium::testCreateData() {
     QTest::addColumn<bool>("shouldBeValid");
@@ -37,12 +38,12 @@ void TestMedium::testCreateValidator() {
     QFETCH(QUuid, candidateId);
     QFETCH(QDate, candidateDateAdded);
 
-    QCOMPARE(ConcreteMedium::createValidator(candidateTitle, candidateId, candidateDateAdded),
+    QCOMPARE(MockConcreteMedium::createValidator(candidateTitle, candidateId, candidateDateAdded),
              shouldBeValid);
 }
 
 void TestMedium::testId() {
-    const ConcreteMedium medium;
+    const MockConcreteMedium medium;
     const QUuid id = medium.id();
 
     QVERIFY2(!id.isNull(), "Ids should never be null");
@@ -51,7 +52,7 @@ void TestMedium::testId() {
 }
 
 void TestMedium::testUserData() {
-    ConcreteMedium medium;
+    MockConcreteMedium medium;
 
     const QString notes{"Valid notes"};
     const std::set topics{QString{"Computer science"}, QString{"Philosophy"}};
@@ -63,7 +64,7 @@ void TestMedium::testUserData() {
     medium.userData().favorite() = favorite;
     medium.userData().priority().set(priority);
 
-    const ConcreteMedium constMedium{medium};
+    const MockConcreteMedium constMedium{medium};
     QCOMPARE(constMedium.userData().notes().has(), true);
     QCOMPARE(constMedium.userData().topics().has(), true);
     QCOMPARE(constMedium.userData().favorite(), true);
@@ -88,7 +89,7 @@ void TestMedium::testDateAdded() {
 
     QCOMPARE(Medium::dateAddedValidator(candidateDateAdded), shouldBeValid);
 
-    const ConcreteMedium m{"valid title", QUuid::createUuid(), candidateDateAdded};
+    const MockConcreteMedium m{"valid title", QUuid::createUuid(), candidateDateAdded};
     QCOMPARE(m.dateAdded(), candidateDateAdded);
 }
 
@@ -108,10 +109,10 @@ void TestMedium::testTitle() {
     QCOMPARE(Medium::titleValidator(candidateTitle), shouldBeValid);
 
     const QString initialTitle{"valid title"};
-    ConcreteMedium medium{initialTitle};
+    MockConcreteMedium medium{initialTitle};
     QCOMPARE(medium.setTitle(candidateTitle), shouldBeValid);
 
-    const ConcreteMedium cmedium{std::move(medium)};
+    const MockConcreteMedium cmedium{std::move(medium)};
     QCOMPARE(cmedium.title(), shouldBeValid ? candidateTitle : initialTitle);
 }
 
@@ -131,7 +132,7 @@ void TestMedium::testAuthors() {
     QFETCH(std::set<QString>, candidateAuthors);
     QFETCH(bool, shouldBeValid);
 
-    TestValidatedSet::testValidatedFieldHelper<ConcreteMedium, QString>(
+    TestValidatedSet::testValidatedFieldHelper<MockConcreteMedium, QString>(
         concreteMediumBuilder, &Medium::authorValidator,
         [](Medium &m) -> ValidatedSet<QString> & { return m.authors(); },
         [](const Medium &m) -> const ValidatedSet<QString> & { return m.authors(); },
@@ -151,7 +152,7 @@ void TestMedium::testLanguage() {
     QFETCH(QString, candidateLanguage);
     QFETCH(bool, shouldBeValid);
 
-    TestValidatedField::testValidatedFieldHelper<ConcreteMedium, QString>(
+    TestValidatedField::testValidatedFieldHelper<MockConcreteMedium, QString>(
         concreteMediumBuilder, &Medium::languageValidator,
         [](Medium &m) -> ValidatedField<QString> & { return m.language(); },
         [](const Medium &m) -> const ValidatedField<QString> & { return m.language(); },

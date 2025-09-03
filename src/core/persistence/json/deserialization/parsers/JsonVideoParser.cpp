@@ -14,11 +14,7 @@ auto JsonVideoParser::parse(const QJsonObject &videoObject, const QString &versi
     // We only manage this version for now.
     assert(version == "1.0");
 
-    QString title{videoObject.value("title").toString()};
-    const QUuid id{videoObject.value("id").toString()};
-    std::unique_ptr<Video> video{Video::make(std::move(title), id, QDate::currentDate()).value()};
-
-    auto result{deserializeCommonFields<Video>(std::move(video), videoObject, version)};
+    auto result{deserializeCommonFields<Video>(videoObject, version)};
 
     result = andThen<Video>(std::move(result), optionalValidatedFieldParser<QUrl, Video>(
                                                    videoObject, "videoUrl", [](Video &v) -> auto & {
