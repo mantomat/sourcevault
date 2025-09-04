@@ -1,4 +1,4 @@
-#include "TestDeserializeCommonFields.h"
+#include "TestJsonParsingLib.h"
 
 #include "model/MediumUserData.h"
 #include "persistence/MediaSerializationConfigs.h"
@@ -85,7 +85,7 @@ void testOptionalValidatedSet(const QString &fieldName,
 
 }
 
-void TestDeserializeCommonFields::testDeserializeCommonFields_data() {
+void TestJsonParsingLib::testDeserializeCommonFields_data() {
     QTest::addColumn<QJsonObject>("mediumObject");
     // We can't use variants in this case, so we use two optionals, but they are mutually exclusive!
     QTest::addColumn<std::optional<JsonDeserializationError>>("expectedError");
@@ -114,7 +114,7 @@ void TestDeserializeCommonFields::testDeserializeCommonFields_data() {
     testOptionalValidatedField<ValidatedField<MediumUserData::PriorityLevel>>(
         "priority", [](MockConcreteMedium &m) -> auto & { return m.userData().priority(); });
 }
-void TestDeserializeCommonFields::testDeserializeCommonFields() {
+void TestJsonParsingLib::testDeserializeCommonFields() {
     QFETCH(QJsonObject, mediumObject);
     QFETCH(std::optional<JsonDeserializationError>, expectedError);
     QFETCH(std::optional<MockConcreteMedium>, expectedMedium);

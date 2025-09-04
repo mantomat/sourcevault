@@ -48,8 +48,8 @@ add_executable(testscore CoreTestsMain.cpp
         queries/sortings/TestTitleSort.cpp
         queries/sortings/TestTitleSort.h
 
-        persistence/json/deserialization/TestDeserializeCommonFields.cpp
-        persistence/json/deserialization/TestDeserializeCommonFields.h
+        persistence/json/deserialization/TestJsonParsingLib.cpp
+        persistence/json/deserialization/TestJsonParsingLib.h
         persistence/json/deserialization/TestJsonArticleParser.cpp
         persistence/json/deserialization/TestJsonArticleParser.h
         persistence/json/deserialization/TestJsonBookParser.cpp
