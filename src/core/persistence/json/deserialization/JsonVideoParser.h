@@ -2,13 +2,17 @@
 #define JSONVIDEOPARSER_H
 
 #include "JsonMediumParser.h"
+#include "JsonParsingLib.h"
+#include "model/Video.h"
 #include "persistence/MediaSerializationConfigs.h"
+
+using Core::Model::Video;
 
 namespace Core::Persistence::Json {
 
 class JsonVideoParser : public JsonMediumParser {
 
-    MediaSerializationConfigs configs;
+    JsonParsingLib<Video> lib;
 
   public:
     ~JsonVideoParser() override = default;

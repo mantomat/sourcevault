@@ -2,14 +2,17 @@
 #define JSONBOOKPARSER_H
 
 #include "JsonMediumParser.h"
+#include "JsonParsingLib.h"
+#include "model/Book.h"
 #include "persistence/MediaSerializationConfigs.h"
-#include "persistence/json/deserialization/engine/JsonDeserializationUtils.h"
+
+using Core::Model::Book;
 
 namespace Core::Persistence::Json {
 
 class JsonBookParser : public JsonMediumParser {
 
-    MediaSerializationConfigs configs;
+    JsonParsingLib<Book> lib;
 
   public:
     ~JsonBookParser() override = default;

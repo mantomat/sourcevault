@@ -1,11 +1,10 @@
 #ifndef JSONMEDIADESERIALIZER_H
 #define JSONMEDIADESERIALIZER_H
 
-#include "engine/JsonDeserializationUtils.h"
+#include "JsonMediumParser.h"
 #include "model/Library.h"
 #include "model/ValidatedField.h"
 #include "model/ValidatedSet.h"
-#include "parsers/JsonMediumParser.h"
 
 #include <QJsonArray>
 #include <QJsonDocument>

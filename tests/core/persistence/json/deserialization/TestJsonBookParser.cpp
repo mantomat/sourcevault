@@ -2,8 +2,8 @@
 
 #include "model/Book.h"
 #include "model/MediumUserData.h"
-#include "persistence/json/deserialization/engine/JsonDeserializationError.h"
-#include "persistence/json/deserialization/parsers/JsonBookParser.h"
+#include "persistence/json/deserialization/JsonBookParser.h"
+#include "persistence/json/deserialization/JsonDeserializationError.h"
 #include "testutils/fixtures/JsonSerializationFixtures.h"
 
 #include <QJsonArray>

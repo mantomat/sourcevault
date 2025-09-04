@@ -48,14 +48,14 @@ add_executable(testscore CoreTestsMain.cpp
         queries/sortings/TestTitleSort.cpp
         queries/sortings/TestTitleSort.h
 
-        persistence/json/deserialization/engine/TestDeserializeCommonFields.cpp
-        persistence/json/deserialization/engine/TestDeserializeCommonFields.h
-        persistence/json/deserialization/parsers/TestJsonArticleParser.cpp
-        persistence/json/deserialization/parsers/TestJsonArticleParser.h
-        persistence/json/deserialization/parsers/TestJsonBookParser.cpp
-        persistence/json/deserialization/parsers/TestJsonBookParser.h
-        persistence/json/deserialization/parsers/TestJsonVideoParser.cpp
-        persistence/json/deserialization/parsers/TestJsonVideoParser.h
+        persistence/json/deserialization/TestDeserializeCommonFields.cpp
+        persistence/json/deserialization/TestDeserializeCommonFields.h
+        persistence/json/deserialization/TestJsonArticleParser.cpp
+        persistence/json/deserialization/TestJsonArticleParser.h
+        persistence/json/deserialization/TestJsonBookParser.cpp
+        persistence/json/deserialization/TestJsonBookParser.h
+        persistence/json/deserialization/TestJsonVideoParser.cpp
+        persistence/json/deserialization/TestJsonVideoParser.h
         persistence/json/deserialization/TestJsonMediaDeserializer.cpp
         persistence/json/deserialization/TestJsonMediaDeserializer.h
         persistence/json/serialization/TestJsonMediumSerializerVisitor.cpp

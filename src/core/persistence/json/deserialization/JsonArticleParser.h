@@ -2,13 +2,16 @@
 #define JSONARTICLEPARSER_H
 
 #include "JsonMediumParser.h"
+#include "model/Article.h"
 #include "persistence/MediaSerializationConfigs.h"
+
+using Core::Model::Article;
 
 namespace Core::Persistence::Json {
 
 class JsonArticleParser : public JsonMediumParser {
 
-    MediaSerializationConfigs configs;
+    JsonParsingLib<Article> lib;
 
   public:
     ~JsonArticleParser() override = default;

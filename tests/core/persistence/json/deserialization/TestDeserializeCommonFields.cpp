@@ -1,8 +1,9 @@
 #include "TestDeserializeCommonFields.h"
 
 #include "model/MediumUserData.h"
-#include "persistence/json/deserialization/engine/JsonDeserializationError.h"
-#include "persistence/json/deserialization/engine/JsonDeserializationUtils.h"
+#include "persistence/MediaSerializationConfigs.h"
+#include "persistence/json/deserialization/JsonDeserializationError.h"
+#include "persistence/json/deserialization/JsonParsingLib.h"
 #include "testutils/fixtures/JsonSerializationFixtures.h"
 #include "testutils/mocks/MockConcreteMedium.h"
 
@@ -12,8 +13,9 @@
 #include <variant>
 
 using Core::Model::MediumUserData;
-using Core::Persistence::Json::deserializeCommonFields;
+using Core::Persistence::MediaSerializationConfigs;
 using Core::Persistence::Json::JsonDeserializationError;
+using Core::Persistence::Json::JsonParsingLib;
 
 namespace {
 
@@ -118,8 +120,10 @@ void TestDeserializeCommonFields::testDeserializeCommonFields() {
     QFETCH(std::optional<MockConcreteMedium>, expectedMedium);
     assert(expectedError.has_value() != expectedMedium.has_value());
 
+    JsonParsingLib<MockConcreteMedium> lib{MediaSerializationConfigs{}};
+
     const QString version = "1.0";
-    auto parseResult = deserializeCommonFields<MockConcreteMedium>(mediumObject, version);
+    auto parseResult = lib.deserializeCommonFields(mediumObject, version);
 
     if (expectedError.has_value()) {
         QVERIFY2(std::holds_alternative<JsonDeserializationError>(parseResult),

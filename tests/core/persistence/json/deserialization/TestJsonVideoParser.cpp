@@ -1,34 +1,36 @@
-#include "TestJsonArticleParser.h"
+#include "TestJsonVideoParser.h"
 
-#include "model/Article.h"
+#include "model/MediumUserData.h"
+#include "model/Video.h"
 #include "persistence/MediaSerializationConfigs.h"
-#include "persistence/json/deserialization/engine/JsonDeserializationError.h"
-#include "persistence/json/deserialization/parsers/JsonArticleParser.h"
-#include "persistence/json/serialization/JsonMediumSerializerVisitor.h"
+#include "persistence/json/deserialization/JsonDeserializationError.h"
+#include "persistence/json/deserialization/JsonVideoParser.h"
 #include "testutils/fixtures/JsonSerializationFixtures.h"
 
+#include <QJsonArray>
+#include <QJsonObject>
 #include <QTest>
 
-using Core::Model::Article;
-using Core::Persistence::MediaSerializationConfigs;
-using Core::Persistence::Json::JsonArticleParser;
+using Core::Model::MediumUserData;
+using Core::Model::Video;
 using Core::Persistence::Json::JsonDeserializationError;
+using Core::Persistence::Json::JsonVideoParser;
 
 namespace {
 template <typename FieldType>
 void testOptionalValidatedField(
-    const QString &fieldName, const std::function<FieldType &(Article &)> &fieldGetter,
+    const QString &fieldName, const std::function<FieldType &(Video &)> &fieldGetter,
     const std::optional<QJsonValue> &semanticallyInvalidValue = std::nullopt) {
-    ArticleJsonFixture fixture{};
+    VideoJsonFixture fixture{};
 
-    Article aWithNoField{fixture.article};
-    fieldGetter(aWithNoField).unset();
+    Video vWithNoField{fixture.video};
+    fieldGetter(vWithNoField).unset();
     QJsonObject jWithNoField{fixture.json};
     jWithNoField.remove(fieldName);
     auto testCaseName{QString{"`%1` field is missing"}.arg(fieldName)};
     QTest::addRow("%s", testCaseName.toStdString().c_str())
         << jWithNoField << std::optional<JsonDeserializationError>{std::nullopt}
-        << std::make_optional<Article>(aWithNoField);
+        << std::make_optional<Video>(vWithNoField);
 
     QJsonObject jWithWrongType{fixture.json};
     jWithWrongType[fieldName] = true;
@@ -39,7 +41,7 @@ void testOptionalValidatedField(
                .code = JsonDeserializationError::Code::WrongMediumFieldType,
                .errorLocation = jWithWrongType,
                .message = "not tested"})
-        << std::optional<Article>{std::nullopt};
+        << std::optional<Video>{std::nullopt};
 
     if (!semanticallyInvalidValue.has_value()) {
         return;
@@ -54,43 +56,46 @@ void testOptionalValidatedField(
                .code = JsonDeserializationError::Code::SemanticValidationFailed,
                .errorLocation = jWithSemanticError,
                .message = "not tested"})
-        << std::optional<Article>{std::nullopt};
-}
+        << std::optional<Video>{std::nullopt};
 }
 
-void TestJsonArticleParser::testParse_data() {
-    QTest::addColumn<QJsonObject>("articleObject");
-    // We can't use variants in this case, so we use two optionals, but they are mutually exclusive!
+}
+
+void TestJsonVideoParser::testParse_data() {
+    QTest::addColumn<QJsonObject>("videoObject");
     QTest::addColumn<std::optional<JsonDeserializationError>>("expectedError");
-    QTest::addColumn<std::optional<Article>>("expectedArticle");
+    QTest::addColumn<std::optional<Video>>("expectedVideo");
 
-    ArticleJsonFixture fixture{};
+    VideoJsonFixture fixture{};
 
-    QTest::addRow("Full valid article")
+    QTest::addRow("Full valid video")
         << fixture.json << std::optional<JsonDeserializationError>{std::nullopt}
-        << std::make_optional<Article>(fixture.article);
+        << std::make_optional<Video>(fixture.video);
 
     testOptionalValidatedField<ValidatedField<QUrl>>(
-        "articleUrl", [](Article &a) -> auto & { return a.articleUrl(); }, "htps:/helo.comaaoaua");
-
-    testOptionalValidatedField<ValidatedField<QString>>(
-        "sourceName", [](Article &a) -> auto & { return a.sourceName(); }, "");
+        "videoUrl", [](Video &v) -> auto & { return v.videoUrl(); },
+        "https://github.com/mantomat/eigencheck/tree/main/qna");
 
     testOptionalValidatedField<ValidatedField<unsigned int>>(
-        "readTimeMinutes", [](Article &a) -> auto & { return a.readTimeMinutes(); }, 0);
+        "durationSeconds", [](Video &v) -> auto & { return v.durationSeconds(); }, 0);
 
     testOptionalValidatedField<ValidatedField<QDate>>(
-        "publicationDate", [](Article &a) -> auto & { return a.publicationDate(); });
-}
-void TestJsonArticleParser::testParse() {
-    QFETCH(QJsonObject, articleObject);
-    QFETCH(std::optional<JsonDeserializationError>, expectedError);
-    QFETCH(std::optional<Article>, expectedArticle);
-    assert(expectedError.has_value() != expectedArticle.has_value());
+        "uploadDate", [](Video &v) -> auto & { return v.uploadDate(); },
+        QDate{1970, 1, 1}.toString(Core::Persistence::MediaSerializationConfigs{}.dateFormat));
 
-    JsonArticleParser parser;
+    testOptionalValidatedField<ValidatedField<QUrl>>(
+        "thumbnailUrl", [](Video &v) -> auto & { return v.thumbnailUrl(); },
+        QUrl{"https://i.ytimg.com/vi/cSlr2I1GGiw/hqdefault.psd"}.toString());
+}
+void TestJsonVideoParser::testParse() {
+    QFETCH(QJsonObject, videoObject);
+    QFETCH(std::optional<JsonDeserializationError>, expectedError);
+    QFETCH(std::optional<Video>, expectedVideo);
+    assert(expectedError.has_value() != expectedVideo.has_value());
+
+    JsonVideoParser parser;
     const QString version = "1.0";
-    auto parseResult = parser.parse(articleObject, version);
+    auto parseResult = parser.parse(videoObject, version);
 
     if (expectedError.has_value()) {
         QVERIFY2(std::holds_alternative<JsonDeserializationError>(parseResult),
@@ -104,13 +109,13 @@ void TestJsonArticleParser::testParse() {
     QVERIFY2(std::holds_alternative<std::unique_ptr<const Medium>>(parseResult),
              "The parser should have succeeded, but it returned an error.");
     auto parsedMedium = std::get<std::unique_ptr<const Medium>>(std::move(parseResult));
-    const auto *parsedArticle = dynamic_cast<const Article *>(parsedMedium.get());
-    QVERIFY2(parsedArticle != nullptr, "The parsed medium is not an Article.");
+    const auto *parsedVideo = dynamic_cast<const Video *>(parsedMedium.get());
+    QVERIFY2(parsedVideo != nullptr, "The parsed medium is not of the right type.");
 
-    testEqualityNoDate(*parsedArticle, expectedArticle.value());
+    testEqualityNoDate(*parsedVideo, expectedVideo.value());
 }
 
-void TestJsonArticleParser::testEqualityNoDate(const Article &lhs, const Article &rhs) {
+void TestJsonVideoParser::testEqualityNoDate(const Video &lhs, const Video &rhs) {
     QCOMPARE(lhs.id(), rhs.id());
     QCOMPARE(lhs.title(), rhs.title());
     QCOMPARE(lhs.userData().favorite(), rhs.userData().favorite());
@@ -119,8 +124,8 @@ void TestJsonArticleParser::testEqualityNoDate(const Article &lhs, const Article
     QCOMPARE(lhs.userData().topics(), rhs.userData().topics());
     QCOMPARE(lhs.userData().notes(), rhs.userData().notes());
     QCOMPARE(lhs.userData().priority(), rhs.userData().priority());
-    QCOMPARE(lhs.articleUrl(), rhs.articleUrl());
-    QCOMPARE(lhs.sourceName(), rhs.sourceName());
-    QCOMPARE(lhs.readTimeMinutes(), rhs.readTimeMinutes());
-    QCOMPARE(lhs.publicationDate(), rhs.publicationDate());
+    QCOMPARE(lhs.videoUrl(), rhs.videoUrl());
+    QCOMPARE(lhs.durationSeconds(), rhs.durationSeconds());
+    QCOMPARE(lhs.uploadDate(), rhs.uploadDate());
+    QCOMPARE(lhs.thumbnailUrl(), rhs.thumbnailUrl());
 }

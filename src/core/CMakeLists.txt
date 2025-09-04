@@ -49,16 +49,16 @@ add_library(sourcevaultcore STATIC
         persistence/MediaSerializationConfigs.h
         persistence/json/deserialization/JsonMediaDeserializer.cpp
         persistence/json/deserialization/JsonMediaDeserializer.h
-        persistence/json/deserialization/engine/JsonConverter.h
-        persistence/json/deserialization/engine/JsonDeserializationError.h
-        persistence/json/deserialization/engine/JsonDeserializationUtils.h
-        persistence/json/deserialization/parsers/JsonArticleParser.cpp
-        persistence/json/deserialization/parsers/JsonArticleParser.h
-        persistence/json/deserialization/parsers/JsonBookParser.cpp
-        persistence/json/deserialization/parsers/JsonBookParser.h
-        persistence/json/deserialization/parsers/JsonMediumParser.h
-        persistence/json/deserialization/parsers/JsonVideoParser.cpp
-        persistence/json/deserialization/parsers/JsonVideoParser.h
+        persistence/json/deserialization/JsonConverter.h
+        persistence/json/deserialization/JsonDeserializationError.h
+        persistence/json/deserialization/JsonParsingLib.h
+        persistence/json/deserialization/JsonArticleParser.cpp
+        persistence/json/deserialization/JsonArticleParser.h
+        persistence/json/deserialization/JsonBookParser.cpp
+        persistence/json/deserialization/JsonBookParser.h
+        persistence/json/deserialization/JsonMediumParser.h
+        persistence/json/deserialization/JsonVideoParser.cpp
+        persistence/json/deserialization/JsonVideoParser.h
         persistence/json/serialization/JsonMediumSerializerVisitor.cpp
         persistence/json/serialization/JsonMediumSerializerVisitor.h
         persistence/json/serialization/JsonMediaSerializer.cpp

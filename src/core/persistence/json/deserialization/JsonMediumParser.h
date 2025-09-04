@@ -1,7 +1,7 @@
 #ifndef JSONMEDIUMPARSER_H
 #define JSONMEDIUMPARSER_H
 
-#include "persistence/json/deserialization/engine/JsonDeserializationUtils.h"
+#include "JsonParsingLib.h"
 
 #include <QJsonObject>
 

@@ -1,10 +1,9 @@
 #include "JsonMediaDeserializer.h"
 
-#include "engine/JsonDeserializationUtils.h"
+#include "JsonArticleParser.h"
+#include "JsonBookParser.h"
+#include "JsonVideoParser.h"
 #include "model/Medium.h"
-#include "parsers/JsonArticleParser.h"
-#include "parsers/JsonBookParser.h"
-#include "parsers/JsonVideoParser.h"
 
 #include <algorithm>
 

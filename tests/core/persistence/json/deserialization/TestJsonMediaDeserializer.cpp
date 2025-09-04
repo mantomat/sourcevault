@@ -1,10 +1,10 @@
 #include "TestJsonMediaDeserializer.h"
 
+#include "persistence/json/deserialization/JsonDeserializationError.h"
 #include "persistence/json/deserialization/JsonMediaDeserializer.h"
-#include "persistence/json/deserialization/engine/JsonDeserializationError.h"
-#include "persistence/json/deserialization/parsers/TestJsonArticleParser.h"
-#include "persistence/json/deserialization/parsers/TestJsonBookParser.h"
-#include "persistence/json/deserialization/parsers/TestJsonVideoParser.h"
+#include "persistence/json/deserialization/TestJsonArticleParser.h"
+#include "persistence/json/deserialization/TestJsonBookParser.h"
+#include "persistence/json/deserialization/TestJsonVideoParser.h"
 #include "testutils/fixtures/JsonSerializationFixtures.h"
 
 #include <QTest>
