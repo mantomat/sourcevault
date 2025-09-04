@@ -21,9 +21,8 @@ auto JsonMediaSerializer::serialize(const std::vector<const Medium *> &media) co
     });
 
     QJsonObject root;
-    if (!mediaJsonArray.isEmpty()) {
-        root["media"] = mediaJsonArray;
-    }
+    root["version"] = QString{version};
+    root["media"] = mediaJsonArray;
     return QJsonDocument{root};
 }
 

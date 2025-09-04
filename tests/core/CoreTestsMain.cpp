@@ -6,6 +6,7 @@
 #include "model/TestValidatedField.h"
 #include "model/TestValidatedSet.h"
 #include "model/TestVideo.h"
+#include "persistence/json/TestJsonPersistenceManager.h"
 #include "persistence/json/deserialization/TestJsonArticleParser.h"
 #include "persistence/json/deserialization/TestJsonBookParser.h"
 #include "persistence/json/deserialization/TestJsonMediaDeserializer.h"
@@ -62,6 +63,7 @@ auto main(const int argc, char **argv) -> int {
     ret |= QTest::qExec(std::make_unique<TestTitleSort>().get(), argc, argv);
 
     // persistence
+    ret |= QTest::qExec(std::make_unique<TestJsonPersistenceManager>().get(), argc, argv);
     // serialization
     ret |= QTest::qExec(std::make_unique<TestJsonMediumSerializerVisitor>().get(), argc, argv);
     ret |= QTest::qExec(std::make_unique<TestJsonMediaSerializer>().get(), argc, argv);

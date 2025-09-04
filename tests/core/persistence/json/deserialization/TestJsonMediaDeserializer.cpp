@@ -8,6 +8,8 @@
 #include "testutils/fixtures/JsonSerializationFixtures.h"
 
 #include <QTest>
+#include <algorithm>
+#include <ranges>
 
 using Core::Persistence::Json::JsonDeserializationError;
 using Core::Persistence::Json::JsonMediaDeserializer;
@@ -266,31 +268,44 @@ void TestJsonMediaDeserializer::testDeserialize() {
     auto parsedLibrary = std::get<Library>(std::move(result));
 
     auto actualMedia{parsedLibrary.getMedia()};
-    auto expectedMedia{parsedLibrary.getMedia()};
+    auto expectedMedia{expectedLibrary.value().getMedia()};
 
-    QCOMPARE(actualMedia.size(), expectedMedia.size());
+    QVERIFY(std::ranges::all_of(
+        actualMedia | std::views::transform([](const auto &medium) { return medium->dateAdded(); }),
+        [](const auto &date) { return date == QDate::currentDate(); }));
 
-    std::ranges::sort(actualMedia);
-    std::ranges::sort(expectedMedia);
-    for (size_t i{0}; i < actualMedia.size(); i++) {
-        if (const Book *expectedBook{dynamic_cast<const Book *>(expectedMedia[i])};
+    testMediaEqualityNoDate(std::move(actualMedia), std::move(expectedMedia));
+}
+
+void TestJsonMediaDeserializer::testMediaEqualityNoDate(std::vector<const Medium *> actual,
+                                                        std::vector<const Medium *> expected) {
+    QCOMPARE(actual.size(), expected.size());
+
+    auto sortById = [](const Medium *a, const Medium *b) {
+        return a->id().toString() < b->id().toString();
+    };
+    std::ranges::sort(actual, sortById);
+    std::ranges::sort(expected, sortById);
+
+    for (size_t i{0}; i < actual.size(); i++) {
+        if (const Book *expectedBook{dynamic_cast<const Book *>(expected[i])};
             expectedBook != nullptr) {
-            const Book *actual{dynamic_cast<const Book *>(actualMedia[i])};
+            const Book *actualBook{dynamic_cast<const Book *>(actual[i])};
 
-            QVERIFY(actual != nullptr);
-            TestJsonBookParser::testEqualityNoDate(*actual, *expectedBook);
-        } else if (const Article *expectedArticle{dynamic_cast<const Article *>(expectedMedia[i])};
+            QVERIFY(actualBook != nullptr);
+            TestJsonBookParser::testEqualityNoDate(*actualBook, *expectedBook);
+        } else if (const Article *expectedArticle{dynamic_cast<const Article *>(expected[i])};
                    expectedArticle != nullptr) {
-            const Article *actual{dynamic_cast<const Article *>(actualMedia[i])};
+            const Article *actualArticle{dynamic_cast<const Article *>(actual[i])};
 
-            QVERIFY(actual != nullptr);
-            TestJsonArticleParser::testEqualityNoDate(*actual, *expectedArticle);
-        } else if (const Video *expectedVideo{dynamic_cast<const Video *>(expectedMedia[i])};
+            QVERIFY(actualArticle != nullptr);
+            TestJsonArticleParser::testEqualityNoDate(*actualArticle, *expectedArticle);
+        } else if (const Video *expectedVideo{dynamic_cast<const Video *>(expected[i])};
                    expectedVideo != nullptr) {
-            const Video *actual{dynamic_cast<const Video *>(actualMedia[i])};
+            const Video *actualVideo{dynamic_cast<const Video *>(actual[i])};
 
-            QVERIFY(actual != nullptr);
-            TestJsonVideoParser::testEqualityNoDate(*actual, *expectedVideo);
+            QVERIFY(actualVideo != nullptr);
+            TestJsonVideoParser::testEqualityNoDate(*actualVideo, *expectedVideo);
         }
     }
 }

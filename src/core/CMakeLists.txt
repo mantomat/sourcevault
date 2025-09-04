@@ -3,6 +3,7 @@ add_library(sourcevaultcore STATIC
         shared/MediumVisitor.h
         shared/MediumTypeVisitor.h
         shared/MediumTypeVisitor.cpp
+        shared/OverloadedVariantVisitor.h
         
         model/Medium.cpp
         model/Medium.h
@@ -47,6 +48,8 @@ add_library(sourcevaultcore STATIC
         queries/sortings/DateAddedSort.h
 
         persistence/MediaSerializationConfigs.h
+        persistence/json/JsonPersistenceManager.cpp
+        persistence/json/JsonPersistenceManager.h
         persistence/json/deserialization/JsonMediaDeserializer.cpp
         persistence/json/deserialization/JsonMediaDeserializer.h
         persistence/json/deserialization/JsonConverter.h

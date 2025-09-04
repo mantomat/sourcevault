@@ -57,7 +57,6 @@ void TestJsonMediumSerializerVisitor::testVisitBook() {
     book.accept(visitor);
 
     const auto result{visitor.getSerializedMedium()};
-    qDebug() << "actual " << result << "\n" << "expected" << expectedSerialization << "\n";
     QCOMPARE(result, expectedSerialization);
 }
 

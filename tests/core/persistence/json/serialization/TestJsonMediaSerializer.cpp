@@ -28,11 +28,13 @@ void TestJsonMediaSerializer::testSerialize_data() {
     Article article{Article::create("title").value()};
     Video video{Video::create("title").value()};
 
+    const QString expectedVersion{JsonMediaSerializer::version};
     QTest::addRow("Empty library serialization")
         << MediaGenerator{[] { return std::vector<std::unique_ptr<const Medium>>{}; }}
-        << QJsonDocument{QJsonObject{}};
+        << QJsonDocument{QJsonObject{{"media", QJsonArray{}}, {"version", expectedVersion}}};
 
     QJsonDocument singleMediaDocument{QJsonObject{
+        {"version", expectedVersion},
         {"media",
          QJsonArray{{QJsonObject{{"type", "book"},
                                  {"id", book.id().toString(QUuid::StringFormat::WithoutBraces)},
@@ -45,6 +47,7 @@ void TestJsonMediaSerializer::testSerialize_data() {
     }} << singleMediaDocument;
 
     const QJsonDocument multipleMediaDocument{QJsonObject{
+        {"version", expectedVersion},
         {"media",
          QJsonArray{{QJsonObject{{"type", "book"},
                                  {"id", book.id().toString(QUuid::StringFormat::WithoutBraces)},

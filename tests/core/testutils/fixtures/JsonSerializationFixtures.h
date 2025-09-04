@@ -24,7 +24,9 @@ using Core::Persistence::MediaSerializationConfigs;
 struct ArticleJsonFixture {
     Article article{[] {
         Article newArticle =
-            Article::create("Test Title", QUuid::createUuid(), QDate(2025, 1, 1)).value();
+            Article::create("Test Title", QUuid{"{9c1f1ba8-a826-45fa-bdfb-b53743384220}"},
+                            QDate(2025, 1, 1))
+                .value();
         newArticle.userData().favorite() = true;
         newArticle.authors().set({"Joan Westenberg"});
         newArticle.language().set("English");
@@ -59,7 +61,9 @@ struct ArticleJsonFixture {
 
 struct VideoJsonFixture {
     Video video{[] {
-        Video newVideo{Video::create("Test Title", QUuid::createUuid(), QDate(2025, 1, 1)).value()};
+        Video newVideo{Video::create("Test Title", QUuid{"{88000708-d23e-498e-afac-4d956bc5d030}"},
+                                     QDate(2025, 1, 1))
+                           .value()};
         newVideo.userData().favorite() = false;
         newVideo.authors().set({"Paolo Coletti"});
         newVideo.language().set("Italian");
@@ -97,7 +101,9 @@ struct VideoJsonFixture {
 
 struct BookJsonFixture {
     Book book{[] {
-        Book newBook{Book::create("Test Title", QUuid::createUuid(), QDate(2025, 1, 1)).value()};
+        Book newBook{Book::create("Test Title", QUuid{"{fc1142b9-3d6d-44b0-aa1a-36f8bbbf22d8}"},
+                                  QDate(2025, 1, 1))
+                         .value()};
         newBook.userData().favorite() = true;
         newBook.authors().set({"Daniel Kahneman"});
         newBook.language().set("English");

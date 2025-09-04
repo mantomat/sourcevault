@@ -13,6 +13,8 @@ class JsonMediaSerializer {
     std::unique_ptr<JsonMediumSerializerVisitor> mediumSerializer;
 
   public:
+    static constexpr const char *version{"1.0"};
+
     explicit JsonMediaSerializer(
         MediaSerializationConfigs newConfigs = MediaSerializationConfigs{});
 
