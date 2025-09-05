@@ -70,5 +70,8 @@ auto Article::publicationDateValidator(const QDate &dateToValidate) -> bool {
 void Article::accept(MediumVisitor &visitor) const {
     visitor.visit(*this);
 }
+void Article::accept(MutMediumVisitor &visitor) {
+    visitor.visit(*this);
+}
 
 }

@@ -23,7 +23,7 @@ class JsonPersistenceManager {
      * @return The `Library` in case of success. A `FileError` if a file system error occurs. A
      * `JsonDeserializationError` if the deserialization process fails.
      */
-    auto importLibrary(const QString &filePath) const
+    [[nodiscard]] auto importLibrary(const QString &filePath) const
         -> std::variant<QFileDevice::FileError, JsonDeserializationError, Library>;
 
     /**
@@ -33,7 +33,8 @@ class JsonPersistenceManager {
      *
      * @return `std::nullopt` if successful. `FileError` otherwise.
      */
-    auto exportMedia(const std::vector<const Medium *> &media, const QString &filePath) const
+    [[nodiscard]] auto exportMedia(const std::vector<const Medium *> &media,
+                                   const QString &filePath) const
         -> std::optional<QFileDevice::FileError>;
 };
 

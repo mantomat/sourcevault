@@ -58,6 +58,7 @@ class Article : public Medium {
     [[nodiscard]] static auto publicationDateValidator(const QDate &dateToValidate) -> bool;
 
     void accept(MediumVisitor &visitor) const override;
+    void accept(MutMediumVisitor &visitor) override;
 };
 
 }

@@ -4,6 +4,8 @@ add_library(sourcevaultcore STATIC
         shared/MediumTypeVisitor.h
         shared/MediumTypeVisitor.cpp
         shared/OverloadedVariantVisitor.h
+        shared/QUuidHasher.h
+        shared/MutMediumVisitor.h
         
         model/Medium.cpp
         model/Medium.h
@@ -48,6 +50,7 @@ add_library(sourcevaultcore STATIC
         queries/sortings/DateAddedSort.h
 
         persistence/MediaSerializationConfigs.h
+
         persistence/json/JsonPersistenceManager.cpp
         persistence/json/JsonPersistenceManager.h
         persistence/json/deserialization/JsonMediaDeserializer.cpp
@@ -66,6 +69,15 @@ add_library(sourcevaultcore STATIC
         persistence/json/serialization/JsonMediumSerializerVisitor.h
         persistence/json/serialization/JsonMediaSerializer.cpp
         persistence/json/serialization/JsonMediaSerializer.h
+
+        persistence/thumbnails/MediumThumbnailSetter.cpp
+        persistence/thumbnails/MediumThumbnailSetter.h
+        persistence/thumbnails/MediumThumbnailVisitor.cpp
+        persistence/thumbnails/MediumThumbnailVisitor.h
+        persistence/thumbnails/ThumbnailsExporter.cpp
+        persistence/thumbnails/ThumbnailsExporter.h
+        persistence/thumbnails/ThumbnailsImporter.cpp
+        persistence/thumbnails/ThumbnailsImporter.h
 )
 
 target_include_directories(sourcevaultcore PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

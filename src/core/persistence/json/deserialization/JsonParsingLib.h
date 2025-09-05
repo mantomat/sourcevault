@@ -100,7 +100,7 @@ template <ConcreteMedium MediumType> class JsonParsingLib {
      * to a field in order to convert it to a ValidatedSet of strings and assign it to the
      * Medium.
      */
-    auto
+    [[nodiscard]] auto
     optionalValidatedSetParser(const QJsonObject &obj, const QString &key,
                                std::function<ValidatedSet<QString> &(MediumType &)> getField) const
         -> std::function<std::optional<JsonDeserializationError>(MediumType &)> {

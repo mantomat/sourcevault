@@ -14,6 +14,10 @@
 #include "persistence/json/deserialization/TestJsonVideoParser.h"
 #include "persistence/json/serialization/TestJsonMediaSerializer.h"
 #include "persistence/json/serialization/TestJsonMediumSerializerVisitor.h"
+#include "persistence/thumbnails/TestMediumThumbnailSetter.h"
+#include "persistence/thumbnails/TestMediumThumbnailVisitor.h"
+#include "persistence/thumbnails/TestThumbnailsExporter.h"
+#include "persistence/thumbnails/TestThumbnailsImporter.h"
 #include "queries/TestFilteringQuery.h"
 #include "queries/TestSearchQuery.h"
 #include "queries/TestSortingQuery.h"
@@ -50,29 +54,35 @@ auto main(const int argc, char **argv) -> int {
     ret |= QTest::qExec(std::make_unique<TestFilteringQuery>().get(), argc, argv);
     ret |= QTest::qExec(std::make_unique<TestSearchQuery>().get(), argc, argv);
     ret |= QTest::qExec(std::make_unique<TestSortingQuery>().get(), argc, argv);
-    // search
+    //// search
     ret |= QTest::qExec(std::make_unique<TestSearchScoreVisitor>().get(), argc, argv);
     ret |= QTest::qExec(std::make_unique<TestFieldScoreCalculator>().get(), argc, argv);
     ret |= QTest::qExec(std::make_unique<TestSearchEngine>().get(), argc, argv);
-    // filters
+    //// filters
     ret |= QTest::qExec(std::make_unique<TestFavoriteFilter>().get(), argc, argv);
     ret |= QTest::qExec(std::make_unique<TestMediumTypeFilter>().get(), argc, argv);
-    // sortings
+    //// sortings
     ret |= QTest::qExec(std::make_unique<TestSort>().get(), argc, argv);
     ret |= QTest::qExec(std::make_unique<TestDateAddedSort>().get(), argc, argv);
     ret |= QTest::qExec(std::make_unique<TestTitleSort>().get(), argc, argv);
 
     // persistence
+    //// json
     ret |= QTest::qExec(std::make_unique<TestJsonPersistenceManager>().get(), argc, argv);
-    // serialization
+    ///// serialization
     ret |= QTest::qExec(std::make_unique<TestJsonMediumSerializerVisitor>().get(), argc, argv);
     ret |= QTest::qExec(std::make_unique<TestJsonMediaSerializer>().get(), argc, argv);
-    // deserialization
+    ////// deserialization
     ret |= QTest::qExec(std::make_unique<TestJsonMediaDeserializer>().get(), argc, argv);
     ret |= QTest::qExec(std::make_unique<TestJsonParsingLib>().get(), argc, argv);
     ret |= QTest::qExec(std::make_unique<TestJsonArticleParser>().get(), argc, argv);
     ret |= QTest::qExec(std::make_unique<TestJsonBookParser>().get(), argc, argv);
     ret |= QTest::qExec(std::make_unique<TestJsonVideoParser>().get(), argc, argv);
+    //// thumbnails
+    ret |= QTest::qExec(std::make_unique<TestMediumThumbnailSetter>().get(), argc, argv);
+    ret |= QTest::qExec(std::make_unique<TestMediumThumbnailVisitor>().get(), argc, argv);
+    ret |= QTest::qExec(std::make_unique<TestThumbnailsExporter>().get(), argc, argv);
+    ret |= QTest::qExec(std::make_unique<TestThumbnailsImporter>().get(), argc, argv);
 
     return ret;
 }

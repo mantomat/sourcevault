@@ -6,6 +6,7 @@
 #include "ValidatedSet.h"
 #include "shared/Cloneable.h"
 #include "shared/MediumVisitor.h"
+#include "shared/MutMediumVisitor.h"
 
 #include <QDate>
 #include <QString>
@@ -13,6 +14,7 @@
 
 using Core::Shared::Cloneable;
 using Core::Shared::MediumVisitor;
+using Core::Shared::MutMediumVisitor;
 
 namespace Core::Model {
 
@@ -89,6 +91,7 @@ class Medium : public Cloneable<Medium> {
     [[nodiscard]] static auto languageValidator(const QString &languageToValidate) -> bool;
 
     virtual void accept(MediumVisitor &) const = 0;
+    virtual void accept(MutMediumVisitor &) = 0;
 };
 
 }

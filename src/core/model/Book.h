@@ -71,6 +71,7 @@ class Book : public Medium {
     [[nodiscard]] static auto thumbnailUrlValidator(const QUrl &urlToValidate) -> bool;
 
     void accept(MediumVisitor &visitor) const override;
+    void accept(MutMediumVisitor &visitor) override;
 };
 
 }

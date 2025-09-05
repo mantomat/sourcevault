@@ -32,6 +32,9 @@ class MockConcreteMedium final : public Medium {
     void accept(MediumVisitor & /*unused*/) const override {
         // never the case
     }
+    void accept(MutMediumVisitor & /*unused*/) override {
+        // never the case
+    }
 
     friend class TestMedium;
 };

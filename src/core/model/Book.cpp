@@ -119,5 +119,8 @@ auto Book::thumbnailUrlValidator(const QUrl &urlToValidate) -> bool {
 void Book::accept(MediumVisitor &visitor) const {
     visitor.visit(*this);
 }
+void Book::accept(MutMediumVisitor &visitor) {
+    visitor.visit(*this);
+}
 
 }

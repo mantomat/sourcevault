@@ -64,6 +64,16 @@ add_executable(testscore CoreTestsMain.cpp
         persistence/json/serialization/TestJsonMediumSerializerVisitor.h
         persistence/json/serialization/TestJsonMediaSerializer.cpp
         persistence/json/serialization/TestJsonMediaSerializer.h
+
+        persistence/thumbnails/TestMediumThumbnailSetter.cpp
+        persistence/thumbnails/TestMediumThumbnailSetter.h
+        persistence/thumbnails/TestMediumThumbnailVisitor.cpp
+        persistence/thumbnails/TestMediumThumbnailVisitor.h
+        persistence/thumbnails/TestThumbnailsExporter.cpp
+        persistence/thumbnails/TestThumbnailsExporter.h
+        persistence/thumbnails/TestThumbnailsImporter.cpp
+        persistence/thumbnails/TestThumbnailsImporter.h
+
 )
 target_link_libraries(testscore sourcevaultcore Qt6::Test)
 target_compile_options(testscore PRIVATE ${COMMON_COMPILE_OPTIONS})

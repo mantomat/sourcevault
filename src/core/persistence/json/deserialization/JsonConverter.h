@@ -19,8 +19,8 @@ namespace Core::Persistence::Json {
 template <typename T> struct JsonConverter;
 
 template <> struct JsonConverter<int> {
-    static auto fromJson(const QJsonObject &mediumObject, const QString &key,
-                         const MediaSerializationConfigs & /*unused*/)
+    [[nodiscard]] static auto fromJson(const QJsonObject &mediumObject, const QString &key,
+                                       const MediaSerializationConfigs & /*unused*/)
         -> std::variant<JsonDeserializationError, int> {
         assert(mediumObject.contains(key));
 
@@ -49,8 +49,8 @@ template <> struct JsonConverter<int> {
 };
 
 template <> struct JsonConverter<unsigned int> {
-    static auto fromJson(const QJsonObject &mediumObject, const QString &key,
-                         const MediaSerializationConfigs & /*unused*/)
+    [[nodiscard]] static auto fromJson(const QJsonObject &mediumObject, const QString &key,
+                                       const MediaSerializationConfigs & /*unused*/)
         -> std::variant<JsonDeserializationError, unsigned int> {
         assert(mediumObject.contains(key));
 
@@ -79,8 +79,8 @@ template <> struct JsonConverter<unsigned int> {
 };
 
 template <> struct JsonConverter<QUrl> {
-    static auto fromJson(const QJsonObject &mediumObject, const QString &key,
-                         const MediaSerializationConfigs & /*unused*/)
+    [[nodiscard]] static auto fromJson(const QJsonObject &mediumObject, const QString &key,
+                                       const MediaSerializationConfigs & /*unused*/)
         -> std::variant<JsonDeserializationError, QUrl> {
         assert(mediumObject.contains(key));
 
@@ -108,8 +108,8 @@ template <> struct JsonConverter<QUrl> {
 };
 
 template <> struct JsonConverter<QString> {
-    static auto fromJson(const QJsonObject &mediumObject, const QString &key,
-                         const MediaSerializationConfigs & /*unused*/)
+    [[nodiscard]] static auto fromJson(const QJsonObject &mediumObject, const QString &key,
+                                       const MediaSerializationConfigs & /*unused*/)
         -> std::variant<JsonDeserializationError, QString> {
         assert(mediumObject.contains(key));
 
@@ -125,8 +125,8 @@ template <> struct JsonConverter<QString> {
 };
 
 template <> struct JsonConverter<QDate> {
-    static auto fromJson(const QJsonObject &mediumObject, const QString &key,
-                         const MediaSerializationConfigs &configs)
+    [[nodiscard]] static auto fromJson(const QJsonObject &mediumObject, const QString &key,
+                                       const MediaSerializationConfigs &configs)
         -> std::variant<JsonDeserializationError, QDate> {
         assert(mediumObject.contains(key));
 
@@ -154,8 +154,8 @@ template <> struct JsonConverter<QDate> {
 };
 
 template <> struct JsonConverter<MediumUserData::PriorityLevel> {
-    static auto fromJson(const QJsonObject &mediumObject, const QString &key,
-                         const MediaSerializationConfigs & /*unused*/)
+    [[nodiscard]] static auto fromJson(const QJsonObject &mediumObject, const QString &key,
+                                       const MediaSerializationConfigs & /*unused*/)
         -> std::variant<JsonDeserializationError, MediumUserData::PriorityLevel> {
         assert(mediumObject.contains(key));
 

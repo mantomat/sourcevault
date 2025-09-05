@@ -98,4 +98,7 @@ auto Video::thumbnailUrlValidator(const QUrl &urlToValidate) -> bool {
 void Video::accept(MediumVisitor &visitor) const {
     visitor.visit(*this);
 }
+void Video::accept(MutMediumVisitor &visitor) {
+    visitor.visit(*this);
+}
 }
