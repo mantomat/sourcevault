@@ -21,13 +21,8 @@ auto ThumbnailsExporter::exportLocalThumbnails(const std::vector<const Medium *>
         return QFileDevice::PositionError;
     }
 
-    const QString subDirName{"soucevault-thumbnails"};
-
-    if (!destinationDir.mkdir(subDirName)) {
-        return QFileDevice::WriteError;
-    }
-
-    if (!destinationDir.cd(subDirName)) {
+    const QString subDirNameStr{subDirName};
+    if (!destinationDir.mkdir(subDirNameStr) || !destinationDir.cd(subDirNameStr)) {
         return QFileDevice::WriteError;
     }
 
@@ -43,9 +38,9 @@ auto ThumbnailsExporter::exportLocalThumbnails(const std::vector<const Medium *>
         QFile thumbnailFile{thumbnailPath.value()};
         const QFileInfo thumbnailFileInfo{thumbnailFile};
 
-        const QString extension{thumbnailFileInfo.baseName()};
+        const QString extension{thumbnailFileInfo.suffix()};
 
-        const QString newFileName = medium->id().toString(QUuid::WithoutBraces) + extension;
+        const QString newFileName = medium->id().toString(QUuid::WithoutBraces) + "." + extension;
         const QString newFilePath = destinationDir.filePath(newFileName);
 
         if (!thumbnailFile.copy(newFilePath)) {

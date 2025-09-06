@@ -19,6 +19,8 @@ class ThumbnailsExporter {
   public:
     ThumbnailsExporter();
 
+    static constexpr const char *subDirName{"sourcevault-thumbnails"};
+
     /**
      * @brief Copies all the available local thumbnails to a subfolder of the given
      * `destinationFolder`, naming them `mediumId.***`.

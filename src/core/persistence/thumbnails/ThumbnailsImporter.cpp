@@ -30,12 +30,11 @@ auto ThumbnailsImporter::importLocalThumbnails(Library library,
 
     for (const QFileInfo &thumbnailInfo : fileInfoList) {
         const QUuid candidateId{thumbnailInfo.baseName()};
-
         if (candidateId.isNull()) {
             continue;
         }
 
-        const std::optional<const Medium *> mediumOpt{library.getMedium(candidateId)};
+        const auto mediumOpt{library.getMedium(candidateId)};
         if (!mediumOpt.has_value()) {
             continue;
         }
@@ -44,7 +43,11 @@ auto ThumbnailsImporter::importLocalThumbnails(Library library,
 
         thumbnailSetter->setThumbnailUrl(QUrl::fromLocalFile(thumbnailInfo.filePath()));
         newMedium->accept(*thumbnailSetter);
-        assert(thumbnailSetter->wasSuccessful());
+        if (!thumbnailSetter->wasSuccessful()) {
+            qDebug() << "setting " << QUrl::fromLocalFile(thumbnailInfo.filePath())
+                     << "was not successful";
+            continue;
+        }
 
         setMediaIds.insert(newMedium->id());
         const bool wasReplaced{library.replaceMedium(std::move(newMedium))};

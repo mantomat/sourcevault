@@ -21,8 +21,8 @@ class ThumbnailsImporter {
     ThumbnailsImporter();
 
     /**
-     * @brief Iterates through the directory at `thumbnailsDirPath` and all the corresponding media
-     * `thumbnailUrl`s to point to the ones found in it.
+     * @brief Iterates through the directory at `thumbnailsDirPath` and sets all the corresponding
+     * media `thumbnailUrl`s to point to the ones found in it.
      *
      * A thumbnail is set (and, in case, overridden) if and only if the image is called
      * `mediumId.XXX` and `mediumId` matches an `id` in the `library`.

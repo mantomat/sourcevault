@@ -13,17 +13,12 @@ using Core::Model::Video;
 namespace Core::Persistence::Thumbnails {
 
 auto MediumThumbnailVisitor::getLocalThumbnailPath() const -> std::optional<QString> {
-    if (!localThumbnail.has_value()) {
-        return std::nullopt;
-    }
-
-    if (!localThumbnail->isLocalFile()) {
+    if (!localThumbnail.has_value() || !localThumbnail->isLocalFile()) {
         return std::nullopt;
     }
 
     QString path{localThumbnail->toLocalFile()};
-    QFileInfo fileInfo{path};
-
+    const QFileInfo fileInfo{path};
     if (!fileInfo.exists() || !fileInfo.isReadable()) {
         return std::nullopt;
     }
