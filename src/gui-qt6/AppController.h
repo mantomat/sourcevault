@@ -15,12 +15,12 @@ namespace Gui {
 class AppController : public QObject {
     Q_OBJECT
 
-    MainWindow mainWindow;
+    MainWindow *mainWindow;
 
     LibraryPageController *libraryPageController;
 
   public:
-    AppController();
+    AppController(MainWindow *newMainWindow);
 };
 
 }

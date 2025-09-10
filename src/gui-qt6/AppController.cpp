@@ -2,9 +2,7 @@
 
 namespace Gui {
 
-AppController::AppController()
-    : libraryPageController{new LibraryPageController{mainWindow.getLibraryPage(), this}} {
-    mainWindow.show();
-}
-
+AppController::AppController(MainWindow *newMainWindow)
+    : mainWindow{newMainWindow}
+    , libraryPageController{new LibraryPageController{mainWindow->getLibraryPage(), this}} {}
 }

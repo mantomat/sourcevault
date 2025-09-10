@@ -1,7 +1,7 @@
 #include "ThumbnailRenderer.h"
 
+#include <QNetworkAccessManager>
 #include <QVBoxLayout>
-#include <qnetworkaccessmanager.h>
 #include <qnetworkreply.h>
 #include <qpixmap.h>
 
@@ -14,40 +14,62 @@ ThumbnailRenderer::ThumbnailRenderer(const std::optional<QUrl> &preferredThumbna
     , imageLabel{new QLabel{this}}
     , networkManager{new QNetworkAccessManager{this}} {
 
-    auto *layout{new QVBoxLayout(this)};
+    initLayout();
+    initImageLabel();
+
+    trySetImageLabel(preferredThumbnailUrl);
+}
+
+void ThumbnailRenderer::initLayout() {
+    auto *layout{new QVBoxLayout{this}};
+
     layout->addWidget(imageLabel);
     layout->setContentsMargins(0, 0, 0, 0);
     layout->setAlignment(Qt::AlignCenter);
+}
 
+void ThumbnailRenderer::initImageLabel() {
     imageLabel->setScaledContents(true);
 
     QPixmap loadingPixmap{":/assets/loading.png"};
     imageLabel->setPixmap(loadingPixmap);
+}
 
+void ThumbnailRenderer::trySetImageLabel(const std::optional<QUrl> &preferredThumbnailUrl) {
     if (!preferredThumbnailUrl.has_value() || !preferredThumbnailUrl.value().isValid()) {
         setFallback();
         return;
     }
+    trySetPreferred(preferredThumbnailUrl.value());
+}
 
-    if (preferredThumbnailUrl.value().isLocalFile()) {
-        QPixmap localFilePixmap{preferredThumbnailUrl.value().toLocalFile()};
-        if (!localFilePixmap.isNull()) {
-            imageLabel->setPixmap(localFilePixmap);
-        } else {
-            qWarning() << "Error: local image file is invalid"
-                       << preferredThumbnailUrl.value().toLocalFile();
-            setFallback();
-        }
-        return;
+void ThumbnailRenderer::trySetPreferred(const QUrl &preferredThumbnailUrl) {
+
+    if (preferredThumbnailUrl.isLocalFile()) {
+        trySetLocalPreferred(preferredThumbnailUrl);
     }
+    trySetOnlinePreferred(preferredThumbnailUrl);
+}
 
-    networkManager->get(QNetworkRequest(preferredThumbnailUrl.value()));
+void ThumbnailRenderer::trySetLocalPreferred(const QUrl &preferredThumbnailUrl) {
+    const QString localFilePath{preferredThumbnailUrl.toLocalFile()};
+
+    QPixmap localFilePixmap{localFilePath};
+    if (!localFilePixmap.isNull()) {
+        imageLabel->setPixmap(localFilePixmap);
+    } else {
+        qWarning() << "Error: local image file is invalid" << localFilePath;
+        setFallback();
+    }
+}
+
+void ThumbnailRenderer::trySetOnlinePreferred(const QUrl &preferredThumbnailUrl) {
+    networkManager->get(QNetworkRequest(preferredThumbnailUrl));
     connect(networkManager, &QNetworkAccessManager::finished, this,
             &ThumbnailRenderer::onNetworkReply);
 }
 
 void ThumbnailRenderer::setFallback() {
-
     QPixmap fallbackPixmap{fallbackThumbnailPath};
     assert(!fallbackPixmap.isNull());
 
@@ -73,5 +95,4 @@ void ThumbnailRenderer::onNetworkReply(QNetworkReply *reply) {
     imageLabel->setPixmap(pixmap);
     reply->deleteLater();
 }
-
 }
