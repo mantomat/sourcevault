@@ -19,7 +19,7 @@ class LibrarySidebar : public QWidget {
      * This section defines the public interface for the sidebar's state.
      *
      * These enums and structs serve as a "ViewModel," creating a clear and stable
-     * contract between the LibrarySidebar (View) and the AppController (Controller).
+     * contract between the LibrarySidebar (View) and the Controller.
      *
      * This decouples the View from the backend Model. The View only needs to know
      * how to construct a SidebarState object, while the Controller knows how to

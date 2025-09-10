@@ -20,6 +20,10 @@ class LibraryMediaList : public QWidget {
 
     void setMedia(const std::vector<LibraryMediumCard::MediumCardViewModel> &media);
     void removeFromList(const QUuid &id);
+
+  private:
+    void initLayout();
+    void initMediaList();
 };
 
 }

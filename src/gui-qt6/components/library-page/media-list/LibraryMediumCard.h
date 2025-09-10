@@ -3,7 +3,9 @@
 
 #include <QUrl>
 #include <QUuid>
+#include <QVBoxLayout>
 #include <QWidget>
+#include <components/thumbnail-renderer/ThumbnailRenderer.h>
 
 namespace Gui::Components {
 
@@ -21,6 +23,13 @@ class LibraryMediumCard : public QWidget {
     };
 
     LibraryMediumCard(const MediumCardViewModel &cardData, QWidget *parent);
+
+  private:
+    [[nodiscard]] auto initThumbnailRenderer(const MediumCardViewModel &cardData)
+        -> ThumbnailRenderer *;
+    [[nodiscard]] auto initTitleLabel(const MediumCardViewModel &cardData) -> QLabel *;
+    [[nodiscard]] auto initInfoLabel(const MediumCardViewModel &cardData) -> QLabel *;
+    void initLayout(ThumbnailRenderer *thumbnailRenderer, QLabel *titleLabel, QLabel *infoLabel);
 };
 
 }

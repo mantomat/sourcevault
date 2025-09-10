@@ -25,7 +25,7 @@ LibraryTopbar::LibraryTopbar(QWidget *parent)
     setLayout(layout);
 
     searchDebounceTimer->setSingleShot(true);
-    searchDebounceTimer->setInterval(300);
+    searchDebounceTimer->setInterval(5);
 
     connect(searchInput, &QLineEdit::textChanged, this, &LibraryTopbar::onSearchInputChanged);
     connect(searchDebounceTimer, &QTimer::timeout, this, &LibraryTopbar::onDebounceTimeout);

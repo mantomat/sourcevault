@@ -10,16 +10,9 @@ namespace Gui::Components {
 LibraryMediaList::LibraryMediaList(QWidget *parent)
     : QWidget{parent}
     , mediaList{new QListWidget{this}} {
-    mediaList->setViewMode(QListView::IconMode);
-    mediaList->setFlow(QListView::LeftToRight);
-    mediaList->setWrapping(true);
-    mediaList->setResizeMode(QListView::Adjust);
-    mediaList->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
-    mediaList->setDragDropMode(QAbstractItemView::NoDragDrop);
 
-    auto *layout{new QVBoxLayout(this)};
-    layout->setContentsMargins(0, 0, 0, 0);
-    layout->addWidget(mediaList);
+    initLayout();
+    initMediaList();
 }
 
 void LibraryMediaList::setMedia(const std::vector<LibraryMediumCard::MediumCardViewModel> &media) {
@@ -48,4 +41,20 @@ void LibraryMediaList::removeFromList(const QUuid &id) {
         }
     }
 }
+
+void LibraryMediaList::initLayout() {
+    auto *layout{new QVBoxLayout(this)};
+    layout->setContentsMargins(0, 0, 0, 0);
+    layout->addWidget(mediaList);
+}
+
+void LibraryMediaList::initMediaList() {
+    mediaList->setViewMode(QListView::IconMode);
+    mediaList->setFlow(QListView::LeftToRight);
+    mediaList->setWrapping(true);
+    mediaList->setResizeMode(QListView::Adjust);
+    mediaList->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
+    mediaList->setDragDropMode(QAbstractItemView::NoDragDrop);
+}
+
 }
