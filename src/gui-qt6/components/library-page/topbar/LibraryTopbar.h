@@ -11,6 +11,8 @@ namespace Gui::Components {
 class LibraryTopbar : public QWidget {
     Q_OBJECT
 
+    static constexpr int debounceMs{10};
+
     QPushButton *sidebarToggle;
 
     QLineEdit *searchInput;
@@ -29,8 +31,14 @@ class LibraryTopbar : public QWidget {
     void sidebarToggled(bool showSidebar);
 
   private slots:
-    void onSearchInputChanged(const QString & /*unused*/);
+    void onSearchInputChanged();
     void onDebounceTimeout();
+
+  private:
+    void initSidebarToggle();
+    void initSearchInput();
+    void initSearchDebounceTimer();
+    void initLayout();
 };
 
 }

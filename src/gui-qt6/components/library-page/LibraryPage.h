@@ -31,6 +31,10 @@ class LibraryPage : public QWidget {
   private slots:
     void onSidebarToggled(bool showSidebar);
     void onSplitterMoved(int pos, int index);
+
+  private:
+    void initSplitter();
+    void initPageLayout();
 };
 
 }

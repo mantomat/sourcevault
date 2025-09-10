@@ -16,41 +16,12 @@ LibrarySidebar::LibrarySidebar(QWidget *parent)
     , onlyFavoriteFilter{new QCheckBox{this}}
     , topicsFilter{new QListWidget{this}} {
 
-    setupSorting();
-    setupMediumTypeFilter();
-    setupMinimumPriorityFilter();
+    initSorting();
+    initMediumTypeFilter();
+    initMinimumPriorityFilter();
 
-    auto *mainLayout{new QVBoxLayout{this}};
+    initMainLayout(initSortingBox(), initFiltersBox());
 
-    auto *sortingBox{new QGroupBox{"Sorting", this}};
-    auto *sortingBoxLayout{new QFormLayout{sortingBox}};
-    sortingBoxLayout->addRow("Sorting", sorting);
-
-    auto *filtersBox{new QGroupBox{"Filters", this}};
-    auto *filtersBoxLayout{new QFormLayout{filtersBox}};
-
-    auto *minimumPriorityBox{new QWidget{this}};
-    auto *minimumPriorityBoxLayout{new QVBoxLayout{minimumPriorityBox}};
-    minimumPriorityBoxLayout->addWidget(minimumPriorityFilter);
-    minimumPriorityBoxLayout->addWidget(currentMinPriorityValue);
-    minimumPriorityBox->setLayout(minimumPriorityBoxLayout);
-
-    topicsFilter->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
-
-    filtersBoxLayout->addRow("Only Favorites", onlyFavoriteFilter);
-    filtersBoxLayout->addRow("Type", mediumTypeFilter);
-    filtersBoxLayout->addRow("Min Priority", minimumPriorityBox);
-    filtersBoxLayout->addRow("Topics", topicsFilter);
-
-    mainLayout->addWidget(sortingBox);
-    mainLayout->addWidget(filtersBox, 1);
-
-    connect(minimumPriorityFilter, &QSlider::valueChanged, this,
-            &LibrarySidebar::onMinimumPriorityFilterChanged);
-
-    connect(sorting, &QComboBox::currentIndexChanged, this, &LibrarySidebar::stateChanged);
-    connect(mediumTypeFilter, &QComboBox::currentIndexChanged, this, &LibrarySidebar::stateChanged);
-    connect(minimumPriorityFilter, &QSlider::valueChanged, this, &LibrarySidebar::stateChanged);
     connect(onlyFavoriteFilter, &QCheckBox::stateChanged, this, &LibrarySidebar::stateChanged);
     connect(topicsFilter, &QListWidget::itemChanged, this, &LibrarySidebar::stateChanged);
 }
@@ -85,30 +56,38 @@ auto LibrarySidebar::getState() const -> SidebarState {
     };
 }
 
-void LibrarySidebar::setupSorting() const {
+void LibrarySidebar::initSorting() const {
     sorting->addItem("Title (A-Z)", QVariant::fromValue(SortTypeOptions::TitleAsc));
     sorting->addItem("Title (Z-A)", QVariant::fromValue(SortTypeOptions::TitleDesc));
     sorting->addItem("Date Added (newest first)",
                      QVariant::fromValue(SortTypeOptions::DateAddedDesc));
     sorting->addItem("Date Added (oldest first)",
                      QVariant::fromValue(SortTypeOptions::DateAddedAsc));
+
+    connect(sorting, &QComboBox::currentIndexChanged, this, &LibrarySidebar::stateChanged);
 }
 
-void LibrarySidebar::setupMediumTypeFilter() const {
+void LibrarySidebar::initMediumTypeFilter() const {
     mediumTypeFilter->addItem("Any", QVariant::fromValue(MediumTypeFilterOptions::NoFilter));
     mediumTypeFilter->addItem("Article", QVariant::fromValue(MediumTypeFilterOptions::Article));
     mediumTypeFilter->addItem("Book", QVariant::fromValue(MediumTypeFilterOptions::Book));
     mediumTypeFilter->addItem("Video", QVariant::fromValue(MediumTypeFilterOptions::Video));
+
+    connect(mediumTypeFilter, &QComboBox::currentIndexChanged, this, &LibrarySidebar::stateChanged);
 }
 
-void LibrarySidebar::setupMinimumPriorityFilter() const {
+void LibrarySidebar::initMinimumPriorityFilter() {
     minimumPriorityFilter->setRange(0, 5);
-    minimumPriorityFilter->setValue(0);
     minimumPriorityFilter->setTickPosition(QSlider::TicksBelow);
     minimumPriorityFilter->setTracking(false);
 
     currentMinPriorityValue->setStyleSheet("font-size: 6pt;");
-    currentMinPriorityValue->setText("Any");
+
+    minimumPriorityFilter->setValue(0);
+    onMinimumPriorityFilterChanged(0);
+
+    connect(minimumPriorityFilter, &QSlider::valueChanged, this,
+            &LibrarySidebar::onMinimumPriorityFilterChanged);
 }
 
 void LibrarySidebar::onMinimumPriorityFilterChanged(int value) {
@@ -148,6 +127,41 @@ auto LibrarySidebar::topicsFilterToData() const -> std::vector<QString> {
     }
 
     return selectedTopics;
+}
+
+auto LibrarySidebar::initSortingBox() -> QGroupBox * {
+    auto *sortingBox{new QGroupBox{"Sorting", this}};
+    auto *sortingBoxLayout{new QFormLayout{sortingBox}};
+    sortingBoxLayout->addRow("Sorting", sorting);
+
+    return sortingBox;
+}
+
+auto LibrarySidebar::initFiltersBox() -> QGroupBox * {
+    auto *filtersBox{new QGroupBox{"Filters", this}};
+    auto *filtersBoxLayout{new QFormLayout{filtersBox}};
+
+    auto *minimumPriorityBox{new QWidget{this}};
+    auto *minimumPriorityBoxLayout{new QVBoxLayout{minimumPriorityBox}};
+    minimumPriorityBoxLayout->addWidget(minimumPriorityFilter);
+    minimumPriorityBoxLayout->addWidget(currentMinPriorityValue);
+    minimumPriorityBox->setLayout(minimumPriorityBoxLayout);
+
+    topicsFilter->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
+
+    filtersBoxLayout->addRow("Only Favorites", onlyFavoriteFilter);
+    filtersBoxLayout->addRow("Type", mediumTypeFilter);
+    filtersBoxLayout->addRow("Min Priority", minimumPriorityBox);
+    filtersBoxLayout->addRow("Topics", topicsFilter);
+
+    return filtersBox;
+}
+
+void LibrarySidebar::initMainLayout(QGroupBox *sortingBox, QGroupBox *filtersBox) {
+    auto *mainLayout{new QVBoxLayout{this}};
+
+    mainLayout->addWidget(sortingBox);
+    mainLayout->addWidget(filtersBox, 1);
 }
 
 }

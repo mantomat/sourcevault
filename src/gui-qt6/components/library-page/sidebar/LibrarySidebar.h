@@ -3,6 +3,7 @@
 
 #include <QCheckBox>
 #include <QComboBox>
+#include <QGroupBox>
 #include <QLabel>
 #include <QListWidget>
 #include <QSlider>
@@ -74,9 +75,14 @@ class LibrarySidebar : public QWidget {
     void stateChanged();
 
   private:
-    void setupSorting() const;
-    void setupMediumTypeFilter() const;
-    void setupMinimumPriorityFilter() const;
+    void initSorting() const;
+    void initMediumTypeFilter() const;
+    void initMinimumPriorityFilter();
+
+    auto initSortingBox() -> QGroupBox *;
+    auto initFiltersBox() -> QGroupBox *;
+    void initMainLayout(QGroupBox *sortingBox, QGroupBox *filtersBox);
+
     [[nodiscard]] auto topicsFilterToData() const -> std::vector<QString>;
 
   private slots:

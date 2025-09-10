@@ -35,23 +35,11 @@ class LibraryPageController : public QObject {
     void onMediumEdited(const Medium &medium);
 
   private:
-    [[nodiscard]] static auto toMediumCards(std::vector<const Medium *> media)
-        -> std::vector<LibraryMediumCard::MediumCardViewModel>;
     void setMediaCards(const std::vector<const Medium *> &media) const;
     void refreshSidebarTopicsList() const;
 
     auto queryLibrary(const LibrarySidebar::SidebarState &state, const QString &searchQuery) const
         -> std::vector<const Medium *>;
-
-    static auto sidebarAndSearchStateToQuery(const LibrarySidebar::SidebarState &state,
-                                             const QString &searchQuery) -> std::unique_ptr<Query>;
-    static auto sidebarAndSearchStateToSearchQuery(const LibrarySidebar::SidebarState &state,
-                                                   const QString &searchQuery)
-        -> std::unique_ptr<Query>;
-    static auto sidebarStateToSortingQuery(const LibrarySidebar::SidebarState &state)
-        -> std::unique_ptr<Query>;
-    static auto sidebarStateToFilteringQuery(const LibrarySidebar::SidebarState &state)
-        -> FilteringQuery;
 
   private slots:
     void onQueryChanged();

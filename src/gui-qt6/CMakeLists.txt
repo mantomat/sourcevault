@@ -15,6 +15,10 @@ add_executable(sourcevaultgui-qt6
         components/library-page/LibraryPageController.h
         components/library-page/MediumToCardVisitor.cpp
         components/library-page/MediumToCardVisitor.h
+        components/library-page/LibraryQueryBuilder.cpp
+        components/library-page/LibraryQueryBuilder.h
+        components/library-page/MediumCardsViewModelFactory.cpp
+        components/library-page/MediumCardsViewModelFactory.h
         components/library-page/topbar/LibraryTopbar.cpp
         components/library-page/topbar/LibraryTopbar.h
         components/library-page/sidebar/LibrarySidebar.cpp

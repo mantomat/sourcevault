@@ -12,24 +12,8 @@ LibraryPage::LibraryPage(QWidget *parent)
     , mediaList{new LibraryMediaList{this}}
     , sidebar{new LibrarySidebar{this}} {
 
-    auto *pageLayout{new QVBoxLayout{this}};
-    pageLayout->setContentsMargins(0, 0, 0, 0);
-
-    splitter->addWidget(sidebar);
-
-    auto *rightPanel{new QWidget{this}};
-    auto *rightPanelLayout{new QVBoxLayout{}};
-
-    rightPanelLayout->addWidget(topbar);
-
-    rightPanelLayout->addWidget(mediaList, 1);
-
-    rightPanel->setLayout(rightPanelLayout);
-    splitter->addWidget(rightPanel);
-
-    splitter->setSizes({0, 1});
-
-    pageLayout->addWidget(splitter);
+    initSplitter();
+    initPageLayout();
 
     connect(topbar, &LibraryTopbar::sidebarToggled, this, &LibraryPage::onSidebarToggled);
     connect(splitter, &QSplitter::splitterMoved, this, &LibraryPage::onSplitterMoved);
@@ -73,6 +57,25 @@ void LibraryPage::onSplitterMoved(int pos, int index) {
     if (pos > 0 && !topbar->isSidebarToggled()) {
         topbar->setSidebarToggle(true);
     }
+}
+
+void LibraryPage::initPageLayout() {
+    auto *pageLayout{new QVBoxLayout{this}};
+    pageLayout->setContentsMargins(0, 0, 0, 0);
+    pageLayout->addWidget(splitter);
+}
+
+void LibraryPage::initSplitter() {
+    auto *rightPanel{new QWidget{this}};
+    auto *rightPanelLayout{new QVBoxLayout{rightPanel}};
+
+    rightPanelLayout->addWidget(topbar);
+    rightPanelLayout->addWidget(mediaList, 1);
+
+    splitter->addWidget(sidebar);
+    splitter->addWidget(rightPanel);
+
+    splitter->setSizes({0, 1});
 }
 
 }
