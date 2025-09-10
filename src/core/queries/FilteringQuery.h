@@ -2,6 +2,7 @@
 #define FILTERINGQUERY_H
 
 #include "model/Medium.h"
+#include "queries/Query.h"
 #include "queries/filters/Filter.h"
 #include "queries/search/SearchEngine.h"
 #include "queries/sortings/Sort.h"
@@ -17,7 +18,7 @@ using Core::Queries::Sortings::Sort;
 
 namespace Core::Queries {
 
-class FilteringQuery final {
+class FilteringQuery final : Query {
     std::unordered_map<std::type_index, std::unique_ptr<const Filter>> filters;
 
     FilteringQuery(std::unordered_map<std::type_index, std::unique_ptr<const Filter>> newFilters);
@@ -26,7 +27,7 @@ class FilteringQuery final {
 
   public:
     FilteringQuery() = delete;
-    ~FilteringQuery() = default;
+    ~FilteringQuery() override = default;
     FilteringQuery(FilteringQuery &&) = default;
     auto operator=(FilteringQuery &&) -> FilteringQuery & = default;
 
@@ -52,7 +53,7 @@ class FilteringQuery final {
      * @brief Filters out the given collection of media.
      */
     [[nodiscard]] auto query(std::vector<const Medium *> media) const
-        -> std::vector<const Medium *>;
+        -> std::vector<const Medium *> override;
 };
 
 }

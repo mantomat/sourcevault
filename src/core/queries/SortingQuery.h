@@ -11,7 +11,7 @@ using Core::Queries::Sortings::Sort;
 
 namespace Core::Queries {
 
-class SortingQuery final {
+class SortingQuery final : public Query {
 
     FilteringQuery filteringQuery;
     std::unique_ptr<const Sort> sort;
@@ -22,7 +22,7 @@ class SortingQuery final {
 
   public:
     SortingQuery() = delete;
-    ~SortingQuery() = default;
+    ~SortingQuery() override = default;
     SortingQuery(SortingQuery &&) = default;
     auto operator=(SortingQuery &&) -> SortingQuery & = default;
 
@@ -34,7 +34,7 @@ class SortingQuery final {
         -> std::optional<SortingQuery>;
 
     [[nodiscard]] auto query(std::vector<const Medium *> media) const
-        -> std::vector<const Medium *>;
+        -> std::vector<const Medium *> override;
 };
 
 }

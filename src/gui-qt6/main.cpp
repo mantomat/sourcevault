@@ -1,11 +1,14 @@
+#include "AppController.h"
+
 #include <QApplication>
 #include <QPushButton>
 
-auto main(int argc, char **argv) -> int {
-    QApplication app(argc, argv);
+using Gui::AppController;
 
-    QPushButton button("Hello world !");
-    button.show();
+auto main(int argc, char **argv) -> int {
+    QApplication app{argc, argv};
+
+    AppController appController;
 
     return QApplication::exec();
 }
