@@ -2,9 +2,6 @@
 
 #include "DialogsController.h"
 #include "components/menubar/MenubarController.h"
-#include "model/MediumUserData.h"
-
-using Core::Model::MediumUserData;
 
 namespace Gui {
 
