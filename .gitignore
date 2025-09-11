@@ -13,3 +13,6 @@ cmake-build*/
 
 # vscode
 .vscode/
+
+data/
+.data/

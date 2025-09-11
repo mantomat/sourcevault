@@ -93,7 +93,15 @@ template <> struct JsonConverter<QUrl> {
                         key),
             };
         }
-        QUrl url{mediumObject.value(key).toString(), QUrl::ParsingMode::StrictMode};
+
+        const QString pathOrUrlString = mediumObject.value(key).toString();
+        QUrl url;
+        if (pathOrUrlString.contains("://")) {
+            url = QUrl(pathOrUrlString, QUrl::ParsingMode::StrictMode);
+        } else {
+            url = QUrl::fromLocalFile(pathOrUrlString);
+        }
+
         if (url.isEmpty() || !url.isValid()) {
             return JsonDeserializationError{
                 .code = JsonDeserializationError::Code::WrongMediumFieldType,

@@ -27,7 +27,7 @@ void AppController::onLibraryImportMergeRequest(const Library &lib) {
     libraryPageController->refreshMediaList();
 }
 void AppController::onThumbnailsImportRequest(const Library &lib) {
-    library = std::make_unique<Library>(lib);
+    *library = lib;
     libraryPageController->refreshMediaList();
 }
 
