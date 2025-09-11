@@ -4,14 +4,20 @@
 #include "queries/SortingQuery.h"
 #include "queries/filters/FavoriteFilter.h"
 #include "queries/filters/MediumTypeFilter.h"
+#include "queries/filters/MinimumPriorityFilter.h"
+#include "queries/filters/TopicsFilter.h"
 #include "queries/sortings/DateAddedSort.h"
+#include "queries/sortings/PrioritySort.h"
 #include "queries/sortings/TitleSort.h"
 
 using Core::Queries::SearchQuery;
 using Core::Queries::SortingQuery;
 using Core::Queries::Filters::FavoriteFilter;
 using Core::Queries::Filters::MediumTypeFilter;
+using Core::Queries::Filters ::MinimumPriorityFilter;
+using Core::Queries::Filters::TopicsFilter;
 using Core::Queries::Sortings::DateAddedSort;
+using Core::Queries::Sortings::PrioritySort;
 using Core::Queries::Sortings::TitleSort;
 
 namespace Gui::Components {
@@ -54,6 +60,12 @@ auto LibraryQueryBuilder::sidebarStateToSortingQuery(const LibrarySidebar::Sideb
     case LibrarySidebar::SortTypeOptions::DateAddedAsc:
         sort = std::make_unique<DateAddedSort>(false);
         break;
+    case LibrarySidebar::SortTypeOptions::PriorityAsc:
+        sort = std::make_unique<PrioritySort>(true);
+        break;
+    case LibrarySidebar::SortTypeOptions::PriorityDesc:
+        sort = std::make_unique<PrioritySort>(false);
+        break;
     case LibrarySidebar::SortTypeOptions::Disabled:
         qWarning() << "This place should never be reached";
         assert(false);
@@ -89,7 +101,36 @@ auto LibraryQueryBuilder::sidebarStateToFilteringQuery(const LibrarySidebar::Sid
         filters.push_back(std::make_unique<FavoriteFilter>());
     }
 
-    // TODO model minimumPriorityFilter, topicsFilter
+    switch (state.minimumPriorityFilter) {
+    case LibrarySidebar::MinimumPriorityFilterOptions::Min:
+        filters.push_back(
+            std::make_unique<MinimumPriorityFilter>(MediumUserData::PriorityLevel::min));
+        break;
+    case LibrarySidebar::MinimumPriorityFilterOptions::Low:
+        filters.push_back(
+            std::make_unique<MinimumPriorityFilter>(MediumUserData::PriorityLevel::low));
+        break;
+    case LibrarySidebar::MinimumPriorityFilterOptions::Mid:
+        filters.push_back(
+            std::make_unique<MinimumPriorityFilter>(MediumUserData::PriorityLevel::mid));
+        break;
+    case LibrarySidebar::MinimumPriorityFilterOptions::High:
+        filters.push_back(
+            std::make_unique<MinimumPriorityFilter>(MediumUserData::PriorityLevel::high));
+        break;
+    case LibrarySidebar::MinimumPriorityFilterOptions::Max:
+        filters.push_back(
+            std::make_unique<MinimumPriorityFilter>(MediumUserData::PriorityLevel::max));
+        break;
+    case LibrarySidebar::MinimumPriorityFilterOptions::NoFilter:
+        break;
+    }
+
+    if (!state.topicsFilter.empty()) {
+        filters.push_back(std::make_unique<TopicsFilter>(state.topicsFilter));
+    }
+
+    qDebug() << state.topicsFilter.empty();
 
     return FilteringQuery::create(std::move(filters)).value();
 }

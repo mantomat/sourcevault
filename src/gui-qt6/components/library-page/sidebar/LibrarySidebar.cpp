@@ -57,12 +57,14 @@ auto LibrarySidebar::getState() const -> SidebarState {
 }
 
 void LibrarySidebar::initSorting() const {
-    sorting->addItem("Title (A-Z)", QVariant::fromValue(SortTypeOptions::TitleAsc));
-    sorting->addItem("Title (Z-A)", QVariant::fromValue(SortTypeOptions::TitleDesc));
+    sorting->addItem("Title (A-z)", QVariant::fromValue(SortTypeOptions::TitleAsc));
+    sorting->addItem("Title (z-A)", QVariant::fromValue(SortTypeOptions::TitleDesc));
     sorting->addItem("Date Added (newest first)",
                      QVariant::fromValue(SortTypeOptions::DateAddedDesc));
     sorting->addItem("Date Added (oldest first)",
                      QVariant::fromValue(SortTypeOptions::DateAddedAsc));
+    sorting->addItem("Priority (highest first)", QVariant::fromValue(SortTypeOptions::PriorityAsc));
+    sorting->addItem("Priority (lowest first)", QVariant::fromValue(SortTypeOptions::PriorityDesc));
 
     connect(sorting, &QComboBox::currentIndexChanged, this, &LibrarySidebar::stateChanged);
 }
@@ -88,6 +90,7 @@ void LibrarySidebar::initMinimumPriorityFilter() {
 
     connect(minimumPriorityFilter, &QSlider::valueChanged, this,
             &LibrarySidebar::onMinimumPriorityFilterChanged);
+    connect(minimumPriorityFilter, &QSlider::valueChanged, this, &LibrarySidebar::stateChanged);
 }
 
 void LibrarySidebar::onMinimumPriorityFilterChanged(int value) {
@@ -116,13 +119,13 @@ void LibrarySidebar::onMinimumPriorityFilterChanged(int value) {
     }
 }
 
-auto LibrarySidebar::topicsFilterToData() const -> std::vector<QString> {
-    std::vector<QString> selectedTopics;
+auto LibrarySidebar::topicsFilterToData() const -> std::unordered_set<QString> {
+    std::unordered_set<QString> selectedTopics;
 
     for (int i = 0; i < topicsFilter->count(); ++i) {
         QListWidgetItem *item = topicsFilter->item(i);
         if (item->checkState() == Qt::Checked) {
-            selectedTopics.push_back(item->text());
+            selectedTopics.insert(item->text());
         }
     }
 

@@ -9,6 +9,7 @@
 #include <QSlider>
 #include <QWidget>
 #include <set>
+#include <unordered_set>
 
 namespace Gui::Components {
 
@@ -32,23 +33,25 @@ class LibrarySidebar : public QWidget {
         TitleDesc,
         DateAddedDesc,
         DateAddedAsc,
+        PriorityAsc,
+        PriorityDesc,
         Disabled
     };
     enum class MediumTypeFilterOptions : std::uint8_t { Article, Book, Video, NoFilter };
     enum class MinimumPriorityFilterOptions : std::uint8_t {
-        Min = 0,
+        NoFilter = 0,
+        Min,
         Low,
         Mid,
         High,
         Max,
-        NoFilter
     };
 
     struct SidebarState {
         SortTypeOptions sort;
         MediumTypeFilterOptions mediumTypeFilter;
         MinimumPriorityFilterOptions minimumPriorityFilter;
-        std::vector<QString> topicsFilter;
+        std::unordered_set<QString> topicsFilter;
         bool onlyFavoriteFilter;
     };
 
@@ -83,7 +86,7 @@ class LibrarySidebar : public QWidget {
     auto initFiltersBox() -> QGroupBox *;
     void initMainLayout(QGroupBox *sortingBox, QGroupBox *filtersBox);
 
-    [[nodiscard]] auto topicsFilterToData() const -> std::vector<QString>;
+    [[nodiscard]] auto topicsFilterToData() const -> std::unordered_set<QString>;
 
   private slots:
     void onMinimumPriorityFilterChanged(int value);

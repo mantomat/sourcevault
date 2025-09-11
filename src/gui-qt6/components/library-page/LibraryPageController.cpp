@@ -8,7 +8,7 @@
 #include "queries/search/SearchEngine.h"
 #include "queries/sortings/Sort.h"
 
-using Core::Model::Book;
+using Core::Model::MediumUserData;
 
 namespace Gui::Components {
 
@@ -22,13 +22,16 @@ LibraryPageController::LibraryPageController(LibraryPage *newLibraryPage, QObjec
         auto book{Book::make("A Book").value()};
         book->authors().set({"Author 1", "Author 2"});
         book->userData().topics().set({"topic 1"});
+        book->userData().priority().set(MediumUserData::PriorityLevel::mid);
 
         auto article{Article::make("An article").value()};
         article->authors().set({"Author 3", "Author 4"});
         article->userData().topics().set({"topic 2"});
+        article->userData().priority().set(MediumUserData::PriorityLevel::low);
 
         auto video{Video::make("My video").value()};
         video->authors().set({"Author 1", "Author 4"});
+        video->userData().priority().set(MediumUserData::PriorityLevel::high);
 
         library.addMedium(std::move(book));
         library.addMedium(std::move(article));

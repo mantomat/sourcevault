@@ -17,7 +17,7 @@ auto MinimumPriorityFilter::matches(const Medium *medium) const -> bool {
     if (medium == nullptr || !medium->userData().priority().has()) {
         return false;
     }
-    return std::underlying_type_t<MediumUserData::PriorityLevel>(minPriority) >=
+    return std::underlying_type_t<MediumUserData::PriorityLevel>(minPriority) <=
            std::underlying_type_t<MediumUserData::PriorityLevel>(
                medium->userData().priority().get().value());
 }
