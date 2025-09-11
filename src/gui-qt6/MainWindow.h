@@ -20,11 +20,22 @@ class MainWindow : public QMainWindow {
     QStackedWidget *mainStack;
     LibraryPage *libraryPage;
 
+    QLabel *actionFeedback;
+    QTimer *actionFeedbackTimer;
+
   public:
+    static constexpr int feedbackFadeSeconds{10};
+
     MainWindow();
 
     [[nodiscard]] auto getLibraryPage() const -> LibraryPage *;
     [[nodiscard]] auto getMenubar() const -> Menubar *;
+
+  public slots:
+    void setActionFeedback(const QString &feedback);
+
+  private slots:
+    void onActionFeedbackTimerTimeout();
 };
 
 }

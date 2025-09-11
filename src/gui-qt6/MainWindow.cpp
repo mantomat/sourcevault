@@ -1,17 +1,32 @@
 #include "MainWindow.h"
 
+#include <QVBoxLayout>
+#include <QWidget>
+
 namespace Gui {
 
 MainWindow::MainWindow()
     : menubar{new Menubar{this}}
     , mainStack{new QStackedWidget{this}}
-    , libraryPage{new LibraryPage{this}} {
+    , libraryPage{new LibraryPage{this}}
+    , actionFeedback{new QLabel{this}}
+    , actionFeedbackTimer{new QTimer{this}} {
+
+    actionFeedbackTimer->setSingleShot(true);
+    actionFeedbackTimer->setInterval(feedbackFadeSeconds * 1000);
+    connect(actionFeedbackTimer, &QTimer::timeout, this, &MainWindow::onActionFeedbackTimerTimeout);
 
     setMenuBar(menubar);
 
+    QWidget *centralWidget{new QWidget{this}};
+    QVBoxLayout *centralLayout{new QVBoxLayout{centralWidget}};
+
+    centralLayout->addWidget(mainStack);
+    centralLayout->addWidget(actionFeedback);
+
     mainStack->addWidget(libraryPage);
 
-    setCentralWidget(mainStack);
+    setCentralWidget(centralWidget);
 
     resize(960, 540);
 }
@@ -22,6 +37,15 @@ auto MainWindow::getLibraryPage() const -> LibraryPage * {
 
 auto MainWindow::getMenubar() const -> Menubar * {
     return menubar;
+}
+
+void MainWindow::setActionFeedback(const QString &feedback) {
+    actionFeedback->setText(feedback);
+    actionFeedbackTimer->start();
+}
+
+void MainWindow::onActionFeedbackTimerTimeout() {
+    actionFeedback->clear();
 }
 
 }

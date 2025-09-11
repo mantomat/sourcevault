@@ -38,11 +38,12 @@ void MenubarController::onImportLocalThumbnailsActions() {
 void MenubarController::onExportLibraryPathChosen(const QString &path) {
     const auto result{jsonPersistenceManager.exportMedia(library->getMedia(), path)};
 
-    qDebug() << "Exporting";
-
     if (result.has_value()) {
         emitFsErrorModalRequest("Library Export Failed", result.value());
+        return;
     }
+    emit requestSetActionFeedback(QString{"Library succesfully exported! (Total: %1 media)"}.arg(
+        QString::number(library->mediaCount())));
 }
 
 void MenubarController::onExportThumbnailsPathChosen(const QString &path) {
@@ -52,7 +53,11 @@ void MenubarController::onExportThumbnailsPathChosen(const QString &path) {
                    [this](const QFileDevice::FileError &err) {
                        emitFsErrorModalRequest("Thumbnails Export Failed", err);
                    },
-                   [](const std::unordered_set<QUuid> & /*unused*/) {},
+                   [this](const std::unordered_set<QUuid> &exportedIds) {
+                       emit requestSetActionFeedback(
+                           QString{"Thumbnails succesfully exported! (Total: %1 thumbnails)"}.arg(
+                               QString::number(exportedIds.size())));
+                   },
                },
                result);
 }
@@ -60,41 +65,62 @@ void MenubarController::onExportThumbnailsPathChosen(const QString &path) {
 void MenubarController::onImportLibraryOverwritePathChosen(const QString &path) {
     const auto result{jsonPersistenceManager.importLibrary(path)};
 
-    std::visit(OverloadedVariantVisitor{
-                   [this](const QFileDevice::FileError &err) {
-                       emitFsErrorModalRequest("Library Import Failed", err);
-                   },
-                   [this](const JsonDeserializationError &err) { emitDeserErrorModalRequest(err); },
-                   [this](const Library &lib) { emit libraryImportOverwriteRequest(lib); },
-               },
-               result);
+    std::visit(
+        OverloadedVariantVisitor{
+            [this](const QFileDevice::FileError &err) {
+                emitFsErrorModalRequest("Library Import Failed", err);
+            },
+            [this](const JsonDeserializationError &err) { emitDeserErrorModalRequest(err); },
+            [this](const Library &lib) {
+                emit libraryImportOverwriteRequest(lib);
+                emit requestSetActionFeedback(
+                    QString{"Library succesfully imported! (Overwrite mode, total %1 media)"}.arg(
+                        QString::number(lib.mediaCount())));
+            },
+        },
+        result);
 }
 
 void MenubarController::onImportLibraryMergePathChosen(const QString &path) {
     const auto result{jsonPersistenceManager.importLibrary(path)};
 
-    std::visit(OverloadedVariantVisitor{
-                   [this](const QFileDevice::FileError &err) {
-                       emitFsErrorModalRequest("Library Import Failed", err);
-                   },
-                   [this](const JsonDeserializationError &err) { emitDeserErrorModalRequest(err); },
-                   [this](const Library &lib) { emit libraryImportMergeRequest(lib); },
-               },
-               result);
+    std::visit(
+        OverloadedVariantVisitor{
+            [this](const QFileDevice::FileError &err) {
+                emitFsErrorModalRequest("Library Import Failed", err);
+            },
+            [this](const JsonDeserializationError &err) { emitDeserErrorModalRequest(err); },
+            [this](const Library &lib) {
+                emit libraryImportMergeRequest(lib);
+                emit requestSetActionFeedback(QString{
+                    "Library succesfully imported! (Merge mode, total: %1 media before merging)"}
+                                                  .arg(QString::number(lib.mediaCount() +
+                                                                       library->mediaCount())));
+            },
+        },
+        result);
 }
 
 void MenubarController::onImportThumbnailsPathChosen(const QString &path) {
     const auto result{thumbnailsImporter.importLocalThumbnails(*library, path)};
 
-    std::visit(OverloadedVariantVisitor{
-                   [this](const QFileDevice::FileError &err) {
-                       emitFsErrorModalRequest("Thumbnails Import Failed", err);
-                   },
-                   [this](const std::pair<Library, std::unordered_set<QUuid>> &success) {
-                       emit thumbnailsImportRequest(success.first);
-                   },
-               },
-               result);
+    std::visit(
+        OverloadedVariantVisitor{
+            [this](const QFileDevice::FileError &err) {
+                emitFsErrorModalRequest("Thumbnails Import Failed", err);
+            },
+            [this](const std::pair<Library, std::unordered_set<QUuid>> &success) {
+                emit thumbnailsImportRequest(success.first);
+
+                QString feedback{
+                    success.second.empty()
+                        ? QString{"No thumbnails to import in that location."}
+                        : QString{"Thumbnails succesfully imported! (Total: %1 thumbnails)"}.arg(
+                              QString::number(success.second.size()))};
+                emit requestSetActionFeedback(feedback);
+            },
+        },
+        result);
 }
 
 void MenubarController::initActionsToDialogsConnections() {

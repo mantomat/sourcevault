@@ -42,6 +42,8 @@ class AppController : public QObject {
     // void onMediumEditRequest(QUuid id);
     // void onMediumDeleteRequest(QUuid id);
 
+    void onSetActionFeedbackRequest(const QString &feedback);
+
   private:
     void initMenubarToDialogsConnections();
     void initDialogsToMenubarConnections();

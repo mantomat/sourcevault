@@ -31,6 +31,10 @@ void AppController::onThumbnailsImportRequest(const Library &lib) {
     libraryPageController->refreshMediaList();
 }
 
+void AppController::onSetActionFeedbackRequest(const QString &feedback) {
+    mainWindow->setActionFeedback(feedback);
+}
+
 void AppController::initMenubarToDialogsConnections() {
     connect(menubarController, &MenubarController::requestExportLibraryDialog, dialogsController,
             &DialogsController::onRequestExportLibraryDialog);
@@ -67,6 +71,9 @@ void AppController::initMenubarToThisConnections() {
             &AppController::onLibraryImportMergeRequest);
     connect(menubarController, &MenubarController::thumbnailsImportRequest, this,
             &AppController::onThumbnailsImportRequest);
+
+    connect(menubarController, &MenubarController::requestSetActionFeedback, this,
+            &AppController::onSetActionFeedbackRequest);
 }
 
 }

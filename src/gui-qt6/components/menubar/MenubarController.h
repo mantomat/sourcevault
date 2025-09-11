@@ -50,6 +50,8 @@ class MenubarController : public QObject {
     void libraryImportMergeRequest(const Library &lib);
     void thumbnailsImportRequest(const Library &lib);
 
+    void requestSetActionFeedback(const QString &feedback);
+
   public slots:
     void onExportLibraryPathChosen(const QString &path);
     void onExportThumbnailsPathChosen(const QString &path);
