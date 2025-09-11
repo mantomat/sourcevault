@@ -41,6 +41,10 @@ add_library(sourcevaultcore STATIC
         queries/filters/FavoriteFilter.cpp
         queries/filters/MediumTypeFilter.h
         queries/filters/MediumTypeFilter.cpp
+        queries/filters/MinimumPriorityFilter.h
+        queries/filters/MinimumPriorityFilter.cpp
+        queries/filters/TopicsFilter.h
+        queries/filters/TopicsFilter.cpp
 
         queries/sortings/Sort.cpp
         queries/sortings/Sort.h
@@ -48,6 +52,8 @@ add_library(sourcevaultcore STATIC
         queries/sortings/TitleSort.h
         queries/sortings/DateAddedSort.cpp
         queries/sortings/DateAddedSort.h
+        queries/sortings/PrioritySort.cpp
+        queries/sortings/PrioritySort.h
 
         persistence/MediaSerializationConfigs.h
 

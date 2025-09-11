@@ -9,7 +9,9 @@ class DateAddedSort : public Sort {
 
   public:
     ~DateAddedSort() override = default;
+
     explicit DateAddedSort(bool isAscending = true);
+
     DateAddedSort(const DateAddedSort &) = default;
     DateAddedSort(DateAddedSort &&) = default;
     auto operator=(const DateAddedSort &) -> DateAddedSort & = default;
