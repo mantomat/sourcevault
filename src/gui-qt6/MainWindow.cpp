@@ -3,8 +3,11 @@
 namespace Gui {
 
 MainWindow::MainWindow()
-    : mainStack{new QStackedWidget{this}}
+    : menubar{new Menubar{this}}
+    , mainStack{new QStackedWidget{this}}
     , libraryPage{new LibraryPage{this}} {
+
+    setMenuBar(menubar);
 
     mainStack->addWidget(libraryPage);
 
@@ -15,6 +18,10 @@ MainWindow::MainWindow()
 
 auto MainWindow::getLibraryPage() const -> LibraryPage * {
     return libraryPage;
+}
+
+auto MainWindow::getMenubar() const -> Menubar * {
+    return menubar;
 }
 
 }

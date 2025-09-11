@@ -130,8 +130,6 @@ auto LibraryQueryBuilder::sidebarStateToFilteringQuery(const LibrarySidebar::Sid
         filters.push_back(std::make_unique<TopicsFilter>(state.topicsFilter));
     }
 
-    qDebug() << state.topicsFilter.empty();
-
     return FilteringQuery::create(std::move(filters)).value();
 }
 

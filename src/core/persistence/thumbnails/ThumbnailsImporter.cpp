@@ -44,8 +44,6 @@ auto ThumbnailsImporter::importLocalThumbnails(Library library,
         thumbnailSetter->setThumbnailUrl(QUrl::fromLocalFile(thumbnailInfo.filePath()));
         newMedium->accept(*thumbnailSetter);
         if (!thumbnailSetter->wasSuccessful()) {
-            qDebug() << "setting " << QUrl::fromLocalFile(thumbnailInfo.filePath())
-                     << "was not successful";
             continue;
         }
 

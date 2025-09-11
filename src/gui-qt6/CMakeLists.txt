@@ -8,6 +8,8 @@ add_executable(sourcevaultgui-qt6
         AppController.h 
         MainWindow.cpp
         MainWindow.h
+        DialogsController.cpp
+        DialogsController.h
 
         components/library-page/LibraryPage.cpp
         components/library-page/LibraryPage.h
@@ -31,6 +33,10 @@ add_executable(sourcevaultgui-qt6
         components/thumbnail-renderer/ThumbnailRenderer.cpp
         components/thumbnail-renderer/ThumbnailRenderer.h
 
+        components/menubar/Menubar.cpp
+        components/menubar/Menubar.h
+        components/menubar/MenubarController.cpp
+        components/menubar/MenubarController.h
 )
 
 target_include_directories(sourcevaultgui-qt6 PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

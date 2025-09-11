@@ -8,7 +8,6 @@
 #include <QJsonDocument>
 #include <QTemporaryFile>
 #include <QTest>
-#include <qdebug.h>
 
 using Core::Persistence::Json::JsonDeserializationError;
 using Core::Persistence::Json::JsonPersistenceManager;

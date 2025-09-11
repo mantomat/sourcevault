@@ -114,7 +114,6 @@ void LibrarySidebar::onMinimumPriorityFilterChanged(int value) {
         currentMinPriorityValue->setText("Max");
         break;
     default:
-        qDebug() << "Minumum priority filter unhandled value: " << value;
         break;
     }
 }

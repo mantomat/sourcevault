@@ -19,31 +19,28 @@ namespace Gui::Components {
 class LibraryPageController : public QObject {
     Q_OBJECT
 
-    Library library;
+    const Library *library;
     LibraryPage *libraryPage;
 
   public:
-    LibraryPageController(LibraryPage *newLibraryPage, QObject *parent);
+    LibraryPageController(LibraryPage *newLibraryPage, const Library *newLibrary, QObject *parent);
 
   signals:
-    void mediumDetailsRequest(const Medium *medium);
-    void mediumEditRequest(const Medium *medium);
+    void mediumDetailsRequest(QUuid id);
+    void mediumEditRequest(QUuid id);
+    void mediumDeleteRequest(QUuid id);
 
   public slots:
-    void onLibraryImportRequest(const Library &newLibrary);
-    void onLibraryMergeRequest(const Library &libraryToMerge);
-    void onMediumEdited(const Medium &medium);
+    void refreshMediaList();
 
   private:
     void setMediaCards(const std::vector<const Medium *> &media) const;
-    void refreshSidebarTopicsList() const;
-
-    auto queryLibrary(const LibrarySidebar::SidebarState &state, const QString &searchQuery) const
+    [[nodiscard]] auto queryLibrary(const LibrarySidebar::SidebarState &state,
+                                    const QString &searchQuery) const
         -> std::vector<const Medium *>;
 
   private slots:
     void onQueryChanged();
-    void onMediumDeletionRequested(const QUuid &id);
 };
 
 }

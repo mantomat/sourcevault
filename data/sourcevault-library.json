@@ -1,0 +1,792 @@
+{
+    "media": [
+        {
+            "favorite": true,
+            "id": "fe4eb146-b664-4fec-b63c-d18bbde03732",
+            "notes": "ciao come va?",
+            "title": "Favorite With notes",
+            "type": "book"
+        },
+        {
+            "authors": [
+                "Author 3",
+                "Author 4"
+            ],
+            "favorite": false,
+            "id": "a46f978b-1543-40cb-9ca9-ddc387c071c1",
+            "priority": 2,
+            "title": "An article",
+            "topics": [
+                "topic 2"
+            ],
+            "type": "article"
+        },
+        {
+            "authors": [
+                "Author 3",
+                "Author 4"
+            ],
+            "favorite": false,
+            "id": "c04f15b5-7489-45e3-9060-78dfdb16d710",
+            "priority": 2,
+            "title": "An article",
+            "topics": [
+                "topic 2"
+            ],
+            "type": "article"
+        },
+        {
+            "authors": [
+                "Author 1",
+                "Author 4"
+            ],
+            "favorite": false,
+            "id": "06ca8c73-f893-445c-aa24-11d9e0b00716",
+            "priority": 4,
+            "title": "My video",
+            "type": "video"
+        },
+        {
+            "authors": [
+                "Author 1",
+                "Author 4"
+            ],
+            "favorite": false,
+            "id": "162927b2-937c-4834-bdb1-fd8a1143fd3a",
+            "priority": 4,
+            "title": "My video",
+            "type": "video"
+        },
+        {
+            "authors": [
+                "Author 1",
+                "Author 2"
+            ],
+            "favorite": false,
+            "id": "6974f813-915e-43fc-b7f8-d305db768255",
+            "priority": 3,
+            "title": "A Book",
+            "topics": [
+                "topic 1"
+            ],
+            "type": "book"
+        },
+        {
+            "authors": [
+                "Author 1",
+                "Author 4"
+            ],
+            "favorite": false,
+            "id": "f2cc9413-f5fd-42f1-b216-ba48c9696fd8",
+            "priority": 4,
+            "title": "My video",
+            "type": "video"
+        },
+        {
+            "authors": [
+                "Author 3",
+                "Author 4"
+            ],
+            "favorite": false,
+            "id": "68170608-46a1-4580-9c5c-0af576f80806",
+            "priority": 2,
+            "title": "An article",
+            "topics": [
+                "topic 2"
+            ],
+            "type": "article"
+        },
+        {
+            "authors": [
+                "Author 3",
+                "Author 4"
+            ],
+            "favorite": false,
+            "id": "0cd9fd79-0cc5-46ac-974b-faa60bd57e72",
+            "priority": 2,
+            "title": "An article",
+            "topics": [
+                "topic 2"
+            ],
+            "type": "article"
+        },
+        {
+            "authors": [
+                "Author 1",
+                "Author 2"
+            ],
+            "favorite": false,
+            "id": "40df3d4f-66b8-458d-8094-33c832e0ee4a",
+            "priority": 3,
+            "title": "A Book",
+            "topics": [
+                "topic 1"
+            ],
+            "type": "book"
+        },
+        {
+            "authors": [
+                "Author 3",
+                "Author 4"
+            ],
+            "favorite": false,
+            "id": "d17ac732-eec5-47a5-a269-1895600689b6",
+            "priority": 2,
+            "title": "An article",
+            "topics": [
+                "topic 2"
+            ],
+            "type": "article"
+        },
+        {
+            "authors": [
+                "Author 1",
+                "Author 4"
+            ],
+            "favorite": false,
+            "id": "02c2845f-ac24-4bb3-b5dd-5ff01772156a",
+            "priority": 4,
+            "title": "My video",
+            "type": "video"
+        },
+        {
+            "authors": [
+                "Author 3",
+                "Author 4"
+            ],
+            "favorite": false,
+            "id": "bd0f3a3e-45ea-4b9a-b27d-afeb168ee227",
+            "priority": 2,
+            "title": "An article",
+            "topics": [
+                "topic 2"
+            ],
+            "type": "article"
+        },
+        {
+            "authors": [
+                "Author 1",
+                "Author 2"
+            ],
+            "favorite": false,
+            "id": "9e801b1c-47f0-488a-9411-7097872ce587",
+            "priority": 3,
+            "title": "A Book",
+            "topics": [
+                "topic 1"
+            ],
+            "type": "book"
+        },
+        {
+            "authors": [
+                "Author 1",
+                "Author 4"
+            ],
+            "favorite": false,
+            "id": "adad530b-b851-4034-ae0c-298b5ca17154",
+            "priority": 4,
+            "title": "My video",
+            "type": "video"
+        },
+        {
+            "authors": [
+                "Author 3",
+                "Author 4"
+            ],
+            "favorite": false,
+            "id": "56bcf6d7-5b17-41e9-a530-4d2c6c66f217",
+            "priority": 2,
+            "title": "An article",
+            "topics": [
+                "topic 2"
+            ],
+            "type": "article"
+        },
+        {
+            "authors": [
+                "Author 3",
+                "Author 4"
+            ],
+            "favorite": false,
+            "id": "f3f00600-bd8f-461d-83ec-fcd8052c67ea",
+            "priority": 2,
+            "title": "An article",
+            "topics": [
+                "topic 2"
+            ],
+            "type": "article"
+        },
+        {
+            "authors": [
+                "Author 1",
+                "Author 4"
+            ],
+            "favorite": false,
+            "id": "97b97d9d-41f4-4b4b-b663-4302a26ab51e",
+            "priority": 4,
+            "title": "My video",
+            "type": "video"
+        },
+        {
+            "authors": [
+                "Author 1",
+                "Author 4"
+            ],
+            "favorite": false,
+            "id": "04cc3cb0-02d0-4ee7-9b72-71f19166fff9",
+            "priority": 4,
+            "title": "My video",
+            "type": "video"
+        },
+        {
+            "authors": [
+                "Author 1",
+                "Author 2"
+            ],
+            "favorite": false,
+            "id": "56df3b38-c60e-45bf-8cfc-a2608b23af94",
+            "priority": 3,
+            "title": "A Book",
+            "topics": [
+                "topic 1"
+            ],
+            "type": "book"
+        },
+        {
+            "authors": [
+                "Author 3",
+                "Author 4"
+            ],
+            "favorite": false,
+            "id": "5226e9d4-b0ad-4c42-ab11-50819fe5c03d",
+            "priority": 2,
+            "title": "An article",
+            "topics": [
+                "topic 2"
+            ],
+            "type": "article"
+        },
+        {
+            "authors": [
+                "Author 3",
+                "Author 4"
+            ],
+            "favorite": false,
+            "id": "da97ed8f-41df-4ad2-b3c4-bb2f83bdee80",
+            "priority": 2,
+            "title": "An article",
+            "topics": [
+                "topic 2"
+            ],
+            "type": "article"
+        },
+        {
+            "authors": [
+                "Author 3",
+                "Author 4"
+            ],
+            "favorite": false,
+            "id": "f4dbf0a0-73f5-4276-9c10-f42dedac20c1",
+            "priority": 2,
+            "title": "An article",
+            "topics": [
+                "topic 2"
+            ],
+            "type": "article"
+        },
+        {
+            "authors": [
+                "Author 1",
+                "Author 2"
+            ],
+            "favorite": false,
+            "id": "16c4229a-a101-4a1d-b490-36dd00cf7b30",
+            "priority": 3,
+            "title": "A Book",
+            "topics": [
+                "topic 1"
+            ],
+            "type": "book"
+        },
+        {
+            "authors": [
+                "Author 1",
+                "Author 2"
+            ],
+            "favorite": false,
+            "id": "76dc1868-ffb9-4746-b6ad-6c22187a9afd",
+            "priority": 3,
+            "title": "A Book",
+            "topics": [
+                "topic 1"
+            ],
+            "type": "book"
+        },
+        {
+            "authors": [
+                "Author 1",
+                "Author 4"
+            ],
+            "favorite": false,
+            "id": "b6ab974d-38dd-4f87-b737-a8c776811224",
+            "priority": 4,
+            "title": "My video",
+            "type": "video"
+        },
+        {
+            "authors": [
+                "Author 1",
+                "Author 2"
+            ],
+            "favorite": false,
+            "id": "96230e9f-87ff-4fb0-90d4-301ccf397d43",
+            "priority": 3,
+            "title": "A Book",
+            "topics": [
+                "topic 1"
+            ],
+            "type": "book"
+        },
+        {
+            "authors": [
+                "Author 1",
+                "Author 2"
+            ],
+            "favorite": false,
+            "id": "224a633e-b81c-4220-8fb6-ff7b6b3b1a66",
+            "priority": 3,
+            "title": "A Book",
+            "topics": [
+                "topic 1"
+            ],
+            "type": "book"
+        },
+        {
+            "authors": [
+                "Author 1",
+                "Author 2"
+            ],
+            "favorite": false,
+            "id": "a2abf469-f6dc-4c57-912b-03f141eecebb",
+            "priority": 3,
+            "title": "A Book",
+            "topics": [
+                "topic 1"
+            ],
+            "type": "book"
+        },
+        {
+            "authors": [
+                "Author 3",
+                "Author 4"
+            ],
+            "favorite": false,
+            "id": "38bbacbe-c693-4e6b-a331-4c3b0af7ad92",
+            "priority": 2,
+            "title": "An article",
+            "topics": [
+                "topic 2"
+            ],
+            "type": "article"
+        },
+        {
+            "authors": [
+                "Author 1",
+                "Author 4"
+            ],
+            "favorite": false,
+            "id": "117e2b8c-0e3c-4ba8-876f-39a188842a0f",
+            "priority": 4,
+            "title": "My video",
+            "type": "video"
+        },
+        {
+            "authors": [
+                "Author 3",
+                "Author 4"
+            ],
+            "favorite": false,
+            "id": "f84e86ea-558c-4b3b-b2b0-284bb0132610",
+            "priority": 2,
+            "title": "An article",
+            "topics": [
+                "topic 2"
+            ],
+            "type": "article"
+        },
+        {
+            "authors": [
+                "Author 1",
+                "Author 4"
+            ],
+            "favorite": false,
+            "id": "fba40538-c32e-4102-a37c-54cd228fc102",
+            "priority": 4,
+            "title": "My video",
+            "type": "video"
+        },
+        {
+            "authors": [
+                "Author 1",
+                "Author 2"
+            ],
+            "favorite": false,
+            "id": "074c47d1-d8ee-48f7-98ac-80ce2dfb52f3",
+            "priority": 3,
+            "title": "A Book",
+            "topics": [
+                "topic 1"
+            ],
+            "type": "book"
+        },
+        {
+            "authors": [
+                "Author 3",
+                "Author 4"
+            ],
+            "favorite": false,
+            "id": "d996c5f0-fbf0-435d-b928-d2a17ca5bb15",
+            "priority": 2,
+            "title": "An article",
+            "topics": [
+                "topic 2"
+            ],
+            "type": "article"
+        },
+        {
+            "authors": [
+                "Author 1",
+                "Author 2"
+            ],
+            "favorite": false,
+            "id": "df20019f-f3d9-4105-b438-4da515e4d925",
+            "priority": 3,
+            "title": "A Book",
+            "topics": [
+                "topic 1"
+            ],
+            "type": "book"
+        },
+        {
+            "authors": [
+                "Author 1",
+                "Author 4"
+            ],
+            "favorite": false,
+            "id": "152ce8f0-0a10-42eb-8afb-4c5fdc5ba31e",
+            "priority": 4,
+            "title": "My video",
+            "type": "video"
+        },
+        {
+            "authors": [
+                "Author 3",
+                "Author 4"
+            ],
+            "favorite": false,
+            "id": "a5254ef9-1f69-4801-85d1-e11480628cbf",
+            "priority": 2,
+            "title": "An article",
+            "topics": [
+                "topic 2"
+            ],
+            "type": "article"
+        },
+        {
+            "authors": [
+                "Author 1",
+                "Author 2"
+            ],
+            "favorite": false,
+            "id": "625bc905-9088-48fc-a191-8bbca17dcc1f",
+            "priority": 3,
+            "title": "A Book",
+            "topics": [
+                "topic 1"
+            ],
+            "type": "book"
+        },
+        {
+            "authors": [
+                "Author 1",
+                "Author 2"
+            ],
+            "favorite": false,
+            "id": "115354e0-6de0-41e4-bc6d-682ffdd93e38",
+            "priority": 3,
+            "title": "A Book",
+            "topics": [
+                "topic 1"
+            ],
+            "type": "book"
+        },
+        {
+            "authors": [
+                "Author 1",
+                "Author 4"
+            ],
+            "favorite": false,
+            "id": "e3fac524-6136-445c-8c13-84bda7503a7d",
+            "priority": 4,
+            "title": "My video",
+            "type": "video"
+        },
+        {
+            "authors": [
+                "Author 3",
+                "Author 4"
+            ],
+            "favorite": false,
+            "id": "2c9e5ee3-1058-4291-a8fb-cd5038753cea",
+            "priority": 2,
+            "title": "An article",
+            "topics": [
+                "topic 2"
+            ],
+            "type": "article"
+        },
+        {
+            "authors": [
+                "Author 3",
+                "Author 4"
+            ],
+            "favorite": false,
+            "id": "0af9a4be-bb29-4740-bcb5-23d9d4f70b32",
+            "priority": 2,
+            "title": "An article",
+            "topics": [
+                "topic 2"
+            ],
+            "type": "article"
+        },
+        {
+            "authors": [
+                "Author 1",
+                "Author 4"
+            ],
+            "favorite": false,
+            "id": "46404ee6-cd37-434c-874c-eb1fd54dfca3",
+            "priority": 4,
+            "title": "My video",
+            "type": "video"
+        },
+        {
+            "authors": [
+                "Author 1",
+                "Author 2"
+            ],
+            "favorite": false,
+            "id": "81a3470d-8f64-48b2-9909-7f4e59f9c93f",
+            "priority": 3,
+            "title": "A Book",
+            "topics": [
+                "topic 1"
+            ],
+            "type": "book"
+        },
+        {
+            "authors": [
+                "Author 1",
+                "Author 4"
+            ],
+            "favorite": false,
+            "id": "5f595179-ce2e-47c3-848c-8ddfd4836d0e",
+            "priority": 4,
+            "title": "My video",
+            "type": "video"
+        },
+        {
+            "authors": [
+                "Author 1",
+                "Author 4"
+            ],
+            "favorite": false,
+            "id": "8812b7a0-e2b5-4c36-9e6c-1104dcbbfc42",
+            "priority": 4,
+            "title": "My video",
+            "type": "video"
+        },
+        {
+            "authors": [
+                "Author 1",
+                "Author 2"
+            ],
+            "favorite": false,
+            "id": "1f146201-8209-44bc-bf3c-b344a23ac678",
+            "priority": 3,
+            "title": "A Book",
+            "topics": [
+                "topic 1"
+            ],
+            "type": "book"
+        },
+        {
+            "authors": [
+                "Author 1",
+                "Author 2"
+            ],
+            "favorite": false,
+            "id": "383aed65-71d8-4135-b55f-61a91d007a37",
+            "priority": 3,
+            "title": "A Book",
+            "topics": [
+                "topic 1"
+            ],
+            "type": "book"
+        },
+        {
+            "authors": [
+                "Author 1",
+                "Author 4"
+            ],
+            "favorite": false,
+            "id": "87ab3b4c-0494-4011-9595-583aac5626c2",
+            "priority": 4,
+            "title": "My video",
+            "type": "video"
+        },
+        {
+            "authors": [
+                "Author 1",
+                "Author 2"
+            ],
+            "favorite": false,
+            "id": "382b430d-6968-4f28-b6a3-53cf1adffa36",
+            "priority": 3,
+            "title": "A Book",
+            "topics": [
+                "topic 1"
+            ],
+            "type": "book"
+        },
+        {
+            "authors": [
+                "Author 3",
+                "Author 4"
+            ],
+            "favorite": false,
+            "id": "754fd11f-da2c-4861-b88f-ebd966dfc04d",
+            "priority": 2,
+            "title": "An article",
+            "topics": [
+                "topic 2"
+            ],
+            "type": "article"
+        },
+        {
+            "authors": [
+                "Author 1",
+                "Author 4"
+            ],
+            "favorite": false,
+            "id": "e59abeb5-ff16-40c4-a60d-b7d399ada59e",
+            "priority": 4,
+            "title": "My video",
+            "type": "video"
+        },
+        {
+            "authors": [
+                "Author 1",
+                "Author 4"
+            ],
+            "favorite": false,
+            "id": "a49fe878-121e-4032-bc6f-e4fe47f80ff2",
+            "priority": 4,
+            "title": "My video",
+            "type": "video"
+        },
+        {
+            "authors": [
+                "Author 3",
+                "Author 4"
+            ],
+            "favorite": false,
+            "id": "7279d6bd-290f-4dd7-a8c1-6faacbe36e63",
+            "priority": 2,
+            "title": "An article",
+            "topics": [
+                "topic 2"
+            ],
+            "type": "article"
+        },
+        {
+            "authors": [
+                "Author 1",
+                "Author 2"
+            ],
+            "favorite": false,
+            "id": "34c8568f-dd51-4901-b707-4d5a7d4af7d9",
+            "priority": 3,
+            "title": "A Book",
+            "topics": [
+                "topic 1"
+            ],
+            "type": "book"
+        },
+        {
+            "authors": [
+                "Author 1",
+                "Author 4"
+            ],
+            "favorite": false,
+            "id": "52bcfe79-29b8-4ef0-8215-c9ea3eb7d004",
+            "priority": 4,
+            "title": "My video",
+            "type": "video"
+        },
+        {
+            "authors": [
+                "Author 1",
+                "Author 2"
+            ],
+            "favorite": false,
+            "id": "2ccc1998-b473-44e6-a8e1-97dad5021e0a",
+            "priority": 3,
+            "title": "A Book",
+            "topics": [
+                "topic 1"
+            ],
+            "type": "book"
+        },
+        {
+            "authors": [
+                "Author 1",
+                "Author 2"
+            ],
+            "favorite": false,
+            "id": "15f247ba-4faf-4938-8085-c75c7f9fbe0e",
+            "priority": 3,
+            "title": "A Book",
+            "topics": [
+                "topic 1"
+            ],
+            "type": "book"
+        },
+        {
+            "authors": [
+                "Author 1",
+                "Author 4"
+            ],
+            "favorite": false,
+            "id": "c164eb12-6529-4d21-877f-69ae8202bed7",
+            "priority": 4,
+            "title": "My video",
+            "type": "video"
+        },
+        {
+            "authors": [
+                "Author 3",
+                "Author 4"
+            ],
+            "favorite": false,
+            "id": "5cc8abbb-eb5d-47df-8d1a-adea6c475a78",
+            "priority": 2,
+            "title": "An article",
+            "topics": [
+                "topic 2"
+            ],
+            "type": "article"
+        }
+    ],
+    "version" : "1.0"
+}
