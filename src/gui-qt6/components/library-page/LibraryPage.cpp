@@ -68,6 +68,7 @@ void LibraryPage::initPageLayout() {
 void LibraryPage::initSplitter() {
     auto *rightPanel{new QWidget{this}};
     auto *rightPanelLayout{new QVBoxLayout{rightPanel}};
+    rightPanelLayout->setContentsMargins(0, 0, 0, 0);
 
     rightPanelLayout->addWidget(topbar);
     rightPanelLayout->addWidget(mediaList, 1);

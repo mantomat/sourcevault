@@ -161,6 +161,7 @@ auto LibrarySidebar::initFiltersBox() -> QGroupBox * {
 
 void LibrarySidebar::initMainLayout(QGroupBox *sortingBox, QGroupBox *filtersBox) {
     auto *mainLayout{new QVBoxLayout{this}};
+    mainLayout->setContentsMargins(0, 0, 0, 0);
 
     mainLayout->addWidget(sortingBox);
     mainLayout->addWidget(filtersBox, 1);

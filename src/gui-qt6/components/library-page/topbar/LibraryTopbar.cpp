@@ -55,6 +55,8 @@ void LibraryTopbar::initSearchDebounceTimer() {
 
 void LibraryTopbar::initLayout() {
     auto *layout{new QHBoxLayout{this}};
+    layout->setContentsMargins(0, 0, 0, 0);
+
     layout->addWidget(sidebarToggle);
     layout->addWidget(searchInput);
     setLayout(layout);

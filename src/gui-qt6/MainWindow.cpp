@@ -23,6 +23,7 @@ MainWindow::MainWindow()
 
     centralLayout->addWidget(mainStack);
     centralLayout->addWidget(actionFeedback);
+    // centralLayout->setContentsMargins(0, 0, 0, 0);
 
     mainStack->addWidget(libraryPage);
 
