@@ -14,7 +14,8 @@ AppController::AppController(MainWindow *newMainWindow)
     , libraryPageController{new LibraryPageController{mainWindow->getLibraryPage(), library.get(),
                                                       this}}
     , menubarController{new MenubarController{mainWindow->getMenubar(), library.get(), this}}
-    , dialogsController{new DialogsController{mainWindow, this}} {
+    , dialogsController{new DialogsController{mainWindow, this}}
+    , currentDetailPageController{nullptr} {
 
     initMenubarToDialogsConnections();
     initDialogsToMenubarConnections();
@@ -40,6 +41,7 @@ void AppController::onMediumDetailsRequest(QUuid id) {
         DetailPageFactory::createDetailPage(library->getMedium(id).value(), mainWindow, this)};
 
     mainWindow->displayDetailPage(page);
+    currentDetailPageController = controller;
 
     connect(controller, &DetailPageController::mediumEdited, this, &AppController::onMediumEdited);
     connect(controller, &DetailPageController::goBackToLibraryRequest, this,
@@ -47,7 +49,15 @@ void AppController::onMediumDetailsRequest(QUuid id) {
 }
 
 void AppController::onMediumEdited(const Medium &updatedMedium) {
+    assert(currentDetailPageController != nullptr);
+
     library->replaceMedium(updatedMedium.clone());
+
+    currentDetailPageController->deleteLater();
+    currentDetailPageController = nullptr;
+
+    onMediumDetailsRequest(updatedMedium.id());
+    libraryPageController->refreshMediaList();
 }
 
 void AppController::onMediumDetailsClosed() {

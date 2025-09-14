@@ -4,12 +4,14 @@
 #include "DialogsController.h"
 #include "MainWindow.h"
 #include "components/library-page/LibraryPageController.h"
+#include "components/medium-detail/DetailPageController.h"
 #include "components/menubar/MenubarController.h"
 #include "model/Library.h"
 
 #include <QObject>
 
 using Core::Model::Library;
+using Gui::Components::DetailPageController;
 using Gui::Components::LibraryPageController;
 using Gui::Components::MenubarController;
 
@@ -29,6 +31,8 @@ class AppController : public QObject {
     LibraryPageController *libraryPageController;
     MenubarController *menubarController;
     DialogsController *dialogsController;
+
+    DetailPageController *currentDetailPageController;
 
   public:
     AppController(MainWindow *newMainWindow);
