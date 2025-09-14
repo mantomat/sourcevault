@@ -3,6 +3,7 @@
 #include "LibraryMediumCard.h"
 
 #include <QListView>
+#include <QMenu>
 #include <QVBoxLayout>
 
 namespace Gui::Components {
@@ -15,6 +16,8 @@ LibraryMediaList::LibraryMediaList(QWidget *parent)
     initMediaList();
 
     connect(mediaList, &QListWidget::itemClicked, this, &LibraryMediaList::onItemClicked);
+    connect(mediaList, &QListWidget::customContextMenuRequested, this,
+            &LibraryMediaList::onContextMenuRequested);
 }
 
 void LibraryMediaList::setMedia(const std::vector<LibraryMediumCard::MediumCardViewModel> &media) {
@@ -48,6 +51,21 @@ void LibraryMediaList::onItemClicked(QListWidgetItem *item) {
     emit mediumDetailRequest(item->data(Qt::UserRole).toUuid());
 }
 
+void LibraryMediaList::onContextMenuRequested(const QPoint &pos) {
+    QListWidgetItem *item = mediaList->itemAt(pos);
+    if (item == nullptr) {
+        return;
+    }
+
+    QMenu contextMenu;
+    QAction *removeAction = contextMenu.addAction("Remove");
+
+    connect(removeAction, &QAction::triggered,
+            [this, item]() { emit mediumDeleteRequest(item->data(Qt::UserRole).toUuid()); });
+
+    contextMenu.exec(mediaList->mapToGlobal(pos));
+}
+
 void LibraryMediaList::initLayout() {
     auto *layout{new QVBoxLayout(this)};
     layout->setContentsMargins(0, 0, 0, 0);
@@ -61,6 +79,7 @@ void LibraryMediaList::initMediaList() {
     mediaList->setResizeMode(QListView::Adjust);
     mediaList->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
     mediaList->setDragDropMode(QAbstractItemView::NoDragDrop);
+    mediaList->setContextMenuPolicy(Qt::CustomContextMenu);
 }
 
 }

@@ -36,7 +36,7 @@ void AppController::onThumbnailsImportRequest(const Library &lib) {
     libraryPageController->refreshMediaList();
 }
 
-void AppController::onMediumDetailsRequest(QUuid id) {
+void AppController::onMediumDetailsRequest(const QUuid &id) {
     auto [page, controller]{
         DetailPageFactory::createDetailPage(library->getMedium(id).value(), mainWindow, this)};
 
@@ -46,6 +46,13 @@ void AppController::onMediumDetailsRequest(QUuid id) {
     connect(controller, &DetailPageController::mediumEdited, this, &AppController::onMediumEdited);
     connect(controller, &DetailPageController::goBackToLibraryRequest, this,
             &AppController::onMediumDetailsClosed);
+}
+
+void AppController::onMediumDeleteRequest(const QUuid &id) {
+    const auto result{library->removeMedium(id)};
+    assert(result);
+
+    libraryPageController->refreshMediaList();
 }
 
 void AppController::onMediumEdited(const Medium &updatedMedium) {
@@ -112,5 +119,8 @@ void AppController::initMenubarToThisConnections() {
 void AppController::initMediaListToThisConnections() {
     connect(mainWindow->getLibraryPage()->getMediaList(), &LibraryMediaList::mediumDetailRequest,
             this, &AppController::onMediumDetailsRequest);
+    connect(mainWindow->getLibraryPage()->getMediaList(), &LibraryMediaList::mediumDeleteRequest,
+            this, &AppController::onMediumDeleteRequest);
 }
+
 }

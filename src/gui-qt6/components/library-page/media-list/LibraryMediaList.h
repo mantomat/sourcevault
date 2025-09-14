@@ -23,9 +23,11 @@ class LibraryMediaList : public QWidget {
 
   signals:
     void mediumDetailRequest(const QUuid &id);
+    void mediumDeleteRequest(const QUuid &id);
 
   private slots:
     void onItemClicked(QListWidgetItem *item);
+    void onContextMenuRequested(const QPoint &pos);
 
   private:
     void initLayout();

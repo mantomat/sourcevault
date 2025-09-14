@@ -42,8 +42,8 @@ class AppController : public QObject {
     void onLibraryImportMergeRequest(const Library &lib);
     void onThumbnailsImportRequest(const Library &lib);
 
-    void onMediumDetailsRequest(QUuid id);
-    // void onMediumDeleteRequest(QUuid id);
+    void onMediumDetailsRequest(const QUuid &id);
+    void onMediumDeleteRequest(const QUuid &id);
 
     void onMediumEdited(const Medium &updatedMedium);
     void onMediumDetailsClosed();
