@@ -20,10 +20,11 @@ class ThumbnailRenderer : public QWidget {
     ThumbnailRenderer(const std::optional<QUrl> &preferredThumbnailUrl,
                       const QString &fallbackThumbnailQrcPath, QWidget *parent);
 
+    void trySetPreferred(const std::optional<QUrl> &preferredThumbnailUrl);
+
   private:
     void initLayout();
     void initImageLabel();
-    void trySetImageLabel(const std::optional<QUrl> &preferredThumbnailUrl);
     void trySetPreferred(const QUrl &preferredThumbnailUrl);
     void trySetLocalPreferred(const QUrl &preferredThumbnailUrl);
     void trySetOnlinePreferred(const QUrl &preferredThumbnailUrl);

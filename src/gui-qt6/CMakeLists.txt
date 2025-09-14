@@ -10,6 +10,10 @@ add_executable(sourcevaultgui-qt6
         MainWindow.h
         DialogsController.cpp
         DialogsController.h
+        DetailPageFactory.cpp
+        DetailPageFactory.h
+        MediumToDetailPageVisitor.cpp
+        MediumToDetailPageVisitor.h
 
         components/library-page/LibraryPage.cpp
         components/library-page/LibraryPage.h
@@ -37,6 +41,49 @@ add_executable(sourcevaultgui-qt6
         components/menubar/Menubar.h
         components/menubar/MenubarController.cpp
         components/menubar/MenubarController.h
+
+        components/medium-detail/CreateController.h
+        components/medium-detail/DetailPage.cpp
+        components/medium-detail/DetailPage.h
+        components/medium-detail/DetailPageController.h
+        components/medium-detail/VideoCreateController.cpp
+        components/medium-detail/VideoCreateController.h
+        components/medium-detail/VideoDetailPage.cpp
+        components/medium-detail/VideoDetailPage.h
+        components/medium-detail/VideoDetailPageController.cpp
+        components/medium-detail/VideoDetailPageController.h
+
+        components/medium-detail/detail-sections/MediumDetailSection.cpp
+        components/medium-detail/detail-sections/MediumDetailSection.h
+        components/medium-detail/detail-sections/MediumSectionController.cpp
+        components/medium-detail/detail-sections/MediumSectionController.h
+        components/medium-detail/detail-sections/UserDataDetailSection.cpp
+        components/medium-detail/detail-sections/UserDataDetailSection.h
+        components/medium-detail/detail-sections/UserDataSectionController.cpp
+        components/medium-detail/detail-sections/UserDataSectionController.h
+        components/medium-detail/detail-sections/VideoDetailSection.cpp
+        components/medium-detail/detail-sections/VideoDetailSection.h
+        components/medium-detail/detail-sections/VideoDetailSectionController.cpp
+        components/medium-detail/detail-sections/VideoDetailSectionController.h
+
+        components/medium-detail/field-editors/BooleanFieldEditor.cpp
+        components/medium-detail/field-editors/BooleanFieldEditor.h
+        components/medium-detail/field-editors/DateFieldEditor.cpp
+        components/medium-detail/field-editors/DateFieldEditor.h
+        components/medium-detail/field-editors/FieldEditor.cpp
+        components/medium-detail/field-editors/FieldEditor.h
+        components/medium-detail/field-editors/NumberFieldEditor.cpp
+        components/medium-detail/field-editors/NumberFieldEditor.h
+        components/medium-detail/field-editors/PriorityFieldEditor.cpp
+        components/medium-detail/field-editors/PriorityFieldEditor.h
+        components/medium-detail/field-editors/SetFieldEditor.cpp
+        components/medium-detail/field-editors/SetFieldEditor.h
+        components/medium-detail/field-editors/StringFieldEditor.cpp
+        components/medium-detail/field-editors/StringFieldEditor.h
+        components/medium-detail/field-editors/TextFieldEditor.cpp
+        components/medium-detail/field-editors/TextFieldEditor.h
+        components/medium-detail/field-editors/UrlFieldEditor.cpp
+        components/medium-detail/field-editors/UrlFieldEditor.h
 )
 
 target_include_directories(sourcevaultgui-qt6 PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

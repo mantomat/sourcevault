@@ -1,7 +1,10 @@
 #include "AppController.h"
 
+#include "DetailPageFactory.h"
 #include "DialogsController.h"
 #include "components/menubar/MenubarController.h"
+
+using Gui::Components::LibraryMediaList;
 
 namespace Gui {
 
@@ -16,6 +19,7 @@ AppController::AppController(MainWindow *newMainWindow)
     initMenubarToDialogsConnections();
     initDialogsToMenubarConnections();
     initMenubarToThisConnections();
+    initMediaListToThisConnections();
 }
 
 void AppController::onLibraryImportOverwriteRequest(const Library &lib) {
@@ -31,9 +35,28 @@ void AppController::onThumbnailsImportRequest(const Library &lib) {
     libraryPageController->refreshMediaList();
 }
 
+void AppController::onMediumDetailsRequest(QUuid id) {
+    auto [page, controller]{
+        DetailPageFactory::createDetailPage(library->getMedium(id).value(), mainWindow, this)};
+
+    mainWindow->displayDetailPage(page);
+
+    connect(controller, &DetailPageController::mediumEdited, this, &AppController::onMediumEdited);
+    connect(controller, &DetailPageController::goBackToLibraryRequest, this,
+            &AppController::onMediumDetailsClosed);
+}
+
+void AppController::onMediumEdited(const Medium &updatedMedium) {
+    library->replaceMedium(updatedMedium.clone());
+}
+
+void AppController::onMediumDetailsClosed() {
+    mainWindow->closeDetailPage();
+}
+
 void AppController::onSetActionFeedbackRequest(const QString &feedback) {
     mainWindow->setActionFeedback(feedback);
-}
+};
 
 void AppController::initMenubarToDialogsConnections() {
     connect(menubarController, &MenubarController::requestExportLibraryDialog, dialogsController,
@@ -76,4 +99,8 @@ void AppController::initMenubarToThisConnections() {
             &AppController::onSetActionFeedbackRequest);
 }
 
+void AppController::initMediaListToThisConnections() {
+    connect(mainWindow->getLibraryPage()->getMediaList(), &LibraryMediaList::mediumDetailRequest,
+            this, &AppController::onMediumDetailsRequest);
+}
 }

@@ -13,6 +13,8 @@ LibraryMediaList::LibraryMediaList(QWidget *parent)
 
     initLayout();
     initMediaList();
+
+    connect(mediaList, &QListWidget::itemClicked, this, &LibraryMediaList::onItemClicked);
 }
 
 void LibraryMediaList::setMedia(const std::vector<LibraryMediumCard::MediumCardViewModel> &media) {
@@ -40,6 +42,10 @@ void LibraryMediaList::removeFromList(const QUuid &id) {
             break;
         }
     }
+}
+
+void LibraryMediaList::onItemClicked(QListWidgetItem *item) {
+    emit mediumDetailRequest(item->data(Qt::UserRole).toUuid());
 }
 
 void LibraryMediaList::initLayout() {

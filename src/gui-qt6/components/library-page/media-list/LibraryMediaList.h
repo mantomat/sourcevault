@@ -21,6 +21,12 @@ class LibraryMediaList : public QWidget {
     void setMedia(const std::vector<LibraryMediumCard::MediumCardViewModel> &media);
     void removeFromList(const QUuid &id);
 
+  signals:
+    void mediumDetailRequest(const QUuid &id);
+
+  private slots:
+    void onItemClicked(QListWidgetItem *item);
+
   private:
     void initLayout();
     void initMediaList();

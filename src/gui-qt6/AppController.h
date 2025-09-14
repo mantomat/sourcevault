@@ -37,10 +37,12 @@ class AppController : public QObject {
     void onLibraryImportOverwriteRequest(const Library &lib);
     void onLibraryImportMergeRequest(const Library &lib);
     void onThumbnailsImportRequest(const Library &lib);
-    // void onMediumEdit();
-    // void onMediumDetailsRequest(QUuid id);
-    // void onMediumEditRequest(QUuid id);
+
+    void onMediumDetailsRequest(QUuid id);
     // void onMediumDeleteRequest(QUuid id);
+
+    void onMediumEdited(const Medium &updatedMedium);
+    void onMediumDetailsClosed();
 
     void onSetActionFeedbackRequest(const QString &feedback);
 
@@ -48,6 +50,7 @@ class AppController : public QObject {
     void initMenubarToDialogsConnections();
     void initDialogsToMenubarConnections();
     void initMenubarToThisConnections();
+    void initMediaListToThisConnections();
 };
 
 }

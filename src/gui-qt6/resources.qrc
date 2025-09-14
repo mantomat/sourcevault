@@ -1,6 +1,11 @@
 <RCC>
 <qresource prefix="/">
     <file>assets/icons/menu.png</file>
+    <file>assets/icons/arrow-left.png</file>
+    <file>assets/icons/edit.png</file>
+    <file>assets/icons/save.png</file>
+    <file>assets/icons/filesystem.png</file>
+    <file>assets/icons/cross.png</file>
     
     <file>assets/default-thumbnails/loading.png</file>
     <file>assets/default-thumbnails/article.png</file>

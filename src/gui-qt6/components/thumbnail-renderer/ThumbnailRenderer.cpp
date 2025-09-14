@@ -17,7 +17,7 @@ ThumbnailRenderer::ThumbnailRenderer(const std::optional<QUrl> &preferredThumbna
     initLayout();
     initImageLabel();
 
-    trySetImageLabel(preferredThumbnailUrl);
+    trySetPreferred(preferredThumbnailUrl);
 }
 
 void ThumbnailRenderer::initLayout() {
@@ -35,7 +35,7 @@ void ThumbnailRenderer::initImageLabel() {
     imageLabel->setPixmap(loadingPixmap);
 }
 
-void ThumbnailRenderer::trySetImageLabel(const std::optional<QUrl> &preferredThumbnailUrl) {
+void ThumbnailRenderer::trySetPreferred(const std::optional<QUrl> &preferredThumbnailUrl) {
     if (!preferredThumbnailUrl.has_value() || !preferredThumbnailUrl.value().isValid()) {
         setFallback();
         return;
