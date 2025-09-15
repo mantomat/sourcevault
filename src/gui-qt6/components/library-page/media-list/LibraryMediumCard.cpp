@@ -25,9 +25,9 @@ auto LibraryMediumCard::initTitleLabel(const MediumCardViewModel &cardData) -> Q
     auto *titleLabel{new QLabel{this}};
 
     QFontMetrics metrics(titleLabel->font());
-    QString elidedText = metrics.elidedText(cardData.title, Qt::ElideRight, width - (margins * 2));
+    QString elidedText =
+        metrics.elidedText(cardData.title, Qt::ElideRight, width - (margins * 2) - 5);
     titleLabel->setText(elidedText);
-    titleLabel->setWordWrap(true);
 
     QFont titleFont{titleLabel->font()};
     titleFont.setBold(true);
@@ -42,7 +42,7 @@ auto LibraryMediumCard::initInfoLabel(const MediumCardViewModel &cardData) -> QL
     QString infoText{cardData.type + (cardData.authors.has_value()
                                           ? QString{" by "} + cardData.authors.value()
                                           : "")};
-    QString elidedText = metrics.elidedText(infoText, Qt::ElideRight, width - (margins * 2));
+    QString elidedText = metrics.elidedText(infoText, Qt::ElideRight, width - (margins * 2) - 5);
 
     infoLabel->setText(elidedText);
     infoLabel->setWordWrap(true);
@@ -56,8 +56,6 @@ void LibraryMediumCard::initLayout(ThumbnailRenderer *thumbnailRenderer, QLabel 
     setCursor(Qt::PointingHandCursor);
 
     auto *cardLayout{new QVBoxLayout{this}};
-    cardLayout->setContentsMargins(0, 0, 0, 0);
-    cardLayout->setSpacing(2);
     cardLayout->setContentsMargins(margins, margins, margins, margins);
     cardLayout->addWidget(thumbnailRenderer);
     cardLayout->addWidget(titleLabel);
