@@ -28,7 +28,7 @@ class MainWindow : public QMainWindow {
     DetailPage *currentDetailPage;
 
   public:
-    static constexpr int feedbackFadeSeconds{10};
+    static constexpr int feedbackFadeSeconds{5};
 
     MainWindow();
 
