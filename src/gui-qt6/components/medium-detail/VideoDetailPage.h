@@ -37,9 +37,9 @@ class VideoDetailPage : public DetailPage {
 
   public slots:
     void setEditMode(bool isEditing) override;
+    void setPreferredThumbnailUrl(const QUrl &url);
 
   private slots:
-    void refreshThumbnail();
     void onStateChanged();
 };
 

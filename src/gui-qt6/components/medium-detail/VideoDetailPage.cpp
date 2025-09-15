@@ -17,13 +17,13 @@ VideoDetailPage::VideoDetailPage(const MediumDetailSection::Dependencies &medium
     , userDataSection{new UserDataDetailSection{userDataDeps, this}}
     , videoSection{new VideoDetailSection{videoDeps, this}} {
 
+    thumbnail->setFixedHeight(300);
+
     getContentLayout()->addWidget(thumbnail);
     getContentLayout()->addWidget(mediumSection);
     getContentLayout()->addWidget(videoSection);
     getContentLayout()->addWidget(userDataSection);
     getContentLayout()->addStretch();
-
-    connect(this, &VideoDetailPage::saveRequested, this, &VideoDetailPage::refreshThumbnail);
 
     connect(mediumSection, &MediumDetailSection::stateChanged, this,
             &VideoDetailPage::onStateChanged);
@@ -53,8 +53,8 @@ void VideoDetailPage::setEditMode(bool isEditing) {
     videoSection->setEditMode(isEditing);
 }
 
-void VideoDetailPage::refreshThumbnail() {
-    thumbnail->trySetPreferred(videoSection->getState().videoUrl);
+void VideoDetailPage::setPreferredThumbnailUrl(const QUrl &url) {
+    thumbnail->trySetPreferred(url);
 }
 
 void VideoDetailPage::onStateChanged() {

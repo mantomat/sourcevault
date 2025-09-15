@@ -13,6 +13,9 @@ BookDetailPageController::BookDetailPageController(BookDetailPage *newView,
     , userDataSectionController{view->getUserDataSection(), originalBook, this} {
 
     view->setEditMode(false);
+    if (originalBook->thumbnailUrl().has()) {
+        view->setPreferredThumbnailUrl(originalBook->thumbnailUrl().get().value());
+    }
 
     connect(view, &DetailPage::saveRequested, this, &BookDetailPageController::onSave);
     connect(view, &DetailPage::editRequested, this, &BookDetailPageController::onEditRequested);

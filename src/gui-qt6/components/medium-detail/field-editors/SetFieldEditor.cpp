@@ -36,6 +36,9 @@ void SetFieldEditor::setItems(const std::optional<std::set<QString>> &items) {
 }
 
 auto SetFieldEditor::items() const -> std::optional<std::set<QString>> {
+    if (!isEnabled()) {
+        return std::nullopt;
+    }
     if (!isValid()) {
         return std::nullopt;
     }

@@ -32,6 +32,9 @@ void NumberFieldEditor::setNumber(const std::optional<int> &number) {
 }
 
 auto NumberFieldEditor::number() const -> std::optional<int> {
+    if (!isEnabled()) {
+        return std::nullopt;
+    }
     if (!isValid()) {
         return std::nullopt;
     }

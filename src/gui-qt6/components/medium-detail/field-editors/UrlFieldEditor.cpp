@@ -49,6 +49,9 @@ void UrlFieldEditor::setUrl(const std::optional<QUrl> &url) {
 }
 
 auto UrlFieldEditor::url() const -> std::optional<QUrl> {
+    if (!isEnabled()) {
+        return std::nullopt;
+    }
     if (!isValid()) {
         return std::nullopt;
     }

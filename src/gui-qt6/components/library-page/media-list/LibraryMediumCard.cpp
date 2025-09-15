@@ -2,6 +2,7 @@
 
 #include "components/thumbnail-renderer/ThumbnailRenderer.h"
 
+#include <QFontMetrics>
 #include <QWidget>
 
 namespace Gui::Components {
@@ -16,13 +17,16 @@ auto LibraryMediumCard::initThumbnailRenderer(const MediumCardViewModel &cardDat
     -> ThumbnailRenderer * {
     auto *thumbnailRenderer{
         new ThumbnailRenderer{cardData.thumbnailUrl, cardData.fallbackThumbnailQrcPath, this}};
-    thumbnailRenderer->setFixedSize(100, 100);
+    thumbnailRenderer->setFixedSize(width, 100);
     return thumbnailRenderer;
 }
 
 auto LibraryMediumCard::initTitleLabel(const MediumCardViewModel &cardData) -> QLabel * {
     auto *titleLabel{new QLabel{this}};
-    titleLabel->setText(cardData.title);
+
+    QFontMetrics metrics(titleLabel->font());
+    QString elidedText = metrics.elidedText(cardData.title, Qt::ElideRight, width - (margins * 2));
+    titleLabel->setText(elidedText);
     titleLabel->setWordWrap(true);
 
     QFont titleFont{titleLabel->font()};
@@ -33,18 +37,28 @@ auto LibraryMediumCard::initTitleLabel(const MediumCardViewModel &cardData) -> Q
 
 auto LibraryMediumCard::initInfoLabel(const MediumCardViewModel &cardData) -> QLabel * {
     auto *infoLabel{new QLabel{this}};
-    infoLabel->setText(cardData.type + (cardData.authors.has_value()
-                                            ? QString{" by "} + cardData.authors.value()
-                                            : ""));
+    QFontMetrics metrics(infoLabel->font());
+
+    QString infoText{cardData.type + (cardData.authors.has_value()
+                                          ? QString{" by "} + cardData.authors.value()
+                                          : "")};
+    QString elidedText = metrics.elidedText(infoText, Qt::ElideRight, width - (margins * 2));
+
+    infoLabel->setText(elidedText);
     infoLabel->setWordWrap(true);
+
     return infoLabel;
 }
 
 void LibraryMediumCard::initLayout(ThumbnailRenderer *thumbnailRenderer, QLabel *titleLabel,
                                    QLabel *infoLabel) {
-    setFixedWidth(100);
+    setFixedWidth(width);
+    setCursor(Qt::PointingHandCursor);
 
     auto *cardLayout{new QVBoxLayout{this}};
+    cardLayout->setContentsMargins(0, 0, 0, 0);
+    cardLayout->setSpacing(2);
+    cardLayout->setContentsMargins(margins, margins, margins, margins);
     cardLayout->addWidget(thumbnailRenderer);
     cardLayout->addWidget(titleLabel);
     cardLayout->addWidget(infoLabel);

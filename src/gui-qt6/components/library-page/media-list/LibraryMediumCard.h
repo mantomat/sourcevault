@@ -22,6 +22,9 @@ class LibraryMediumCard : public QWidget {
         QString fallbackThumbnailQrcPath;
     };
 
+    static constexpr int width{120};
+    static constexpr int margins{5};
+
     LibraryMediumCard(const MediumCardViewModel &cardData, QWidget *parent);
 
   private:

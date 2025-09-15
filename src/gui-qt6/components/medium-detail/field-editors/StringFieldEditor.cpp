@@ -28,6 +28,9 @@ void StringFieldEditor::setText(const std::optional<QString> &text) {
 }
 
 auto StringFieldEditor::text() const -> std::optional<QString> {
+    if (!isEnabled()) {
+        return std::nullopt;
+    }
     if (!isValid()) {
         return std::nullopt;
     }

@@ -14,6 +14,8 @@ BookDetailPage::BookDetailPage(const MediumDetailSection::Dependencies &mediumDe
     , userDataSection{new UserDataDetailSection{userDataDeps, this}}
     , bookSection{new BookDetailSection{bookDeps, this}} {
 
+    thumbnail->setFixedWidth(250);
+
     auto *dataLayout = new QVBoxLayout;
     dataLayout->setContentsMargins(0, 0, 0, 0);
     dataLayout->addWidget(mediumSection);
@@ -27,8 +29,6 @@ BookDetailPage::BookDetailPage(const MediumDetailSection::Dependencies &mediumDe
     mainLayout->addLayout(dataLayout, 1);
 
     getContentLayout()->addLayout(mainLayout);
-
-    connect(this, &BookDetailPage::saveRequested, this, &BookDetailPage::refreshThumbnail);
 
     connect(mediumSection, &MediumDetailSection::stateChanged, this,
             &BookDetailPage::onStateChanged);
@@ -57,8 +57,8 @@ void BookDetailPage::setEditMode(bool isEditing) {
     bookSection->setEditMode(isEditing);
 }
 
-void BookDetailPage::refreshThumbnail() {
-    thumbnail->trySetPreferred(bookSection->getState().thumbnailUrl);
+void BookDetailPage::setPreferredThumbnailUrl(const QUrl &url) {
+    thumbnail->trySetPreferred(url);
 }
 
 void BookDetailPage::onStateChanged() {

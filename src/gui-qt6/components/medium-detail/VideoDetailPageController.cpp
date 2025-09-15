@@ -13,6 +13,9 @@ VideoDetailPageController::VideoDetailPageController(VideoDetailPage *newView,
     , userDataSectionController{view->getUserDataSection(), originalVideo, this} {
 
     view->setEditMode(false);
+    if (originalVideo->thumbnailUrl().has()) {
+        view->setPreferredThumbnailUrl(originalVideo->thumbnailUrl().get().value());
+    }
 
     connect(view, &DetailPage::saveRequested, this, &VideoDetailPageController::onSave);
     connect(view, &DetailPage::editRequested, this, &VideoDetailPageController::onEditRequested);

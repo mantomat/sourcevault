@@ -80,6 +80,9 @@ void LibraryMediaList::initMediaList() {
     mediaList->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
     mediaList->setDragDropMode(QAbstractItemView::NoDragDrop);
     mediaList->setContextMenuPolicy(Qt::CustomContextMenu);
+    mediaList->setStyleSheet(
+        "QListWidget::item { background-color: #f0f0f0; border-radius: 5px; margin: 2px; } "
+        "QListWidget::item:hover { background-color: #e0e0e0; }");
 }
 
 }

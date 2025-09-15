@@ -32,6 +32,9 @@ DetailPage::DetailPage(QWidget *parent)
     editButton->setIcon(QIcon{":/assets/icons/edit.png"});
     saveButton->setIcon(QIcon{":/assets/icons/save.png"});
 
+    backDiscardStack->setMaximumWidth(100);
+    editSaveStack->setMaximumWidth(100);
+
     headerLayout->addWidget(backDiscardStack);
     headerLayout->addStretch();
     headerLayout->addWidget(editSaveStack);

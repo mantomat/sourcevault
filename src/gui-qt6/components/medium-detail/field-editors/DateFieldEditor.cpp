@@ -35,6 +35,9 @@ void DateFieldEditor::setDate(const std::optional<QDate> &date) {
 }
 
 auto DateFieldEditor::date() const -> std::optional<QDate> {
+    if (!isEnabled()) {
+        return std::nullopt;
+    }
     if (!isValid()) {
         return std::nullopt;
     }
