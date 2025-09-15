@@ -19,8 +19,8 @@ ArticleDetailSection::ArticleDetailSection(const Dependencies &deps, QWidget *pa
     layout->setContentsMargins(0, 0, 0, 0);
 
     layout->addRow("Article URL:", articleUrlEditor);
-    layout->addRow("Source name", sourceNameEditor);
-    layout->addRow("Read time (minutes)", readTimeMinutesFieldEditor);
+    layout->addRow("Source name:", sourceNameEditor);
+    layout->addRow("Read time (minutes):", readTimeMinutesFieldEditor);
     layout->addRow("Publication date:", publicationDateFieldEditor);
 
     connect(articleUrlEditor, &UrlFieldEditor::stateChanged, this,
