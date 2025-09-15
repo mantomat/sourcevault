@@ -15,7 +15,8 @@ AppController::AppController(MainWindow *newMainWindow)
                                                       this}}
     , menubarController{new MenubarController{mainWindow->getMenubar(), library.get(), this}}
     , dialogsController{new DialogsController{mainWindow, this}}
-    , currentDetailPageController{nullptr} {
+    , currentDetailPageController{nullptr}
+    , currentCreateController{nullptr} {
 
     initMenubarToDialogsConnections();
     initDialogsToMenubarConnections();
@@ -48,6 +49,17 @@ void AppController::onMediumDetailsRequest(const QUuid &id) {
             &AppController::onMediumDetailsClosed);
 }
 
+void AppController::onMediumCreateRequest(LibraryTopbar::MediumTypeViewModel type) {
+    auto [page, controller]{DetailPageFactory::createNewMediumPage(type, mainWindow, this)};
+
+    mainWindow->displayDetailPage(page);
+    currentCreateController = controller;
+
+    connect(controller, &CreateController::mediumCreated, this, &AppController::onMediumCreated);
+    connect(controller, &CreateController::creationCancelled, this,
+            &AppController::onMediumCreationAborted);
+}
+
 void AppController::onMediumDeleteRequest(const QUuid &id) {
     const auto result{library->removeMedium(id)};
     assert(result);
@@ -64,10 +76,33 @@ void AppController::onMediumEdited(const Medium &updatedMedium) {
     currentDetailPageController = nullptr;
 
     onMediumDetailsRequest(updatedMedium.id());
-    libraryPageController->refreshMediaList();
 }
 
 void AppController::onMediumDetailsClosed() {
+    assert(currentDetailPageController != nullptr);
+    currentDetailPageController->deleteLater();
+    currentDetailPageController = nullptr;
+
+    libraryPageController->refreshMediaList();
+    mainWindow->closeDetailPage();
+}
+
+void AppController::onMediumCreated(const Medium &createdMedium) {
+    assert(currentCreateController != nullptr);
+    library->addMedium(createdMedium.clone());
+
+    currentCreateController->deleteLater();
+    currentCreateController = nullptr;
+
+    onMediumDetailsRequest(createdMedium.id());
+}
+
+void AppController::onMediumCreationAborted() {
+    assert(currentCreateController != nullptr);
+    currentCreateController->deleteLater();
+    currentCreateController = nullptr;
+
+    libraryPageController->refreshMediaList();
     mainWindow->closeDetailPage();
 }
 
@@ -121,6 +156,8 @@ void AppController::initMediaListToThisConnections() {
             this, &AppController::onMediumDetailsRequest);
     connect(mainWindow->getLibraryPage()->getMediaList(), &LibraryMediaList::mediumDeleteRequest,
             this, &AppController::onMediumDeleteRequest);
+    connect(mainWindow->getLibraryPage()->getTopbar(), &LibraryTopbar::createMediumRequest, this,
+            &AppController::onMediumCreateRequest);
 }
 
 }

@@ -1,15 +1,19 @@
 #include "LibraryTopbar.h"
 
+#include <QAction>
 #include <QHBoxLayout>
+#include <QMenu>
 
 namespace Gui::Components {
 
 LibraryTopbar::LibraryTopbar(QWidget *parent)
     : QWidget{parent}
+    , createMediumButton{new QPushButton{this}}
     , sidebarToggle{new QPushButton{}}
     , searchInput{new QLineEdit{}}
     , searchDebounceTimer{new QTimer{this}} {
 
+    initCreateMediumButton();
     initSidebarToggle();
     initSearchInput();
     initSearchDebounceTimer();
@@ -35,6 +39,27 @@ void LibraryTopbar::onDebounceTimeout() {
     emit searchQueryChanged();
 }
 
+void LibraryTopbar::onCreateMedium() {
+    QMenu contextMenu{this};
+    QAction *articleAction{contextMenu.addAction("Article")};
+    QAction *bookAction{contextMenu.addAction("Book")};
+    QAction *videoAction{contextMenu.addAction("Video")};
+
+    connect(articleAction, &QAction::triggered,
+            [this]() { emit createMediumRequest(MediumTypeViewModel::Article); });
+    connect(bookAction, &QAction::triggered,
+            [this]() { emit createMediumRequest(MediumTypeViewModel::Book); });
+    connect(videoAction, &QAction::triggered,
+            [this]() { emit createMediumRequest(MediumTypeViewModel::Video); });
+
+    contextMenu.exec(createMediumButton->mapToGlobal(QPoint(0, createMediumButton->height())));
+}
+
+void LibraryTopbar::initCreateMediumButton() {
+    createMediumButton->setIcon(QIcon{":/assets/icons/plus.png"});
+    connect(createMediumButton, &QPushButton::clicked, this, &LibraryTopbar::onCreateMedium);
+}
+
 void LibraryTopbar::initSidebarToggle() {
     sidebarToggle->setIcon(QIcon{":/assets/icons/menu.png"});
     sidebarToggle->setCheckable(true);
@@ -58,7 +83,9 @@ void LibraryTopbar::initLayout() {
     layout->setContentsMargins(0, 0, 0, 0);
 
     layout->addWidget(sidebarToggle);
-    layout->addWidget(searchInput);
+    layout->addWidget(searchInput, 1);
+    layout->addWidget(createMediumButton);
     setLayout(layout);
 }
+
 }

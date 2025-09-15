@@ -9,15 +9,7 @@
 #include "components/medium-detail/detail-sections/ArticleDetailSection.h"
 #include "components/medium-detail/detail-sections/BookDetailSection.h"
 #include "components/medium-detail/detail-sections/VideoDetailSection.h"
-#include "model/Book.h"
-#include "model/Medium.h"
-#include "model/MediumUserData.h"
-#include "model/Video.h"
 
-using Core::Model::Book;
-using Core::Model::Medium;
-using Core::Model::MediumUserData;
-using Core::Model::Video;
 using Gui::Components::ArticleDetailPage;
 using Gui::Components::ArticleDetailPageController;
 using Gui::Components::ArticleDetailSection;
@@ -30,19 +22,19 @@ using Gui::Components::VideoDetailSection;
 
 namespace Gui {
 
-MediumToDetailPageVisitor::MediumToDetailPageVisitor(QWidget *newWindowParent,
-                                                     QObject *newControllerParent)
+MediumToDetailPageVisitor::MediumToDetailPageVisitor(
+    MediumDetailSection::Dependencies newMediumDeps,
+    UserDataDetailSection::Dependencies newUserDataDeps,
+    VideoDetailSection::Dependencies newVideoDeps, BookDetailSection::Dependencies newBookDeps,
+    ArticleDetailSection::Dependencies newArticleDeps, QWidget *newWindowParent,
+    QObject *newControllerParent)
     : windowParent{newWindowParent}
     , controllerParent{newControllerParent}
-    , mediumDeps{MediumDetailSection::Dependencies{
-          .titleValidator = &Medium::titleValidator,
-          .authorValidator = &Medium::authorValidator,
-          .languageValidator = &Medium::languageValidator,
-      }}
-    , userDataDeps{UserDataDetailSection::Dependencies{
-          .notesValidator = &MediumUserData::notesValidator,
-          .topicValidator = &MediumUserData::topicValidator,
-      }} {}
+    , mediumDeps{std::move(newMediumDeps)}
+    , userDataDeps{std::move(newUserDataDeps)}
+    , videoDeps{std::move(newVideoDeps)}
+    , bookDeps{std::move(newBookDeps)}
+    , articleDeps{std::move(newArticleDeps)} {}
 
 auto MediumToDetailPageVisitor::getDetail() const
     -> std::pair<DetailPage *, DetailPageController *> {
@@ -50,45 +42,21 @@ auto MediumToDetailPageVisitor::getDetail() const
 }
 
 void MediumToDetailPageVisitor::visit(const Article &article) {
-    detailPage =
-        new ArticleDetailPage{mediumDeps, userDataDeps,
-                              ArticleDetailSection::Dependencies{
-                                  .articleUrlValidator = &Article::articleUrlValidator,
-                                  .sourceNameValidator = &Article::sourceNameValidator,
-                                  .readTimeMinutesValidator = &Article::readTimeMinutesValidator,
-                                  .publicationDateValidator = &Article::publicationDateValidator},
-                              windowParent};
+    detailPage = new ArticleDetailPage{mediumDeps, userDataDeps, articleDeps, windowParent};
 
     detailPageController = new ArticleDetailPageController{
         dynamic_cast<ArticleDetailPage *>(detailPage), &article, controllerParent};
 }
 void MediumToDetailPageVisitor::visit(const Book &book) {
-    detailPage = new BookDetailPage{
-        mediumDeps, userDataDeps,
-        BookDetailSection::Dependencies{.isbnValidator = &Book::isbnValidator,
-                                        .editionValidator = &Book::editionValidator,
-                                        .publisherValidator = &Book::publisherValidator,
-                                        .yearPublishedValidator = &Book::yearPublishedValidator,
-                                        .pageNumberValidator = &Book::pageNumberValidator,
-                                        .descriptionValidator = &Book::descriptionValidator,
-                                        .thumbnailUrlValidator = &Book::thumbnailUrlValidator},
-        windowParent};
+    detailPage = new BookDetailPage{mediumDeps, userDataDeps, bookDeps, windowParent};
 
     detailPageController = new BookDetailPageController{dynamic_cast<BookDetailPage *>(detailPage),
                                                         &book, controllerParent};
 }
 void MediumToDetailPageVisitor::visit(const Video &video) {
-    detailPage =
-        new VideoDetailPage{mediumDeps, userDataDeps,
-                            VideoDetailSection::Dependencies{
-                                .videoUrlValidator = &Video::videoUrlValidator,
-                                .durationSecondsValidator = &Video::durationSecondsValidator,
-                                .uploadDateValidator = &Video::uploadDateValidator,
-                                .thumbnailUrlValidator = &Video::thumbnailUrlValidator},
-                            windowParent};
+    detailPage = new VideoDetailPage{mediumDeps, userDataDeps, videoDeps, windowParent};
 
     detailPageController = new VideoDetailPageController{
         dynamic_cast<VideoDetailPage *>(detailPage), &video, controllerParent};
 }
-
 }

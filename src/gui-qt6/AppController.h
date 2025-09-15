@@ -1,6 +1,7 @@
 #ifndef APPCONTROLLER_H
 #define APPCONTROLLER_H
 
+#include "DetailPageFactory.h"
 #include "DialogsController.h"
 #include "MainWindow.h"
 #include "components/library-page/LibraryPageController.h"
@@ -33,6 +34,7 @@ class AppController : public QObject {
     DialogsController *dialogsController;
 
     DetailPageController *currentDetailPageController;
+    CreateController *currentCreateController;
 
   public:
     AppController(MainWindow *newMainWindow);
@@ -43,10 +45,14 @@ class AppController : public QObject {
     void onThumbnailsImportRequest(const Library &lib);
 
     void onMediumDetailsRequest(const QUuid &id);
+    void onMediumCreateRequest(LibraryTopbar::MediumTypeViewModel type);
     void onMediumDeleteRequest(const QUuid &id);
 
     void onMediumEdited(const Medium &updatedMedium);
     void onMediumDetailsClosed();
+
+    void onMediumCreated(const Medium &createdMedium);
+    void onMediumCreationAborted();
 
     void onSetActionFeedbackRequest(const QString &feedback);
 

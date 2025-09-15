@@ -3,15 +3,21 @@
 
 #include "components/medium-detail/DetailPage.h"
 #include "components/medium-detail/DetailPageController.h"
+#include "components/medium-detail/detail-sections/ArticleDetailSection.h"
+#include "components/medium-detail/detail-sections/BookDetailSection.h"
 #include "components/medium-detail/detail-sections/MediumDetailSection.h"
 #include "components/medium-detail/detail-sections/UserDataDetailSection.h"
+#include "components/medium-detail/detail-sections/VideoDetailSection.h"
 #include "shared/MediumVisitor.h"
 
 using Core::Shared::MediumVisitor;
+using Gui::Components::ArticleDetailSection;
+using Gui::Components::BookDetailSection;
 using Gui::Components::DetailPage;
 using Gui::Components::DetailPageController;
 using Gui::Components::MediumDetailSection;
 using Gui::Components::UserDataDetailSection;
+using Gui::Components::VideoDetailSection;
 
 namespace Gui {
 
@@ -23,6 +29,9 @@ class MediumToDetailPageVisitor : public MediumVisitor {
 
     MediumDetailSection::Dependencies mediumDeps;
     UserDataDetailSection::Dependencies userDataDeps;
+    VideoDetailSection::Dependencies videoDeps;
+    BookDetailSection::Dependencies bookDeps;
+    ArticleDetailSection::Dependencies articleDeps;
 
     DetailPage *detailPage{nullptr};
     DetailPageController *detailPageController{nullptr};
@@ -30,7 +39,12 @@ class MediumToDetailPageVisitor : public MediumVisitor {
   public:
     ~MediumToDetailPageVisitor() = default;
 
-    MediumToDetailPageVisitor(QWidget *windowParent, QObject *controllerParent);
+    MediumToDetailPageVisitor(MediumDetailSection::Dependencies newMediumDeps,
+                              UserDataDetailSection::Dependencies newUserDataDeps,
+                              VideoDetailSection::Dependencies newVideoDeps,
+                              BookDetailSection::Dependencies newBookDeps,
+                              ArticleDetailSection::Dependencies newArticleDeps,
+                              QWidget *newWindowParent, QObject *newControllerParent);
 
     MediumToDetailPageVisitor(const MediumToDetailPageVisitor &) = default;
     MediumToDetailPageVisitor(MediumToDetailPageVisitor &&) = default;
