@@ -14,6 +14,7 @@ DateFieldEditor::DateFieldEditor(const std::function<bool(const QDate &)> &newVa
     setEditMode(false);
 
     editInput->setDisplayFormat(dateFormat);
+    editInput->setCalendarPopup(true);
 
     connect(editInput, &QDateEdit::dateChanged, this, &DateFieldEditor::validateInput);
     connect(editInput, &QDateEdit::dateChanged, this, &DateFieldEditor::stateChanged);

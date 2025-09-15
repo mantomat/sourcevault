@@ -11,6 +11,7 @@ NumberFieldEditor::NumberFieldEditor(const std::function<bool(int)> &newValidato
 
     setEditModeWidget(editInput);
     setEditMode(false);
+    editInput->setRange(-10000, 10000);
 
     connect(editInput, &QSpinBox::valueChanged, this, &NumberFieldEditor::validateInput);
     connect(editInput, &QSpinBox::valueChanged, this, &NumberFieldEditor::stateChanged);
