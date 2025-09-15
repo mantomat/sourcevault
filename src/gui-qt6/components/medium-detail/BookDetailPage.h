@@ -40,6 +40,7 @@ class BookDetailPage : public DetailPage {
 
   private slots:
     void refreshThumbnail();
+    void onStateChanged();
 };
 
 }

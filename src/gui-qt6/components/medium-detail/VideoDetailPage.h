@@ -40,6 +40,7 @@ class VideoDetailPage : public DetailPage {
 
   private slots:
     void refreshThumbnail();
+    void onStateChanged();
 };
 
 }

@@ -29,6 +29,12 @@ BookDetailPage::BookDetailPage(const MediumDetailSection::Dependencies &mediumDe
     getContentLayout()->addLayout(mainLayout);
 
     connect(this, &BookDetailPage::saveRequested, this, &BookDetailPage::refreshThumbnail);
+
+    connect(mediumSection, &MediumDetailSection::stateChanged, this,
+            &BookDetailPage::onStateChanged);
+    connect(bookSection, &BookDetailSection::stateChanged, this, &BookDetailPage::onStateChanged);
+    connect(userDataSection, &UserDataDetailSection::stateChanged, this,
+            &BookDetailPage::onStateChanged);
 };
 
 auto BookDetailPage::getMediumSection() const -> MediumDetailSection * {
@@ -53,6 +59,12 @@ void BookDetailPage::setEditMode(bool isEditing) {
 
 void BookDetailPage::refreshThumbnail() {
     thumbnail->trySetPreferred(bookSection->getState().thumbnailUrl);
+}
+
+void BookDetailPage::onStateChanged() {
+    setSaveButtonDisabled(!(mediumSection->isEverythingValid() &&
+                            bookSection->isEverythingValid() &&
+                            userDataSection->isEverythingValid()));
 }
 
 }

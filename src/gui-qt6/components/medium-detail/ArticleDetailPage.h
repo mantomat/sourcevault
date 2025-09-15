@@ -34,6 +34,9 @@ class ArticleDetailPage : public DetailPage {
 
   public slots:
     void setEditMode(bool isEditing) override;
+
+  private slots:
+    void onStateChanged();
 };
 
 }

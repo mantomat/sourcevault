@@ -32,6 +32,7 @@ UrlFieldEditor::UrlFieldEditor(const std::function<bool(const QUrl &)> &newValid
     connect(editInput, &QLineEdit::textChanged, this, &UrlFieldEditor::validateInput);
     connect(editInput, &QLineEdit::textChanged, this, &UrlFieldEditor::stateChanged);
     connect(this, &UrlFieldEditor::enabledChanged, this, &UrlFieldEditor::validateInput);
+    connect(this, &UrlFieldEditor::enabledChanged, this, &UrlFieldEditor::stateChanged);
 }
 
 void UrlFieldEditor::setUrl(const std::optional<QUrl> &url) {

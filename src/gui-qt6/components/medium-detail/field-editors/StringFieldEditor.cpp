@@ -17,6 +17,7 @@ StringFieldEditor::StringFieldEditor(const std::function<bool(const QString &)> 
     connect(editInput, &QLineEdit::textChanged, this, &StringFieldEditor::validateInput);
     connect(editInput, &QLineEdit::textChanged, this, &StringFieldEditor::stateChanged);
     connect(this, &StringFieldEditor::enabledChanged, this, &StringFieldEditor::validateInput);
+    connect(this, &StringFieldEditor::enabledChanged, this, &StringFieldEditor::stateChanged);
 }
 
 void StringFieldEditor::setText(const std::optional<QString> &text) {

@@ -19,6 +19,13 @@ ArticleDetailPage::ArticleDetailPage(const MediumDetailSection::Dependencies &me
     getContentLayout()->addWidget(articleSection);
     getContentLayout()->addWidget(userDataSection);
     getContentLayout()->addStretch();
+
+    connect(mediumSection, &MediumDetailSection::stateChanged, this,
+            &ArticleDetailPage::onStateChanged);
+    connect(articleSection, &ArticleDetailSection::stateChanged, this,
+            &ArticleDetailPage::onStateChanged);
+    connect(userDataSection, &UserDataDetailSection::stateChanged, this,
+            &ArticleDetailPage::onStateChanged);
 };
 
 auto ArticleDetailPage::getMediumSection() const -> MediumDetailSection * {
@@ -39,6 +46,12 @@ void ArticleDetailPage::setEditMode(bool isEditing) {
     mediumSection->setEditMode(isEditing);
     userDataSection->setEditMode(isEditing);
     articleSection->setEditMode(isEditing);
+}
+
+void ArticleDetailPage::onStateChanged() {
+    setSaveButtonDisabled(!(mediumSection->isEverythingValid() &&
+                            articleSection->isEverythingValid() &&
+                            userDataSection->isEverythingValid()));
 }
 
 }

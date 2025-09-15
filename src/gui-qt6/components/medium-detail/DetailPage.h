@@ -35,6 +35,7 @@ class DetailPage : public QWidget {
 
   protected:
     [[nodiscard]] auto getContentLayout() -> QVBoxLayout *;
+    void setSaveButtonDisabled(bool disabled);
 
   public slots:
     virtual void setEditMode(bool isEditing);

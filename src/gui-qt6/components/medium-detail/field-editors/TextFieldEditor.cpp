@@ -15,6 +15,7 @@ TextFieldEditor::TextFieldEditor(const std::function<bool(const QString &)> &new
 
     connect(editInput, &QTextEdit::textChanged, this, &TextFieldEditor::validateInput);
     connect(editInput, &QTextEdit::textChanged, this, &TextFieldEditor::stateChanged);
+    connect(this, &TextFieldEditor::enabledChanged, this, &TextFieldEditor::stateChanged);
     connect(this, &TextFieldEditor::enabledChanged, this, &TextFieldEditor::validateInput);
 }
 

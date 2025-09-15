@@ -14,6 +14,7 @@ NumberFieldEditor::NumberFieldEditor(const std::function<bool(int)> &newValidato
 
     connect(editInput, &QSpinBox::valueChanged, this, &NumberFieldEditor::validateInput);
     connect(editInput, &QSpinBox::valueChanged, this, &NumberFieldEditor::stateChanged);
+    connect(this, &NumberFieldEditor::enabledChanged, this, &NumberFieldEditor::stateChanged);
     connect(this, &NumberFieldEditor::enabledChanged, this, &NumberFieldEditor::validateInput);
 }
 

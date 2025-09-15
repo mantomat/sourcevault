@@ -19,6 +19,7 @@ SetFieldEditor::SetFieldEditor(const std::function<bool(const QString &)> &newIt
     connect(editInput, &QLineEdit::textChanged, this, &SetFieldEditor::validateInput);
     connect(editInput, &QLineEdit::textChanged, this, &SetFieldEditor::stateChanged);
     connect(this, &SetFieldEditor::enabledChanged, this, &SetFieldEditor::validateInput);
+    connect(this, &SetFieldEditor::enabledChanged, this, &SetFieldEditor::stateChanged);
 }
 
 void SetFieldEditor::setItems(const std::optional<std::set<QString>> &items) {

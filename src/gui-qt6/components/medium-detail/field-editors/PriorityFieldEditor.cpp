@@ -14,6 +14,7 @@ PriorityFieldEditor::PriorityFieldEditor(QWidget *parent)
     setEditMode(false);
 
     connect(editInput, &QComboBox::currentIndexChanged, this, &PriorityFieldEditor::stateChanged);
+    connect(this, &PriorityFieldEditor::enabledChanged, this, &PriorityFieldEditor::stateChanged);
 }
 
 void PriorityFieldEditor::setPriority(std::optional<Priority> priority) {

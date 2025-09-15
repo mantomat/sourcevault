@@ -59,6 +59,10 @@ auto DetailPage::getContentLayout() -> QVBoxLayout * {
     return contentLayout;
 }
 
+void DetailPage::setSaveButtonDisabled(bool disabled) {
+    saveButton->setDisabled(disabled);
+}
+
 void DetailPage::setEditMode(bool isEditing) {
     backDiscardStack->setCurrentWidget(isEditing ? discardButton : goBackButton);
     editSaveStack->setCurrentWidget(isEditing ? saveButton : editButton);

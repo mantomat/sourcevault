@@ -17,6 +17,7 @@ DateFieldEditor::DateFieldEditor(const std::function<bool(const QDate &)> &newVa
 
     connect(editInput, &QDateEdit::dateChanged, this, &DateFieldEditor::validateInput);
     connect(editInput, &QDateEdit::dateChanged, this, &DateFieldEditor::stateChanged);
+    connect(this, &DateFieldEditor::enabledChanged, this, &DateFieldEditor::stateChanged);
     connect(this, &DateFieldEditor::enabledChanged, this, &DateFieldEditor::validateInput);
 }
 
