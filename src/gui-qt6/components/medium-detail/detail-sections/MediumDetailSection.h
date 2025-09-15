@@ -4,7 +4,9 @@
 #include "components/medium-detail/field-editors/SetFieldEditor.h"
 #include "components/medium-detail/field-editors/StringFieldEditor.h"
 
+#include <QDate>
 #include <QString>
+#include <QUuid>
 #include <QWidget>
 #include <set>
 
@@ -16,6 +18,8 @@ class MediumDetailSection : public QWidget {
   public:
     struct MediumDetailViewModel {
         QString title;
+        QDate dateAdded;
+        QUuid id;
         std::optional<std::set<QString>> authors;
         std::optional<QString> language;
     };
@@ -30,6 +34,9 @@ class MediumDetailSection : public QWidget {
     StringFieldEditor *titleEditor;
     SetFieldEditor *authorsEditor;
     StringFieldEditor *languageEditor;
+
+    QLabel *dateAddedLabel;
+    QLabel *idLabel;
 
   public:
     ~MediumDetailSection() override = default;

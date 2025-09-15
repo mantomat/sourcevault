@@ -31,6 +31,8 @@ void MediumSectionController::applyChanges(Medium &mediumToModify) const {
 void MediumSectionController::populateSection(const Medium *mediumToDisplay) {
     section->setState({
         .title = mediumToDisplay->title(),
+        .dateAdded = mediumToDisplay->dateAdded(),
+        .id = mediumToDisplay->id(),
         .authors = mediumToDisplay->authors().get(),
         .language = mediumToDisplay->language().get(),
     });
