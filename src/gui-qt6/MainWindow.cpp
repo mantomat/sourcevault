@@ -49,6 +49,7 @@ void MainWindow::displayDetailPage(DetailPage *page) {
     currentDetailPage = page;
     mainStack->addWidget(currentDetailPage);
     mainStack->setCurrentWidget(currentDetailPage);
+    menubar->setDisabled(true);
 }
 
 void MainWindow::closeDetailPage() {
@@ -61,6 +62,7 @@ void MainWindow::closeDetailPage() {
     mainStack->removeWidget(currentDetailPage);
     currentDetailPage->deleteLater();
     currentDetailPage = nullptr;
+    menubar->setDisabled(false);
 }
 
 void MainWindow::onActionFeedbackTimerTimeout() {
