@@ -15,7 +15,7 @@ class ThumbnailRenderer : public QWidget {
     QString fallbackThumbnailPath;
     QLabel *imageLabel;
     QNetworkAccessManager *networkManager;
-    QPixmap *currentPixmap;
+    QPixmap currentPixmap;
 
   public:
     ThumbnailRenderer(const std::optional<QUrl> &preferredThumbnailUrl,
@@ -29,7 +29,7 @@ class ThumbnailRenderer : public QWidget {
     void trySetLocalPreferred(const QUrl &preferredThumbnailUrl);
     void trySetOnlinePreferred(const QUrl &preferredThumbnailUrl);
     void setFallback();
-    void setCustomPixmap(QPixmap *pixmap);
+    void setCustomPixmap(QPixmap pixmap);
 
   protected:
     void resizeEvent(QResizeEvent *event) override;

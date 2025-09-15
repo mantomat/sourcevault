@@ -13,7 +13,7 @@ ThumbnailRenderer::ThumbnailRenderer(const std::optional<QUrl> &preferredThumbna
     , fallbackThumbnailPath{fallbackThumbnailQrcPath}
     , imageLabel{new QLabel{this}}
     , networkManager{new QNetworkAccessManager{this}}
-    , currentPixmap{nullptr} {
+    , currentPixmap{} {
 
     initLayout();
     initImageLabel();
@@ -34,7 +34,7 @@ void ThumbnailRenderer::initLayout() {
 }
 
 void ThumbnailRenderer::initImageLabel() {
-    setCustomPixmap(new QPixmap(":/assets/loading.png"));
+    setCustomPixmap(QPixmap(":/assets/loading.png"));
 }
 
 void ThumbnailRenderer::trySetPreferred(const QUrl &preferredThumbnailUrl) {
@@ -47,7 +47,7 @@ void ThumbnailRenderer::trySetPreferred(const QUrl &preferredThumbnailUrl) {
 
 void ThumbnailRenderer::resizeEvent(QResizeEvent *event) {
     QWidget::resizeEvent(event);
-    if (currentPixmap != nullptr) {
+    if (!currentPixmap.isNull()) {
         setCustomPixmap(currentPixmap);
     }
 }
@@ -55,8 +55,8 @@ void ThumbnailRenderer::resizeEvent(QResizeEvent *event) {
 void ThumbnailRenderer::trySetLocalPreferred(const QUrl &preferredThumbnailUrl) {
     const QString localFilePath{preferredThumbnailUrl.toLocalFile()};
 
-    auto *localFilePixmap{new QPixmap{localFilePath}};
-    if (!localFilePixmap->isNull()) {
+    auto localFilePixmap{localFilePath};
+    if (!localFilePixmap.isNull()) {
         setCustomPixmap(localFilePixmap);
     } else {
         qWarning() << "Error: local image file is invalid" << localFilePath;
@@ -71,17 +71,17 @@ void ThumbnailRenderer::trySetOnlinePreferred(const QUrl &preferredThumbnailUrl)
 }
 
 void ThumbnailRenderer::setFallback() {
-    QPixmap *fallbackPixmap{new QPixmap{fallbackThumbnailPath}};
-    assert(!fallbackPixmap->isNull());
+    QPixmap fallbackPixmap{fallbackThumbnailPath};
+    assert(!fallbackPixmap.isNull());
 
     setCustomPixmap(fallbackPixmap);
 }
 
-void ThumbnailRenderer::setCustomPixmap(QPixmap *pixmap) {
-    currentPixmap = pixmap;
-    if (!currentPixmap->isNull()) {
+void ThumbnailRenderer::setCustomPixmap(QPixmap pixmap) {
+    currentPixmap = std::move(pixmap);
+    if (!currentPixmap.isNull()) {
         imageLabel->setPixmap(
-            currentPixmap->scaled(size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
+            currentPixmap.scaled(size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
     }
 }
 
@@ -93,7 +93,7 @@ void ThumbnailRenderer::onNetworkReply(QNetworkReply *reply) {
         return;
     }
 
-    QPixmap pixmap;
+    QPixmap pixmap{};
     if (!pixmap.loadFromData(reply->readAll())) {
         qWarning() << "Error: Downloaded data is not a valid image.";
         setFallback();
@@ -101,7 +101,7 @@ void ThumbnailRenderer::onNetworkReply(QNetworkReply *reply) {
         return;
     }
 
-    imageLabel->setPixmap(pixmap);
+    setCustomPixmap(pixmap);
     reply->deleteLater();
 }
 }
