@@ -1,16 +1,15 @@
-#include "VideoDetailSectionController.h"
+#include "VideoSectionController.h"
 
 namespace Gui::Components {
 
-VideoDetailSectionController::VideoDetailSectionController(VideoDetailSection *newSection,
-                                                           const Video *videoToDisplay,
-                                                           QObject *parent)
+VideoSectionController::VideoSectionController(VideoDetailSection *newSection,
+                                               const Video *videoToDisplay, QObject *parent)
     : QObject{parent}
     , section{newSection} {
     populateSection(videoToDisplay);
 }
 
-void VideoDetailSectionController::applyChanges(Video &videoToModify) const {
+void VideoSectionController::applyChanges(Video &videoToModify) const {
     assert(section->isEverythingValid());
 
     const auto formData{section->getState()};
@@ -40,7 +39,7 @@ void VideoDetailSectionController::applyChanges(Video &videoToModify) const {
     }
 }
 
-void VideoDetailSectionController::populateSection(const Video *videoToDisplay) {
+void VideoSectionController::populateSection(const Video *videoToDisplay) {
     section->setState({.videoUrl = videoToDisplay->videoUrl().get(),
                        .durationSeconds = videoToDisplay->durationSeconds().get(),
                        .uploadDate = videoToDisplay->uploadDate().get(),

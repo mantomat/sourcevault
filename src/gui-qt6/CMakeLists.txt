@@ -52,6 +52,18 @@ add_executable(sourcevaultgui-qt6
         components/medium-detail/VideoDetailPage.h
         components/medium-detail/VideoDetailPageController.cpp
         components/medium-detail/VideoDetailPageController.h
+        components/medium-detail/ArticleCreateController.cpp
+        components/medium-detail/ArticleCreateController.h
+        components/medium-detail/ArticleDetailPage.cpp
+        components/medium-detail/ArticleDetailPage.h
+        components/medium-detail/ArticleDetailPageController.cpp
+        components/medium-detail/ArticleDetailPageController.h
+        components/medium-detail/BookCreateController.cpp
+        components/medium-detail/BookCreateController.h
+        components/medium-detail/BookDetailPage.cpp
+        components/medium-detail/BookDetailPage.h
+        components/medium-detail/BookDetailPageController.cpp
+        components/medium-detail/BookDetailPageController.h
 
         components/medium-detail/detail-sections/MediumDetailSection.cpp
         components/medium-detail/detail-sections/MediumDetailSection.h
@@ -63,8 +75,16 @@ add_executable(sourcevaultgui-qt6
         components/medium-detail/detail-sections/UserDataSectionController.h
         components/medium-detail/detail-sections/VideoDetailSection.cpp
         components/medium-detail/detail-sections/VideoDetailSection.h
-        components/medium-detail/detail-sections/VideoDetailSectionController.cpp
-        components/medium-detail/detail-sections/VideoDetailSectionController.h
+        components/medium-detail/detail-sections/VideoSectionController.cpp
+        components/medium-detail/detail-sections/VideoSectionController.h
+        components/medium-detail/detail-sections/ArticleDetailSection.cpp
+        components/medium-detail/detail-sections/ArticleDetailSection.h
+        components/medium-detail/detail-sections/ArticleSectionController.cpp
+        components/medium-detail/detail-sections/ArticleSectionController.h
+        components/medium-detail/detail-sections/BookDetailSection.cpp
+        components/medium-detail/detail-sections/BookDetailSection.h
+        components/medium-detail/detail-sections/BookSectionController.cpp
+        components/medium-detail/detail-sections/BookSectionController.h
 
         components/medium-detail/field-editors/BooleanFieldEditor.cpp
         components/medium-detail/field-editors/BooleanFieldEditor.h

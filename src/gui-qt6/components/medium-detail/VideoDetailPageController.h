@@ -5,7 +5,7 @@
 #include "components/medium-detail/VideoDetailPage.h"
 #include "components/medium-detail/detail-sections/MediumSectionController.h"
 #include "components/medium-detail/detail-sections/UserDataSectionController.h"
-#include "components/medium-detail/detail-sections/VideoDetailSectionController.h"
+#include "components/medium-detail/detail-sections/VideoSectionController.h"
 #include "model/Video.h"
 
 using Core::Model::Video;
@@ -21,7 +21,7 @@ class VideoDetailPageController : public DetailPageController {
     Video editableVideo;
 
     MediumSectionController mediumSectionController;
-    VideoDetailSectionController videoSectionController;
+    VideoSectionController videoSectionController;
     UserDataSectionController userDataSectionController;
 
   public:
