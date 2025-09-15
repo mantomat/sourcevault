@@ -38,8 +38,8 @@ void AppController::onThumbnailsImportRequest(const Library &lib) {
 }
 
 void AppController::onMediumDetailsRequest(const QUuid &id) {
-    auto [page, controller]{
-        DetailPageFactory::createDetailPage(library->getMedium(id).value(), mainWindow, this)};
+    auto [page, controller]{DetailPageFactory::createDetailPage(
+        library->getMedium(id).value(), dialogsController, mainWindow, this)};
 
     mainWindow->displayDetailPage(page);
     currentDetailPageController = controller;
@@ -50,7 +50,8 @@ void AppController::onMediumDetailsRequest(const QUuid &id) {
 }
 
 void AppController::onMediumCreateRequest(LibraryTopbar::MediumTypeViewModel type) {
-    auto [page, controller]{DetailPageFactory::createNewMediumPage(type, mainWindow, this)};
+    auto [page, controller]{
+        DetailPageFactory::createNewMediumPage(type, dialogsController, mainWindow, this)};
 
     mainWindow->displayDetailPage(page);
     currentCreateController = controller;

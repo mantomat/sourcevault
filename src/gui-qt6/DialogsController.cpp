@@ -53,4 +53,12 @@ void DialogsController::onRequestErrorModal(const QString &errorTitle, const QSt
     QMessageBox::critical(mainWindow, errorTitle, errorInfo);
 }
 
+void DialogsController::onRequestThumbnailUrlDialog() {
+    QString path{QFileDialog::getOpenFileName(mainWindow, "Select Thumbnail Image", "",
+                                              "Image Files (*.png *.jpg *.jpeg);;All Files (*)")};
+    if (!path.isEmpty()) {
+        emit thumbnailUrlPathChosen(path);
+    }
+}
+
 }

@@ -25,12 +25,15 @@ class DialogsController : public QObject {
 
     void onRequestErrorModal(const QString &errorTitle, const QString &errorInfo);
 
+    void onRequestThumbnailUrlDialog();
+
   signals:
     void exportLibraryPathChosen(const QString &path);
     void exportThumbnailsPathChosen(const QString &path);
     void importLibraryOverwritePathChosen(const QString &path);
     void importLibraryMergePathChosen(const QString &path);
     void importThumbnailsPathChosen(const QString &path);
+    void thumbnailUrlPathChosen(const QString &path);
 };
 
 }

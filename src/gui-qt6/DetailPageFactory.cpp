@@ -51,37 +51,51 @@ const VideoDetailSection::Dependencies DetailPageFactory::videoDeps{
     .thumbnailUrlValidator = &Video::thumbnailUrlValidator,
 };
 
-auto DetailPageFactory::createDetailPage(const Core::Model::Medium *medium, QWidget *windowParent,
-                                         QObject *controllerParent)
+auto DetailPageFactory::createDetailPage(const Core::Model::Medium *medium,
+                                         DialogsController *dialogsController,
+                                         QWidget *windowParent, QObject *controllerParent)
     -> std::pair<DetailPage *, DetailPageController *> {
-    MediumToDetailPageVisitor visitor{mediumDeps,  userDataDeps, videoDeps,       bookDeps,
-                                      articleDeps, windowParent, controllerParent};
+    MediumToDetailPageVisitor visitor{mediumDeps,   userDataDeps,    videoDeps,
+                                      bookDeps,     articleDeps,     dialogsController,
+                                      windowParent, controllerParent};
 
     medium->accept(visitor);
     return visitor.getDetail();
 }
 
 auto DetailPageFactory::createNewMediumPage(LibraryTopbar::MediumTypeViewModel mediumType,
+                                            DialogsController *dialogsController,
                                             QWidget *windowParent, QObject *controllerParent)
     -> std::pair<DetailPage *, CreateController *> {
 
     switch (mediumType) {
     case Components::LibraryTopbar::MediumTypeViewModel::Article: {
-        auto *articleDetailPage{
+        auto *detailPage{
             new ArticleDetailPage{mediumDeps, userDataDeps, articleDeps, windowParent}};
-        auto *articleController{new ArticleCreateController{articleDetailPage, controllerParent}};
-        return std::make_pair(articleDetailPage, articleController);
+        auto *controller{new ArticleCreateController{detailPage, controllerParent}};
+
+        return std::make_pair(detailPage, controller);
     }
     case Components::LibraryTopbar::MediumTypeViewModel::Book: {
-        auto *bookDetailPage{new BookDetailPage{mediumDeps, userDataDeps, bookDeps, windowParent}};
-        auto *bookController{new BookCreateController{bookDetailPage, controllerParent}};
-        return std::make_pair(bookDetailPage, bookController);
+        auto *detailPage{new BookDetailPage{mediumDeps, userDataDeps, bookDeps, windowParent}};
+        auto *controller{new BookCreateController{detailPage, controllerParent}};
+
+        connect(detailPage->getBookSection(), &BookDetailSection::thumbnailPathDialogRequested,
+                dialogsController, &DialogsController::onRequestThumbnailUrlDialog);
+        connect(dialogsController, &DialogsController::thumbnailUrlPathChosen,
+                detailPage->getBookSection(), &BookDetailSection::onThumbnailPathSelected);
+
+        return std::make_pair(detailPage, controller);
     }
     case Components::LibraryTopbar::MediumTypeViewModel::Video: {
-        auto *videoDetailPage{
-            new VideoDetailPage{mediumDeps, userDataDeps, videoDeps, windowParent}};
-        auto *videoController{new VideoCreateController{videoDetailPage, controllerParent}};
-        return std::make_pair(videoDetailPage, videoController);
+        auto *detailPage{new VideoDetailPage{mediumDeps, userDataDeps, videoDeps, windowParent}};
+        auto *controller{new VideoCreateController{detailPage, controllerParent}};
+
+        connect(detailPage->getVideoSection(), &VideoDetailSection::thumbnailPathDialogRequested,
+                dialogsController, &DialogsController::onRequestThumbnailUrlDialog);
+        connect(dialogsController, &DialogsController::thumbnailUrlPathChosen,
+                detailPage->getVideoSection(), &VideoDetailSection::onThumbnailPathSelected);
+        return std::make_pair(detailPage, controller);
     }
     }
 

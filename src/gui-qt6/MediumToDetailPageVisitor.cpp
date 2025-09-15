@@ -26,9 +26,11 @@ MediumToDetailPageVisitor::MediumToDetailPageVisitor(
     MediumDetailSection::Dependencies newMediumDeps,
     UserDataDetailSection::Dependencies newUserDataDeps,
     VideoDetailSection::Dependencies newVideoDeps, BookDetailSection::Dependencies newBookDeps,
-    ArticleDetailSection::Dependencies newArticleDeps, QWidget *newWindowParent,
-    QObject *newControllerParent)
-    : windowParent{newWindowParent}
+    ArticleDetailSection::Dependencies newArticleDeps, DialogsController *newDialogsController,
+    QWidget *newWindowParent, QObject *newControllerParent)
+    : QObject{newControllerParent}
+    , dialogsController{newDialogsController}
+    , windowParent{newWindowParent}
     , controllerParent{newControllerParent}
     , mediumDeps{std::move(newMediumDeps)}
     , userDataDeps{std::move(newUserDataDeps)}
@@ -52,11 +54,25 @@ void MediumToDetailPageVisitor::visit(const Book &book) {
 
     detailPageController = new BookDetailPageController{dynamic_cast<BookDetailPage *>(detailPage),
                                                         &book, controllerParent};
+
+    connect(dynamic_cast<BookDetailPage *>(detailPage)->getBookSection(),
+            &BookDetailSection::thumbnailPathDialogRequested, dialogsController,
+            &DialogsController::onRequestThumbnailUrlDialog);
+    connect(dialogsController, &DialogsController::thumbnailUrlPathChosen,
+            dynamic_cast<BookDetailPage *>(detailPage)->getBookSection(),
+            &BookDetailSection::onThumbnailPathSelected);
 }
 void MediumToDetailPageVisitor::visit(const Video &video) {
     detailPage = new VideoDetailPage{mediumDeps, userDataDeps, videoDeps, windowParent};
 
     detailPageController = new VideoDetailPageController{
         dynamic_cast<VideoDetailPage *>(detailPage), &video, controllerParent};
+
+    connect(dynamic_cast<VideoDetailPage *>(detailPage)->getVideoSection(),
+            &VideoDetailSection::thumbnailPathDialogRequested, dialogsController,
+            &DialogsController::onRequestThumbnailUrlDialog);
+    connect(dialogsController, &DialogsController::thumbnailUrlPathChosen,
+            dynamic_cast<VideoDetailPage *>(detailPage)->getVideoSection(),
+            &VideoDetailSection::onThumbnailPathSelected);
 }
 }

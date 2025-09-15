@@ -28,6 +28,9 @@ VideoDetailSection::VideoDetailSection(const Dependencies &deps, QWidget *parent
     connect(uploadDateEditor, &DateFieldEditor::stateChanged, this,
             &VideoDetailSection::stateChanged);
     connect(videoUrlEditor, &UrlFieldEditor::stateChanged, this, &VideoDetailSection::stateChanged);
+
+    connect(thumbnailUrlEditor, &UrlFieldEditor::requestThumbnailUrlSelectionModal, this,
+            &VideoDetailSection::thumbnailPathDialogRequested);
 }
 
 auto VideoDetailSection::isEverythingValid() const -> bool {
@@ -54,6 +57,10 @@ void VideoDetailSection::setEditMode(bool isEditing) {
     durationSecondsEditor->setEditMode(isEditing);
     uploadDateEditor->setEditMode(isEditing);
     thumbnailUrlEditor->setEditMode(isEditing);
+}
+
+void VideoDetailSection::onThumbnailPathSelected(const QString &path) {
+    thumbnailUrlEditor->onThumbnailUrlPathSelected(path);
 }
 
 }

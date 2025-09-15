@@ -61,8 +61,11 @@ class BookDetailSection : public QWidget {
     void setState(const BookDetailViewModel &initData);
     void setEditMode(bool isEditing);
 
+    void onThumbnailPathSelected(const QString &path);
+
   signals:
     void stateChanged();
+    void thumbnailPathDialogRequested();
 };
 
 }

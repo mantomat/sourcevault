@@ -1,6 +1,7 @@
 #ifndef MEDIUMTODETAILPAGEVISITOR_H
 #define MEDIUMTODETAILPAGEVISITOR_H
 
+#include "DialogsController.h"
 #include "components/medium-detail/DetailPage.h"
 #include "components/medium-detail/DetailPageController.h"
 #include "components/medium-detail/detail-sections/ArticleDetailSection.h"
@@ -19,11 +20,15 @@ using Gui::Components::MediumDetailSection;
 using Gui::Components::UserDataDetailSection;
 using Gui::Components::VideoDetailSection;
 
+#include <QObject>
+
 namespace Gui {
 
-class MediumToDetailPageVisitor : public MediumVisitor {
+class MediumToDetailPageVisitor : public QObject, public MediumVisitor {
+    Q_OBJECT
 
   private:
+    DialogsController *dialogsController;
     QWidget *windowParent;
     QObject *controllerParent;
 
@@ -37,19 +42,20 @@ class MediumToDetailPageVisitor : public MediumVisitor {
     DetailPageController *detailPageController{nullptr};
 
   public:
-    ~MediumToDetailPageVisitor() = default;
+    ~MediumToDetailPageVisitor() override = default;
 
     MediumToDetailPageVisitor(MediumDetailSection::Dependencies newMediumDeps,
                               UserDataDetailSection::Dependencies newUserDataDeps,
                               VideoDetailSection::Dependencies newVideoDeps,
                               BookDetailSection::Dependencies newBookDeps,
                               ArticleDetailSection::Dependencies newArticleDeps,
-                              QWidget *newWindowParent, QObject *newControllerParent);
+                              DialogsController *newDialogsController, QWidget *newWindowParent,
+                              QObject *newControllerParent);
 
-    MediumToDetailPageVisitor(const MediumToDetailPageVisitor &) = default;
-    MediumToDetailPageVisitor(MediumToDetailPageVisitor &&) = default;
-    auto operator=(const MediumToDetailPageVisitor &) -> MediumToDetailPageVisitor & = default;
-    auto operator=(MediumToDetailPageVisitor &&) -> MediumToDetailPageVisitor & = default;
+    MediumToDetailPageVisitor(const MediumToDetailPageVisitor &) = delete;
+    MediumToDetailPageVisitor(MediumToDetailPageVisitor &&) = delete;
+    auto operator=(const MediumToDetailPageVisitor &) -> MediumToDetailPageVisitor & = delete;
+    auto operator=(MediumToDetailPageVisitor &&) -> MediumToDetailPageVisitor & = delete;
 
     [[nodiscard]] auto getDetail() const -> std::pair<DetailPage *, DetailPageController *>;
 

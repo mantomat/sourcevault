@@ -64,7 +64,6 @@ auto UrlFieldEditor::stringToUrl(const QString &str) -> QUrl {
         return QUrl{str};
     }
     return QUrl::fromLocalFile(str);
-    // TODO: check if any string is valid with this solution
 }
 
 void UrlFieldEditor::onThumbnailUrlPathSelected(const QString &path) {

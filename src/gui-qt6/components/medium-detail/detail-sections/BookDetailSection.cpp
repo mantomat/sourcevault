@@ -38,6 +38,9 @@ BookDetailSection::BookDetailSection(const Dependencies &deps, QWidget *parent)
             &BookDetailSection::stateChanged);
     connect(thumbnailUrlEditor, &UrlFieldEditor::stateChanged, this,
             &BookDetailSection::stateChanged);
+
+    connect(thumbnailUrlEditor, &UrlFieldEditor::requestThumbnailUrlSelectionModal, this,
+            &BookDetailSection::thumbnailPathDialogRequested);
 }
 
 auto BookDetailSection::isEverythingValid() const -> bool {
@@ -75,6 +78,10 @@ void BookDetailSection::setEditMode(bool isEditing) {
     pageNumberEditor->setEditMode(isEditing);
     descriptionEditor->setEditMode(isEditing);
     thumbnailUrlEditor->setEditMode(isEditing);
+}
+
+void BookDetailSection::onThumbnailPathSelected(const QString &path) {
+    thumbnailUrlEditor->onThumbnailUrlPathSelected(path);
 }
 
 }

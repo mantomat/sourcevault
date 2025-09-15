@@ -1,6 +1,7 @@
 #ifndef DETAILPAGEFACTORY_H
 #define DETAILPAGEFACTORY_H
 
+#include "DialogsController.h"
 #include "components/library-page/topbar/LibraryTopbar.h"
 #include "components/medium-detail/CreateController.h"
 #include "components/medium-detail/DetailPage.h"
@@ -36,11 +37,12 @@ class DetailPageFactory : public QObject {
 
   public:
     [[nodiscard]] static auto createDetailPage(const Core::Model::Medium *medium,
-
+                                               DialogsController *dialogsController,
                                                QWidget *windowParent, QObject *controllerParent)
         -> std::pair<DetailPage *, DetailPageController *>;
 
     [[nodiscard]] static auto createNewMediumPage(LibraryTopbar::MediumTypeViewModel mediumType,
+                                                  DialogsController *dialogsController,
                                                   QWidget *windowParent, QObject *controllerParent)
         -> std::pair<DetailPage *, CreateController *>;
 };

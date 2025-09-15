@@ -51,8 +51,11 @@ class VideoDetailSection : public QWidget {
     void setState(const VideoDetailViewModel &initData);
     void setEditMode(bool isEditing);
 
+    void onThumbnailPathSelected(const QString &path);
+
   signals:
     void stateChanged();
+    void thumbnailPathDialogRequested();
 };
 
 }
