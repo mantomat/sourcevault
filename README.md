@@ -1,33 +1,28 @@
-# SourceVault
+# Sourcevault
 
-[![CI](https://github.com/mntmtt/sourcevault/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/mntmtt/sourcevault/actions/workflows/ci.yml)
 
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=mantomat_sourcevault&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=mantomat_sourcevault)
-
-SourceVault is a **personal library management system** designed to help individuals organize, categorize, and
-prioritize their media collection. Whether you're managing books, articles, videos, or podcasts, SourceVault provides a
+Sourcevault is a **personal library management system** designed to help individuals organize, categorize, and
+prioritize their media collection. Whether you're managing books, articles, or videos,  Sourcevault provides a
 centralized platform to store and access your resources efficiently. With features like customizable topics, priority
-levels, and favorite markers, SourceVault empowers users to take control of their learning and entertainment materials.
+levels, and favorite markers, Sourcevault empowers users to take control of their learning and entertainment materials.
 
-## Features
+# Building Sourcevault
 
-### Searching & Filtering
+In the root directory of the project, type:
 
-- **Search by string** (case-insensitive, supports partial search)
-- **Filter by**: Favorites, Topics, Priority
-- **Sort by**: Date Added, Date Released, Alphabetical (Author/Title), Priority
+```sh
+$ mkdir build && cd build
+$ qmake ..
+$ make
+```
 
-### Import & Export
+This will generate a release build that includes three executables: 
+`tests/core/testscore`, `src/gui/sourcevaultgui-qt6` and `tools/search-tester/search_tester`.
 
-- **Export Library (JSON)**
-- **Export filtered view**
-- **Import from JSON**
+# Contributing
 
-### Localization
+You can find some info about contributing in the CONTRIBUTING.md file.
 
-Supports multiple languages, including English and Italian.
+...
 
-### Persistence
-
-SourceVault uses a **JSON-based storage model**, ensuring data is saved between sessions and allowing easy backup and
-sharing.
+What are you saying? I'm the only one who is developing this? Heh, right...

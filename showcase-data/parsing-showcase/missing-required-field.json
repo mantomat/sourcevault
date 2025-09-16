@@ -1,0 +1,25 @@
+{
+    "media": [
+        {
+            "authors": [
+                "Thomas Mann"
+            ],
+            "edition": "Prima edizione",
+            "favorite": true,
+            "isbn": "978-8867009466",
+            "language": "Italiano",
+            "notes": "My girifriend's favorite one...\n\nWith online thumbnail image.",
+            "pageNumber": 684,
+            "publisher": "Corbaccio",
+            "thumbnailUrl": "https://m.media-amazon.com/images/I/71qIdWniPqL._SL1500_.jpg",
+            "title": "La Montagna Incantata",
+            "topics": [
+                "Nature",
+                "Time"
+            ],
+            "type": "book",
+            "yearPublished": 1992
+        }
+    ],
+    "version": "1.0"
+}

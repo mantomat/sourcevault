@@ -1,0 +1,49 @@
+{
+    "media": [
+        {
+            "favorite": false,
+            "id": "c24823dd-7662-4d77-ac31-917114c03734",
+            "notes": "This medium has been added after merging. Note that the other two medium of its original library have not been merged. This is because they were already in the `main-library`.",
+            "title": "I was not here before merge",
+            "type": "article"
+        },
+        {
+            "authors": [
+                "Daniel Kahneman"
+            ],
+            "description": "A detailed overview of the bisistemic approach to psychology and mind.",
+            "favorite": false,
+            "id": "e33f3c97-2a83-4f16-9592-778f8dfacc08",
+            "language": "English",
+            "notes": "One of my favorite non-fiction, actually :)",
+            "publisher": "Penguin Psychology",
+            "title": "Thinking Fast and Slow",
+            "topics": [
+                "Psychology"
+            ],
+            "type": "book"
+        },
+        {
+            "authors": [
+                "Thomas Mann"
+            ],
+            "edition": "Prima edizione",
+            "favorite": true,
+            "id": "398a5c0c-bdd8-4da9-9bcf-ee6670b52caa",
+            "isbn": "978-8867009466",
+            "language": "Italiano",
+            "notes": "My girifriend's favorite one...\n\nWith online thumbnail image.",
+            "pageNumber": 684,
+            "publisher": "Corbaccio",
+            "thumbnailUrl": "https://m.media-amazon.com/images/I/71qIdWniPqL._SL1500_.jpg",
+            "title": "La Montagna Incantata",
+            "topics": [
+                "Nature",
+                "Time"
+            ],
+            "type": "book",
+            "yearPublished": 1992
+        }
+    ],
+    "version": "1.0"
+}

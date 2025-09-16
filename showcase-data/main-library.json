@@ -1,0 +1,184 @@
+{
+    "media": [
+        {
+            "authors": [
+                "Daniel Kahneman"
+            ],
+            "description": "A detailed overview of the bisistemic approach to psychology and mind.",
+            "favorite": false,
+            "id": "e33f3c97-2a83-4f16-9592-778f8dfacc08",
+            "language": "English",
+            "notes": "One of my favorite non-fiction, actually :)",
+            "publisher": "Penguin Psychology",
+            "title": "Thinking Fast and Slow",
+            "topics": [
+                "Psychology"
+            ],
+            "type": "book"
+        },
+        {
+            "authors": [
+                "Ernest Hemingway"
+            ],
+            "description": "Novel about the relationship between Man and Nature.",
+            "favorite": false,
+            "id": "06c77b0f-2f19-4712-9161-0d6c5982ad44",
+            "language": "English",
+            "title": "The old man and the sea",
+            "type": "book",
+            "yearPublished": 1952
+        },
+        {
+            "authors": [
+                "Nova Lectio"
+            ],
+            "favorite": false,
+            "id": "27f8eb3c-5a76-40e5-9583-d42ff7bc2e14",
+            "language": "Italiano",
+            "notes": "Actually, geography is the cause of all the current superpowers.",
+            "priority": 4,
+            "title": "La geografia ha reso la Cina una superpotenza mondiale. Ecco come:",
+            "topics": [
+                "Geography",
+                "History"
+            ],
+            "type": "video"
+        },
+        {
+            "authors": [
+                "Thomas Mann"
+            ],
+            "edition": "Prima edizione",
+            "favorite": true,
+            "id": "398a5c0c-bdd8-4da9-9bcf-ee6670b52caa",
+            "isbn": "978-8867009466",
+            "language": "Italiano",
+            "notes": "My girifriend's favorite one...\n\nWith online thumbnail image.",
+            "pageNumber": 684,
+            "publisher": "Corbaccio",
+            "thumbnailUrl": "https://m.media-amazon.com/images/I/71qIdWniPqL._SL1500_.jpg",
+            "title": "La Montagna Incantata",
+            "topics": [
+                "Nature",
+                "Time"
+            ],
+            "type": "book",
+            "yearPublished": 1992
+        },
+        {
+            "articleUrl": "https://www.fitelson.org/probability/ramsey.pdf",
+            "authors": [
+                "Frank Ramsey"
+            ],
+            "favorite": false,
+            "id": "9f0be990-8093-4512-82a0-6d46910fb181",
+            "language": "English",
+            "notes": "Very fun paper, you should try reading it :)",
+            "priority": 3,
+            "publicationDate": "1924-01-01",
+            "readTimeMinutes": 360,
+            "title": "Truth and Probability",
+            "topics": [
+                "Philosophy",
+                "Probability"
+            ],
+            "type": "article"
+        },
+        {
+            "authors": [
+                "Veritasium"
+            ],
+            "favorite": false,
+            "id": "4401fad1-c517-4fa6-b037-a598fdd495d0",
+            "language": "English",
+            "notes": "The axiom of choice is really interesting. There are also some repercussions in probability theory obviously.",
+            "priority": 2,
+            "thumbnailUrl": "https://www.tubefilter.com/wp-content/uploads/2023/05/derek-muller-veritasium-1920x1131.jpg",
+            "title": "The man who almost broke math - Axiom of Choice",
+            "topics": [
+                "Math",
+                "Proability"
+            ],
+            "type": "video",
+            "uploadDate": "2025-04-02"
+        },
+        {
+            "authors": [
+                "Salvatore Sanfilippo"
+            ],
+            "favorite": true,
+            "id": "157d9909-67a7-4e5e-8bb4-f5344ad9d2df",
+            "language": "Italiano",
+            "priority": 4,
+            "title": "Impariamo il C, lezione 17.",
+            "topics": [
+                "Computer Science"
+            ],
+            "type": "video"
+        },
+        {
+            "favorite": true,
+            "id": "2144cdb7-8c6b-48b9-bb54-840d2ab03a1e",
+            "language": "English",
+            "notes": "Well, who knows?",
+            "sourceName": "Scriptorium Philosophia",
+            "title": "Is Authenticity Just Labeling?",
+            "type": "article"
+        },
+        {
+            "authors": [
+                "Ludwig Wittgenstein"
+            ],
+            "edition": "Prima edizione 2022",
+            "favorite": false,
+            "id": "c76f6155-a33a-48f7-b583-949d127964c4",
+            "isbn": "978-8807904110",
+            "language": "Italano",
+            "pageNumber": 253,
+            "publisher": "Feltrinelli",
+            "thumbnailUrl": "https://m.media-amazon.com/images/I/41dUm5C0pOL._SY445_SX342_ControlCacheEqualizer_.jpg",
+            "title": "Tractatus logico-philosophicus",
+            "topics": [
+                "Language",
+                "Philosophy"
+            ],
+            "type": "book",
+            "yearPublished": 2022
+        },
+        {
+            "authors": [
+                "JA Westenberg"
+            ],
+            "favorite": false,
+            "id": "e4a71765-86b4-4932-86c3-3dbd44374cf9",
+            "language": "English",
+            "priority": 3,
+            "readTimeMinutes": 10,
+            "sourceName": "Westenberg blog",
+            "title": "I Deleted My Second Brain",
+            "topics": [
+                "PKM",
+                "Personal Growth"
+            ],
+            "type": "article"
+        },
+        {
+            "articleUrl": "https://www.paulgraham.com/noob.html",
+            "authors": [
+                "Paul Graham"
+            ],
+            "favorite": true,
+            "id": "b3584017-af75-4b9d-b9ec-73bfffa712e5",
+            "language": "English",
+            "priority": 2,
+            "publicationDate": "2020-01-01",
+            "readTimeMinutes": 5,
+            "title": "Being a Noob",
+            "topics": [
+                "Personal Growth"
+            ],
+            "type": "article"
+        }
+    ],
+    "version": "1.0"
+}
