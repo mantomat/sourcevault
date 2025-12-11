@@ -23,10 +23,6 @@ levels, and favorite markers, SourceVault empowers users to take control of thei
 - **Export filtered view**
 - **Import from JSON**
 
-### Localization
-
-Supports multiple languages, including English and Italian.
-
 ### Persistence
 
 SourceVault uses a **JSON-based storage model**, ensuring data is saved between sessions and allowing easy backup and
